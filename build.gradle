@@ -16,13 +16,14 @@ apply plugin: 'kotlin'
 
 repositories {
     mavenCentral()
-    mavenLocal()
+//    mavenLocal()
+    maven { url "https://sparse.blue/maven/" }
 }
 
 dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "org.jetbrains.kotlinx:kotlinx-coroutines-core:0.22.5"
-    compile "blue.sparse:sparse-engine:1.0.1"
+    compile "blue.sparse:sparse-engine:1.0.2"
     compile "blue.sparse:config:1.0-SNAPSHOT"
     compile 'com.google.guava:guava:24.0-jre'
 }

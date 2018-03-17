@@ -33,7 +33,7 @@ class CelestialBodyComponent(
 	}
 
 	override fun render(delta: Float, camera: Camera, shader: ShaderProgram) {
-		shader.uniforms["uLightDirection"] = direction
+//		shader.uniforms["uLightDirection"] = direction
 		glCall { GL11.glEnable(GL11.GL_BLEND) }
 		glCall { GL11.glBlendFunc(GL_SRC_ALPHA, GL_ONE) }
 		glCall { GL11.glDisable(GL11.GL_DEPTH_TEST) }

@@ -3,6 +3,7 @@ package blue.sparse.minecraft.client.item
 import blue.sparse.engine.asset.Asset
 import blue.sparse.engine.render.camera.Camera
 import blue.sparse.engine.render.resource.Texture
+import blue.sparse.engine.render.resource.bind
 import blue.sparse.engine.render.resource.shader.ShaderProgram
 import blue.sparse.engine.render.scene.component.Transformed
 import blue.sparse.math.vectors.floats.Vector3f
@@ -20,6 +21,8 @@ class ItemComponent(val item: Item<*>, val position: Vector3f) : Transformed() {
 
 	private lateinit var color: Vector3f
 	private lateinit var enchantColor: Vector3f
+
+	override val overridesShader = true
 
 	init {
 		transform.rotateDeg(Vector3f(0f, 1f, 0f), random.nextFloat() * 360)
@@ -42,19 +45,23 @@ class ItemComponent(val item: Item<*>, val position: Vector3f) : Transformed() {
 	}
 
 	override fun render(delta: Float, camera: Camera, shader: ShaderProgram) {
-		shader.uniforms["uModel"] = modelMatrix
-		shader.uniforms["uColor"] = color
-		shader.uniforms["uEnchantTexture"] = 1
-		enchantTexture.bind(1)
-		shader.uniforms["uEnchantColor"] = enchantColor
-		shader.uniforms["uEnchantTime"] = time * 0.2f
+		Companion.shader.bind {
+			uniforms["uViewProj"] = camera.viewProjectionMatrix
+			uniforms["uModel"] = modelMatrix
+			uniforms["uColor"] = color
+			uniforms["uEnchantTexture"] = 1
+			enchantTexture.bind(1)
+			uniforms["uEnchantColor"] = enchantColor
+			uniforms["uEnchantTime"] = time * 0.2f
 
-//		atlas.texture.bind(0)
-		(Minecraft.proxy as MinecraftClient).atlas.texture.bind(0)
-		(item.type.proxy as ClientItemTypeProxy).model.render()
+			(Minecraft.proxy as MinecraftClient).atlas.texture.bind(0)
+			(item.type.proxy as ClientItemTypeProxy).model.render()
+		}
 	}
 
 	companion object {
 		val enchantTexture = Texture(Asset["minecraft/textures/misc/enchanted_item_glint.png"])
+
+		val shader = ShaderProgram(Asset["minecraft/shaders/item.fs"], Asset["minecraft/shaders/item.vs"])
 	}
 }

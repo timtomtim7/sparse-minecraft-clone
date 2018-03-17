@@ -38,8 +38,7 @@ object GUIManager {
 		right = window.width.toFloat() / scale
 		top = window.height.toFloat() / scale
 
-		//TODO: Math library needs updating, these should not require division by 2
-		projection = Matrix4f.orthographic(0f, right / 2, 0f, top / 2, 100f, -100f)
+		projection = Matrix4f.orthographic(0f, right / 2f, 0f, top / 2f, 100f, -100f)
 	}
 
 	fun open(gui: GUI) {
