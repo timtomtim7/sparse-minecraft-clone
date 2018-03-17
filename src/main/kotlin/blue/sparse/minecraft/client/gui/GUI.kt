@@ -5,13 +5,13 @@ import blue.sparse.math.vectors.floats.*
 import blue.sparse.minecraft.client.text.TextRenderer
 import blue.sparse.minecraft.common.text.Text
 
-interface GUI {
+abstract class GUI {
 	val manager: GUIManager get() = GUIManager
 
-	fun update(delta: Float)
-	fun render(delta: Float)
+	abstract fun update(delta: Float)
+	abstract fun render(delta: Float)
 
-	fun drawString(
+	open fun drawString(
 			text: String,
 			x: Float,
 			y: Float,
@@ -36,7 +36,7 @@ interface GUI {
 		)
 	}
 
-	fun drawText(text: Text, x: Float, y: Float, scale: Float = 1f) {
+	open fun drawText(text: Text, x: Float, y: Float, scale: Float = 1f) {
 		TextRenderer.drawText(
 				text,
 				Vector3f(x, y, 0f),
@@ -46,19 +46,19 @@ interface GUI {
 		)
 	}
 
-	fun drawRectangle(
+	open fun drawRectangle(
 			sprite: String,
 			x: Float, y: Float,
 			sizeX: Float, sizeY: Float = sizeX,
 			repeatX: Float = 1f, repeatY: Float = 1f,
 			color: Long = 0xFFFFFFFF,
-			guiIcon: Boolean = true
+			guiPrefix: Boolean = true
 	) {
 		Rectangle.drawRectangle(
 				Vector3f(x, y, 0f),
 				Vector2f(sizeX, sizeY),
 				color.toInt().vectorFromIntRGBA(),
-				manager.atlas.getOrAddSprite(if(guiIcon) "minecraft/textures/gui/icons/$sprite.png" else "$sprite.png"),
+				manager.atlas.getOrAddSprite(if(guiPrefix) "minecraft/textures/gui/$sprite.png" else "$sprite.png"),
 				Vector4f(0f, 0f, repeatX, repeatY),
 				Matrix4f.identity(),
 				manager.projection

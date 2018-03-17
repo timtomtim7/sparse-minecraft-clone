@@ -14,7 +14,7 @@ object GUIManager {
 	lateinit var projection: Matrix4f// = Camera.orthographic(0f, 0f, 0f, 0f, 0f, 0f, null)
 		private set
 
-	val atlas = TextureAtlas(Vector2i(1024, 1024))
+	val atlas = TextureAtlas(Vector2i(512, 512))
 
 	var scale: Int = 2
 		set(value) {
@@ -52,7 +52,7 @@ object GUIManager {
 	}
 
 	fun update(delta: Float) {
-		stack.peek()?.render(delta)
+		stack.firstOrNull()?.render(delta)
 	}
 
 	fun render(delta: Float) {
@@ -60,7 +60,7 @@ object GUIManager {
 		glCall { glEnable(GL_BLEND) }
 		glCall { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) }
 		depth(false)
-		stack.peek()?.render(delta)
+		stack.firstOrNull()?.render(delta)
 		depth(true)
 		glCall { glDisable(GL_BLEND) }
 	}

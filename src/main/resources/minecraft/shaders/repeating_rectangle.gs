@@ -3,6 +3,8 @@
 //uniform vec4 uTexCoords;
 uniform vec4 uTexCoordRange;
 uniform vec4 uTexCoords;
+uniform vec4 uPadding; // left, right, bottom, top
+
 uniform vec3 uPosition;
 uniform vec2 uSize;
 
@@ -28,6 +30,14 @@ void main() {
 
 	gTexCoordRange = vec4(uTexCoordRange.xy, uTexCoordRange.zw - uTexCoordRange.xy);
 //	gTexCoordRange = uTexCoords;
+
+//	vec2 min = uTexCoords.xy;
+//	vec2 max = uTexCoords.zw;
+//
+//	float xPadding = uPadding.x + uPadding.z;
+//	float yPadding = uPadding.y + uPadding.w;
+//
+
 
 	gl_Position = transform(vec2(0, 0));
 	gTexCoord = uTexCoords.xw;

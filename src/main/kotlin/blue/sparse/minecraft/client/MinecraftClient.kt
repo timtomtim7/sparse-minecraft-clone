@@ -18,14 +18,17 @@ import blue.sparse.minecraft.common.item.Item
 import blue.sparse.minecraft.common.item.ItemType
 import blue.sparse.minecraft.common.util.ProxyHolder
 import org.lwjgl.opengl.GL11
+import java.io.File
+import javax.imageio.ImageIO
 
 class MinecraftClient : SparseGame(), MinecraftProxy {
 
-	val atlas = TextureAtlas(Vector2i(1024, 1024))
+	val atlas = TextureAtlas(Vector2i(1024, 512))
 
 	val sky = OverworldSky()
 
-	private var time = 0f
+	var time = 0f
+		private set
 
 	init {
 		camera.apply {
@@ -42,24 +45,24 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 		ItemType
 		BlockType
 
-//		val item = Item(ItemType.ironChestplate)
-//		item.enchantColor = 0x00FF00
-//		item.editNBT { list("ench", emptyList()) }
-//		spawnItem(item, Vector3f(0f))
-
+		val item = Item(ItemType.ironChestplate)
+		item.enchantColor = 0x00FF00
+		item.editNBT { list("ench", emptyList()) }
+		spawnItem(item, Vector3f(0f))
+//
 		GUIManager.open(TestGUI)
 
-		val itemTypes = ItemType.registry.values
-
-		val squareSize = Math.ceil(Math.sqrt(itemTypes.size.toDouble())).toInt()
-
-		for((i, itemType) in itemTypes.withIndex()) {
-			val x = (i % squareSize) - (squareSize / 2)
-			val y = (i / squareSize) - (squareSize / 2)
-			val item = Item(itemType)
-
-			spawnItem(item, Vector3f(x.toFloat(), y.toFloat(), 0f) * 0.8f)
-		}
+//		val itemTypes = ItemType.registry.values
+//
+//		val squareSize = Math.ceil(Math.sqrt(itemTypes.size.toDouble())).toInt()
+//
+//		for((i, itemType) in itemTypes.withIndex()) {
+//			val x = (i % squareSize) - (squareSize / 2)
+//			val y = (i / squareSize) - (squareSize / 2)
+//			val item = Item(itemType)
+//
+//			spawnItem(item, Vector3f(x.toFloat(), y.toFloat(), 0f) * 0.8f)
+//		}
 
 //		ImageIO.write(atlas.texture.read(), "png", File("atlas.png"))
 	}
@@ -76,6 +79,11 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 		} else if (wireframeButton.released) {
 			glCall { GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL) }
 			glCall { GL11.glEnable(GL11.GL_CULL_FACE) }
+		}
+
+		if(input[Key.F9].pressed) {
+			ImageIO.write(atlas.texture.read(), "png", File("block_item_atlas.png"))
+			ImageIO.write(GUIManager.atlas.texture.read(), "png", File("gui_atlas.png"))
 		}
 	}
 
