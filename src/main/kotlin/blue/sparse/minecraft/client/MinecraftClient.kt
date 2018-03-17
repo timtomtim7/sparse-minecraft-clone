@@ -29,7 +29,7 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 
 	init {
 		camera.apply {
-			move(Vector3f(0f, 0f, 1f))
+			move(Vector3f(0f, 0f, 10f))
 			controller = FirstPerson(this)
 		}
 	}
@@ -54,8 +54,8 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 		val squareSize = Math.ceil(Math.sqrt(itemTypes.size.toDouble())).toInt()
 
 		for((i, itemType) in itemTypes.withIndex()) {
-			val x = i % squareSize
-			val y = i / squareSize
+			val x = (i % squareSize) - (squareSize / 2)
+			val y = (i / squareSize) - (squareSize / 2)
 			val item = Item(itemType)
 
 			spawnItem(item, Vector3f(x.toFloat(), y.toFloat(), 0f) * 0.8f)

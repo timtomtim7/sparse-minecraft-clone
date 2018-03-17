@@ -46,6 +46,7 @@ class ItemComponent(val item: Item<*>, val position: Vector3f) : Transformed() {
 
 	override fun render(delta: Float, camera: Camera, shader: ShaderProgram) {
 		Companion.shader.bind {
+			uniforms["uLightDirection"] = (Minecraft.proxy as MinecraftClient).sky.sun.direction
 			uniforms["uViewProj"] = camera.viewProjectionMatrix
 			uniforms["uModel"] = modelMatrix
 			uniforms["uColor"] = color

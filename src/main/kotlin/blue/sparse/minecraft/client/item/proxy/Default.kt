@@ -4,5 +4,5 @@ import blue.sparse.engine.asset.Asset
 import blue.sparse.minecraft.common.item.ItemType
 
 class Default(itemType: ItemType) : ClientItemTypeProxy(itemType) {
-	override val texture = Asset["minecraft/textures/items/${itemType.identifier.name}.png"]
+	override val texture = Asset["${itemType.identifier.namespace}/textures/items/${itemType.identifier.name}.png"]
 }
