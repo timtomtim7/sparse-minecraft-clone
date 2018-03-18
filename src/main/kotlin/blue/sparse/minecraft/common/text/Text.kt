@@ -46,12 +46,44 @@ sealed class Text {
 
 	}
 
+	class Icon(val iconPath: String): Text() {
+		override val content: String
+			get() = iconPath
+
+		override fun applyToConfig(config: Config) {
+			config["icon"] = iconPath
+		}
+
+//		enum class Type {
+//			ITEM, BLOCK, GUI
+//		}
+	}
+
+	fun last(): Text {
+		return extra?.lastOrNull()?.last() ?: this
+	}
+
+	// ?!?!?!?!
+	fun addExtra(text: Text) {
+		if ((extra as? MutableList?)?.add(text) == null) {
+			extra = extra.orEmpty() + text
+		}
+	}
+
+	fun addExtra(extra: Collection<Text>) {
+		if ((this.extra as? MutableList?)?.addAll(extra) == null) {
+			this.extra = this.extra.orEmpty() + extra
+		}
+	}
+
 	fun toConfig(): Config {
 
 		val config = Config {
-			set("color", textColor.id)
-			if(textColor.color != color)
-				set("customColor", color)
+			if(color != 0xFFFFFF) {
+				set("color", textColor.id)
+				if(textColor.color != color)
+					set("customColor", color)
+			}
 
 			if(bold) set("bold", bold)
 			if(italic) set("italic", italic)
@@ -94,30 +126,39 @@ sealed class Text {
 
 		private fun create(iterator: Iterator<Any>): Text {
 			var color = 0xFFFFFF
-			var text: String? = null
+			var rawContent: String? = null
+			var text: Text? = null
+
 			val extra = ArrayList<Text>()
 			val effects = ArrayList<TextEffect>()
 
-			while(text == null && iterator.hasNext()) {
+			while(rawContent == null && text == null && iterator.hasNext()) {
 				val value = iterator.next()
 
 				when(value) {
 					is Int -> color = value
 					is TextColor -> color = value.color
 					is TextEffect -> effects.add(value)
-					is String -> text = value
-					is Text -> extra.add(value)
-					else -> text = value.toString()
+					is String -> rawContent = value
+					is Text -> text = value
+					else -> rawContent = value.toString()
 				}
 			}
 
-			if(text == null)
-				text = ""
+			if(text != null) {
+				if(iterator.hasNext())
+					extra.add(create(iterator))
+				text.addExtra(extra)
+				return text
+			}
+
+			if(rawContent == null)
+				rawContent = ""
 
 			if(iterator.hasNext())
 				extra.add(create(iterator))
 
-			return Text.Raw(text).apply {
+			return Text.Raw(rawContent).apply {
 				this.color = color
 				this.extra = extra
 				effects.forEach { it.applyTo(this) }

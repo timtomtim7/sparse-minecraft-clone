@@ -3,14 +3,25 @@ package blue.sparse.minecraft.client.gui
 import blue.sparse.engine.SparseEngine
 import blue.sparse.engine.errors.glCall
 import blue.sparse.engine.util.MemoryUsage
+import blue.sparse.math.wrap
+import blue.sparse.minecraft.client.item.proxy.ClientItemTypeProxy
+import blue.sparse.minecraft.common.item.ItemType
+import blue.sparse.minecraft.common.text.Text
 import org.lwjgl.opengl.GL11.*
 
 object TestGUI : GUI() {
-//	val text = Text.create(
-//			TextEffect.Bold, TextEffect.Italic, TextEffect.Obfuscated, "Hello, world!"
-//	)
+	val text = Text.create(Text.Icon("minecraft/textures/items/diamond_sword"), " Hello ", Text.Icon("minecraft/textures/items/diamond_sword"))
 
-	override fun update(delta: Float) {}
+	private var selectedSlot: Int = 0
+
+	init {
+		println(text.toJSON())
+	}
+
+	override fun update(delta: Float) {
+		selectedSlot -= SparseEngine.window.input.scrollDelta.toInt()
+		selectedSlot = wrap(selectedSlot, 0, 8)
+	}
 
 	override fun render(delta: Float) {
 
@@ -25,7 +36,9 @@ object TestGUI : GUI() {
 				182f, 22f
 		)
 
-		drawRectangle("widgets/hotbar_selected", hotbarLeft - 1f, -1f, 24f)
+		drawRectangle("widgets/hotbar_selected", hotbarLeft - 1f + (selectedSlot * 20f), -1f, 24f)
+
+		drawRectangle((ItemType.diamondSword.proxy as ClientItemTypeProxy).sprite, hotbarLeft + 3f + 20f * 2, 3f, 16f, 16f)
 
 //		val exp = Math.sin(System.currentTimeMillis() / 500.0).toFloat() * 0.5f + 0.5f
 		val exp = 0.5f
@@ -34,7 +47,11 @@ object TestGUI : GUI() {
 
 		for (i in 0 until 10) {
 			drawRectangle("icons/heart_black_outline", hotbarLeft + (i * 8), 30f, 9f)
-			drawRectangle("icons/heart_full", hotbarLeft + (i * 8), 30f, 9f)
+			if (i < 5) {
+				drawRectangle("icons/heart_full", hotbarLeft + (i * 8), 30f, 9f)
+			} else if (i == 5) {
+				drawRectangle("icons/heart_half", hotbarLeft + (i * 8), 30f, 9f)
+			}
 		}
 
 		for (i in 0 until 10) {
@@ -43,17 +60,22 @@ object TestGUI : GUI() {
 		}
 
 		glCall { glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE_MINUS_SRC_ALPHA) }
-
 		drawRectangle("icons/crosshair", manager.right / 2f - 16f / 2f, manager.top / 2f - 16f / 2f, 16f)
-
 		glCall { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) }
+
+		/*
+
+			<---------- EXT START --------->
+
+		 */
 
 		drawString(String.format("FPS: %.1f", SparseEngine.frameRate), 1f, manager.top - 9)
 		drawString(String.format("MEM: %s", MemoryUsage.getMemoryUsedString()), 1f, manager.top - 18)
 
 		val (x, y, z) = SparseEngine.game.camera.transform.translation
 		drawString(String.format("POS: %.1f, %.1f, %.1f", x, y, z), 1f, manager.top - 27)
-//		drawText(text, manager.right / 2f - manager.right / 4f, manager.top / 2f, 4f)
+
+//		drawText(text, manager.right / 2f - manager.right / 4f, manager.top / 2f, 1f)
 	}
 }
 

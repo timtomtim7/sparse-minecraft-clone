@@ -85,6 +85,8 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 			ImageIO.write(atlas.texture.read(), "png", File("block_item_atlas.png"))
 			ImageIO.write(GUIManager.atlas.texture.read(), "png", File("gui_atlas.png"))
 		}
+
+		GUIManager.update(delta)
 	}
 
 	override fun render(delta: Float) {

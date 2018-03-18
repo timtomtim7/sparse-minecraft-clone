@@ -6,6 +6,9 @@ import blue.sparse.engine.render.resource.bind
 import blue.sparse.engine.render.resource.shader.ShaderProgram
 import blue.sparse.math.matrices.Matrix4f
 import blue.sparse.math.vectors.floats.*
+import blue.sparse.minecraft.client.MinecraftClient
+import blue.sparse.minecraft.client.gui.GUIManager
+import blue.sparse.minecraft.client.gui.Rectangle
 import blue.sparse.minecraft.client.util.BlankModel
 import blue.sparse.minecraft.common.text.Text
 import blue.sparse.minecraft.common.util.random
@@ -99,7 +102,10 @@ object TextRenderer {
 	}
 
 	fun textWidth(text: Text, includeExtra: Boolean): Float {
-		val width = stringWidth(text.content) + if(text.bold) text.content.length else 0
+//		val width = stringWidth(text.content) + if(text.bold) text.content.length else 0
+		val width = if(text is Text.Icon) 9f else {
+			stringWidth(text.content) + if(text.bold) text.content.length else 0
+		}
 
 		if(includeExtra) {
 			val extras = text.extra ?: return width
@@ -168,18 +174,21 @@ object TextRenderer {
 
 	fun drawText(text: Text, origin: Vector3f, scale: Float, modelMatrix: Matrix4f, viewProjectionMatrix: Matrix4f) {
 //		println("Draw text ${text.toJSON()} at $origin")
-		drawString(
-				text.content,
-				origin,
-				text.color.vectorFromIntRGB(),
-				text.shadow,
-				scale,
-				text.italic,
-				text.bold,
-				text.obfusated,
-				modelMatrix,
-				viewProjectionMatrix
-		)
+		if(text is Text.Icon)
+			drawIcon(text.iconPath, origin, scale, modelMatrix, viewProjectionMatrix)
+		else
+			drawString(
+					text.content,
+					origin,
+					text.color.vectorFromIntRGB(),
+					text.shadow,
+					scale,
+					text.italic,
+					text.bold,
+					text.obfusated,
+					modelMatrix,
+					viewProjectionMatrix
+			)
 
 		val extras = text.extra ?: return
 		var offset = textWidth(text, false) * scale
@@ -188,6 +197,20 @@ object TextRenderer {
 			drawText(extra, origin + Vector3f(offset, 0f, 0f), scale, modelMatrix, viewProjectionMatrix)
 			offset += textWidth(extra, true) * scale
 		}
+	}
+
+	private fun drawIcon(path: String, origin: Vector3f, scale: Float, modelMatrix: Matrix4f, viewProjectionMatrix: Matrix4f) {
+		val sprite = MinecraftClient.proxy.atlas["$path.png"] ?: GUIManager.atlas.getOrAddSprite("$path.png")
+
+		Rectangle.drawRectangle(
+				origin,
+				Vector2f(9f) * scale,
+				Vector4f(1f),
+				sprite,
+				Vector4f(0f, 0f, 1f, 1f),
+				modelMatrix,
+				viewProjectionMatrix
+		)
 	}
 
 	private fun drawStringChunk(string: String, origin: Vector3f, color: Vector3f) {

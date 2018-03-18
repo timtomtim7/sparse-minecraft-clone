@@ -2,6 +2,7 @@ package blue.sparse.minecraft.client.gui
 
 import blue.sparse.math.matrices.Matrix4f
 import blue.sparse.math.vectors.floats.*
+import blue.sparse.minecraft.client.TextureAtlas
 import blue.sparse.minecraft.client.text.TextRenderer
 import blue.sparse.minecraft.common.text.Text
 
@@ -54,11 +55,24 @@ abstract class GUI {
 			color: Long = 0xFFFFFFFF,
 			guiPrefix: Boolean = true
 	) {
+		drawRectangle(
+				manager.atlas.getOrAddSprite(if(guiPrefix) "minecraft/textures/gui/$sprite.png" else "$sprite.png"),
+				x, y, sizeX, sizeY, repeatX, repeatY, color
+		)
+	}
+
+	open fun drawRectangle(
+			sprite: TextureAtlas.Sprite,
+			x: Float, y: Float,
+			sizeX: Float, sizeY: Float = sizeX,
+			repeatX: Float = 1f, repeatY: Float = 1f,
+			color: Long = 0xFFFFFFFF
+	) {
 		Rectangle.drawRectangle(
 				Vector3f(x, y, 0f),
 				Vector2f(sizeX, sizeY),
 				color.toInt().vectorFromIntRGBA(),
-				manager.atlas.getOrAddSprite(if(guiPrefix) "minecraft/textures/gui/$sprite.png" else "$sprite.png"),
+				sprite,
 				Vector4f(0f, 0f, repeatX, repeatY),
 				Matrix4f.identity(),
 				manager.projection

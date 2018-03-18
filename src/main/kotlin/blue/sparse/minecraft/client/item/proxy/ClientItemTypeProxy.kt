@@ -11,6 +11,11 @@ import blue.sparse.minecraft.common.item.ItemType
 abstract class ClientItemTypeProxy(itemType: ItemType) : ItemType.ItemTypeProxy(itemType) {
 	abstract val texture: Asset
 
+	val sprite by lazy {
+		val atlas = (Minecraft.proxy as MinecraftClient).atlas
+		atlas.getOrAddSprite(texture.path, texture.readImage())
+	}
+
 	open fun getColor(item: Item<*>): Vector3f {
 		val displayCompound = item.data?.compound("display") ?: return Vector3f(1f)
 		val colorCompound = displayCompound.compound("color") ?: return Vector3f(1f)

@@ -16,7 +16,7 @@ object GUIManager {
 
 	val atlas = TextureAtlas(Vector2i(512, 512))
 
-	var scale: Int = 2
+	var scale: Int = 3
 		set(value) {
 			field = value
 			updateProjection()
@@ -35,8 +35,8 @@ object GUIManager {
 
 	fun updateProjection() {
 		val window = SparseEngine.window
-		right = window.width.toFloat() / scale
-		top = window.height.toFloat() / scale
+		right = window.width.toFloat() / scale.toFloat()
+		top = window.height.toFloat() / scale.toFloat()
 
 		projection = Matrix4f.orthographic(0f, right / 2f, 0f, top / 2f, 100f, -100f)
 	}
@@ -52,7 +52,10 @@ object GUIManager {
 	}
 
 	fun update(delta: Float) {
-		stack.firstOrNull()?.render(delta)
+		if(SparseEngine.window.resized)
+			updateProjection()
+
+		stack.firstOrNull()?.update(delta)
 	}
 
 	fun render(delta: Float) {

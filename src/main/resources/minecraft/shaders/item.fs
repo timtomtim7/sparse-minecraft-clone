@@ -1,7 +1,7 @@
 #version 330 core
 
 const float PI = 3.14159265;
-const float ROTATION_RADIANS = (45.0 / 180.0) * PI;
+const float ROTATION_RADIANS = (35.0 / 180.0) * PI;
 const float SIN_45 = sin(ROTATION_RADIANS);
 const float COS_45 = cos(ROTATION_RADIANS);
 const mat2 ROTATION_MATRIX = mat2(COS_45, SIN_45, -SIN_45, COS_45);
@@ -27,8 +27,8 @@ void main() {
 	if(color.a < 0.5)
 		discard;
 
-	vec2 rotatedCoord1 = (vTexCoord * ROTATION_MATRIX) * 8 + uEnchantTime;
-	vec2 rotatedCoord2 = (vTexCoord * INV_ROTATION_MATRIX) * 8 + uEnchantTime + 0.5;
+	vec2 rotatedCoord1 = (vTexCoord * ROTATION_MATRIX) * 4 + uEnchantTime;
+	vec2 rotatedCoord2 = (vTexCoord * INV_ROTATION_MATRIX) * 4 + uEnchantTime + 0.5;
 
 //	vec2 rotatedCoord2 = (vTexCoord * ROTATION_MATRIX_NEGATIVE) * 8 + uEnchantTime;
 //	vec4 enchantColor = (texture2D(uEnchantTexture, rotatedCoord1) + texture2D(uEnchantTexture, rotatedCoord2)) * vec4(uEnchantColor, 1.0);

@@ -28,6 +28,10 @@ class TextureAtlas(size: Vector2i) {
 		}
 	}
 
+	operator fun get(name: String): Sprite? {
+		return sprites[name]
+	}
+
 	fun getOrAddSprite(name: String): Sprite {
 		sprites[name]?.let { return it }
 		return addSprite(name, Asset[name])!!
@@ -140,6 +144,9 @@ class TextureAtlas(size: Vector2i) {
 
 		val max = pos + size
 			get() = field.clone()
+
+//		val size = size.clone()
+//			get() = field.clone()
 
 		val textureCoords: Vector4f
 			get() = Vector4f(
