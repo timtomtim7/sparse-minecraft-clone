@@ -3,8 +3,9 @@ package blue.sparse.minecraft.common.item
 import blue.sparse.minecraft.common.item.impl.*
 import blue.sparse.minecraft.common.util.*
 
-abstract class ItemType(val identifier: Identifier) {
-	constructor(id: String): this(Identifier(id))
+abstract class ItemType(val identifier: Identifier, val maxStackSize: Int = 64) {
+
+	constructor(id: String, maxStackSize: Int = 64): this(Identifier(id), maxStackSize)
 
 	init {
 		register(this)

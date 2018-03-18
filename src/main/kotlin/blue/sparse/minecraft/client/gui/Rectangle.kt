@@ -16,7 +16,31 @@ object Rectangle {
 			Asset["minecraft/shaders/repeating_rectangle.gs"]
 	)
 
+	private val coloredShader = ShaderProgram(
+			Asset["minecraft/shaders/colored.fs"],
+			Asset["minecraft/shaders/nothing.vs"],
+			Asset["minecraft/shaders/rectangle.gs"]
+	)
+
 	fun drawRectangle(
+			position: Vector3f,
+			size: Vector2f,
+			color: Vector4f,
+			modelMatrix: Matrix4f,
+			viewProjectionMatrix: Matrix4f
+	) {
+		coloredShader.bind {
+			uniforms["uPosition"] = position
+			uniforms["uSize"] = size
+
+			uniforms["uColor"] = color
+			uniforms["uModel"] = modelMatrix
+			uniforms["uViewProj"] = viewProjectionMatrix
+			BlankModel.render()
+		}
+	}
+
+	fun drawTexturedRectangle(
 			position: Vector3f,
 			size: Vector2f,
 			color: Vector4f,

@@ -16,7 +16,7 @@ object GUIManager {
 
 	val atlas = TextureAtlas(Vector2i(512, 512))
 
-	var scale: Int = 3
+	var scale: Int = 2
 		set(value) {
 			field = value
 			updateProjection()
