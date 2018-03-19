@@ -5,8 +5,6 @@ import blue.sparse.engine.SparseGame
 import blue.sparse.engine.asset.Asset
 import blue.sparse.engine.errors.glCall
 import blue.sparse.engine.render.camera.FirstPerson
-import blue.sparse.engine.render.resource.bind
-import blue.sparse.engine.render.resource.model.VertexArray
 import blue.sparse.engine.render.resource.shader.ShaderProgram
 import blue.sparse.engine.window.input.Key
 import blue.sparse.math.matrices.Matrix4f
@@ -17,13 +15,11 @@ import blue.sparse.minecraft.client.gui.TestGUI
 import blue.sparse.minecraft.client.item.ItemComponent
 import blue.sparse.minecraft.client.sky.OverworldSky
 import blue.sparse.minecraft.client.util.BlankShader
-import blue.sparse.minecraft.client.world.proxy.ClientChunkProxy
 import blue.sparse.minecraft.common.MinecraftProxy
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.item.Item
 import blue.sparse.minecraft.common.item.ItemType
 import blue.sparse.minecraft.common.util.ProxyHolder
-import blue.sparse.minecraft.common.world.Chunk
 import org.lwjgl.opengl.GL11
 import java.io.File
 import javax.imageio.ImageIO
@@ -36,8 +32,6 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 
 	var time = 0f
 		private set
-
-	lateinit var chunk: VertexArray
 
 	val chunkShader = ShaderProgram(
 			Asset["minecraft/shaders/blocks.fs"],
@@ -67,15 +61,19 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 		item.enchantColor = 0x00FF00
 		item.editNBT { list("ench", emptyList()) }
 		spawnItem(item, Vector3f(0f))
-//
+
 		GUIManager.open(TestGUI)
 
-		chunk = Chunk().run {
-			setBlockType(3, 3, 3, BlockType.dirt)
-			setBlockType(3, 4, 3, BlockType.stone)
-			setBlockType(5, 4, 5, BlockType.cobblestone)
-			(proxy as ClientChunkProxy).generateOfflineModel().upload()
-		}
+//		chunk = Chunk().run {
+////			setBlockType(3, 3, 3, BlockType.dirt)
+////			setBlockType(3, 4, 3, BlockType.stone)
+////			setBlockType(5, 4, 5, BlockType.cobblestone)
+//			for(i in 0 until 32 * 3) {
+//				val spiral = SquareSpiral[i] + Vector2i(16, 16)
+//				setBlockType(spiral.x, i / 3, spiral.y, BlockType.cobblestone)
+//			}
+//			(proxy as ClientChunkProxy).generateOfflineModel().upload()
+//		}
 
 //		val itemTypes = ItemType.registry.values
 //
@@ -120,14 +118,16 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 		sky.render(camera, delta)
 		scene.render(delta, camera, BlankShader.shader)
 
-		chunkShader.bind {
-			uniforms["uLightDirection"] = sky.sun.direction
-			uniforms["uModel"] = Matrix4f.identity()
-			uniforms["uViewProj"] = camera.viewProjectionMatrix
-			atlas.texture.bind(0)
-			uniforms["uTexture"] = 0
-			chunk.render()
-		}
+//		chunkShader.bind {
+//			uniforms["uLightDirection"] = sky.sun.direction
+//			uniforms["uModel"] = Matrix4f.identity()
+//			uniforms["uViewProj"] = camera.viewProjectionMatrix
+//			atlas.texture.bind(0)
+//			uniforms["uTexture"] = 0
+//			chunk.render()
+//		}
+
+
 
 		GUIManager.render(delta)
 	}

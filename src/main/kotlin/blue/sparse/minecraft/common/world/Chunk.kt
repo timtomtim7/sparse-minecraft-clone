@@ -1,11 +1,19 @@
 package blue.sparse.minecraft.common.world
 
+import blue.sparse.math.vectors.ints.Vector3i
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.util.Proxy
 import blue.sparse.minecraft.common.util.ProxyProvider
 
-class Chunk {
+class Chunk(val region: Region, position: Vector3i) {
+
 	private val data = IntArray(SIZE * SIZE * SIZE)
+
+	var lastChangedMillis: Long = System.currentTimeMillis()
+		private set
+
+	val position: Vector3i = position
+		get() = field.clone()
 
 	//block type		12 bits 0xFFF
 	//block state		 4 bits 0xF
@@ -49,6 +57,7 @@ class Chunk {
 	}
 
 	internal fun getRaw(index: Int): Int {
+		lastChangedMillis = System.currentTimeMillis()
 		return data[index]
 	}
 
