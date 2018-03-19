@@ -70,4 +70,10 @@ abstract class Inventory(val size: Int, val content: Array<ItemStack<*>?> = Arra
             break
         }
     }
+
+    operator fun get(index: Int) = content[index]
+    operator fun set(index: Int, item: ItemStack<*>) {
+        content[index] = item
+    }
+
 }

@@ -1,7 +1,7 @@
 package blue.sparse.minecraft.common.block
 
 import blue.sparse.minecraft.common.block.impl.*
-import blue.sparse.minecraft.common.item.impl.ItemTypeBlock
+import blue.sparse.minecraft.common.item.impl.types.ItemTypeBlock
 import blue.sparse.minecraft.common.util.*
 
 abstract class BlockType(val identifier: Identifier, val hasItem: Boolean = true) {
