@@ -2,7 +2,7 @@ package blue.sparse.minecraft.common.item
 
 import blue.sparse.minecraft.common.nbt.Compound
 
-class Item<out T : ItemType>(val type: T, var data: Compound? = null) {
+data class Item<out T : ItemType>(val type: T, var data: Compound? = null) {
 	var color: Int
 		get() {
 			return data?.compound("display")?.int("color") ?: 0xFFFFFF

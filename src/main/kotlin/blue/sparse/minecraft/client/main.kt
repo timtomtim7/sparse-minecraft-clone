@@ -19,7 +19,7 @@ fun main(args: Array<String>) {
 		vSync(true)
 	}
 
-	AssetManager.registerProvider(AssetArchive(File("Faithful 1.12.2-rv4.zip"), "assets/"))
+//	AssetManager.registerProvider(AssetArchive(File("Faithful 1.12.2-rv4.zip"), "assets/"))
 //	AssetManager.registerProvider(AssetArchive(File("PureBDcraft  64x MC112.zip"), "assets/"))
 	SparseEngine.start(window, MinecraftClient::class, 0.0)
 }

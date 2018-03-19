@@ -6,6 +6,7 @@ import blue.sparse.engine.errors.glCall
 import blue.sparse.engine.render.camera.FirstPerson
 import blue.sparse.engine.window.input.Key
 import blue.sparse.math.vectors.floats.Vector3f
+import blue.sparse.math.vectors.floats.g
 import blue.sparse.math.vectors.ints.Vector2i
 import blue.sparse.minecraft.client.gui.GUIManager
 import blue.sparse.minecraft.client.gui.TestGUI
@@ -14,6 +15,7 @@ import blue.sparse.minecraft.client.sky.OverworldSky
 import blue.sparse.minecraft.client.util.BlankShader
 import blue.sparse.minecraft.common.MinecraftProxy
 import blue.sparse.minecraft.common.block.BlockType
+import blue.sparse.minecraft.common.inventory.TestInventory
 import blue.sparse.minecraft.common.item.Item
 import blue.sparse.minecraft.common.item.ItemType
 import blue.sparse.minecraft.common.util.ProxyHolder
@@ -35,6 +37,7 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 			move(Vector3f(0f, 0f, 10f))
 			controller = FirstPerson(this)
 		}
+		TestInventory
 	}
 
 	fun spawnItem(item: Item<*>, position: Vector3f) {
