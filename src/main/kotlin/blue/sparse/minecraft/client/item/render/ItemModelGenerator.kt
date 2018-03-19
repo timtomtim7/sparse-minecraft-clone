@@ -140,7 +140,6 @@ object ItemModelGenerator {
 		return IndexedModel(array, indices.toIntArray())
 	}
 
-
 	fun findEdges(image: BufferedImage): List<Edge> {
 		val edges = ArrayList<Edge>()
 

@@ -202,7 +202,7 @@ object TextRenderer {
 	private fun drawIcon(path: String, origin: Vector3f, scale: Float, modelMatrix: Matrix4f, viewProjectionMatrix: Matrix4f) {
 		val sprite = MinecraftClient.proxy.atlas["$path.png"] ?: GUIManager.atlas.getOrAddSprite("$path.png")
 
-		Rectangle.drawRectangle(
+		Rectangle.drawTexturedRectangle(
 				origin,
 				Vector2f(9f) * scale,
 				Vector4f(1f),
