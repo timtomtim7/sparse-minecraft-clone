@@ -57,7 +57,6 @@ abstract class ItemType(val identifier: Identifier, val maxStackSize: Int = 64) 
 		val bookWritable = ItemBookWritable
 		val bookWritten = ItemBookWritten
 		val bowl = ItemBowl
-		val bowStandby = ItemBowStandby
 		val bread = ItemBread
 		val brewingStand = ItemBrewingStand
 		val brick = ItemBrick

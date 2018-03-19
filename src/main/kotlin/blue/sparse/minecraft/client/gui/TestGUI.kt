@@ -20,10 +20,14 @@ object TestGUI : GUI() {
 
 	private val chatMessages = ArrayList<ChatMessage>()
 
-	private val item = Item(ItemType.diamond).apply { color = 0xFF0000 }
+	private val item = Item(ItemType.chainmailChestplate)
 
 	fun sendMessage(message: Text) {
 		chatMessages.add(0, ChatMessage(message, 30f))
+	}
+
+	fun sendMessage(message: String) {
+		sendMessage(Text.create(message))
 	}
 
 	override fun update(delta: Float) {
@@ -42,7 +46,7 @@ object TestGUI : GUI() {
 		val input = SparseEngine.window.input
 		if (input[Key.U].pressed) {
 			TestInventory.addItem(item, 4)
-			sendMessage(Text.create("Added item $item"))
+			sendMessage(Text.create("Added item $item, maxStackSize: ${item.type.maxStackSize}"))
 		}
 		if (input[Key.J].pressed) {
 			sendMessage(Text.create("Removing item $item"))
@@ -51,6 +55,10 @@ object TestGUI : GUI() {
 
 		if (input[Key.K].pressed) {
 			item.color = TextColor.values().run { get(random.nextInt(size)).color }
+		}
+
+		if(input[Key.KP_8].pressed) {
+			TestInventory.clear()
 		}
 	}
 
@@ -72,7 +80,7 @@ object TestGUI : GUI() {
 //		drawTexturedRectangle((ItemType.diamondSword.proxy as ClientItemTypeProxy).sprite, hotbarLeft + 3f + 20f * 2, 3f, 16f, 16f)
 //		drawItem(Item(ItemType.apple), 32, hotbarLeft + 3f + 20f * 2, 3f)
 		for (i in 0 until 9) {
-			val stack = TestInventory.content[i] ?: continue
+			val stack = TestInventory[i] ?: continue
 			drawStack(stack, hotbarLeft + 3f + 20f * i, 3f)
 		}
 
