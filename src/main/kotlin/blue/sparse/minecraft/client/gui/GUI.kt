@@ -104,7 +104,7 @@ abstract class GUI {
 				identity,
 				manager.projection
 		)
-		if (amount != 0) {
+		if (amount > 1) {
 			val textBegin = x + 16f - TextRenderer.stringWidth(amount.toString())
 			drawString(amount.toString(), textBegin, y)
 		}

@@ -3,11 +3,14 @@ package blue.sparse.minecraft.client.gui
 import blue.sparse.engine.SparseEngine
 import blue.sparse.engine.errors.glCall
 import blue.sparse.engine.util.MemoryUsage
+import blue.sparse.engine.window.input.Key
 import blue.sparse.math.clamp
 import blue.sparse.math.wrap
-import blue.sparse.minecraft.common.item.Item
-import blue.sparse.minecraft.common.item.ItemType
+import blue.sparse.minecraft.common.inventory.TestInventory
+import blue.sparse.minecraft.common.item.*
 import blue.sparse.minecraft.common.text.Text
+import blue.sparse.minecraft.common.text.TextColor
+import blue.sparse.minecraft.common.util.random
 import org.lwjgl.opengl.GL11.*
 
 object TestGUI : GUI() {
@@ -16,6 +19,8 @@ object TestGUI : GUI() {
 	data class ChatMessage(val text: Text, var timeRemaining: Float)
 
 	private val chatMessages = ArrayList<ChatMessage>()
+
+	private val item = Item(ItemType.diamond).apply { color = 0xFF0000 }
 
 	fun sendMessage(message: Text) {
 		chatMessages.add(0, ChatMessage(message, 30f))
@@ -30,8 +35,22 @@ object TestGUI : GUI() {
 			it.timeRemaining <= 0f
 		}
 
-		if(Math.random() <= 0.01) {
-			sendMessage(Text.create("Hello! ", Math.random()))
+//		if (Math.random() <= 0.01) {
+//			sendMessage(Text.create("Hello! ", Math.random()))
+//		}
+
+		val input = SparseEngine.window.input
+		if (input[Key.U].pressed) {
+			TestInventory.addItem(item, 4)
+			sendMessage(Text.create("Added item $item"))
+		}
+		if (input[Key.J].pressed) {
+			sendMessage(Text.create("Removing item $item"))
+			TestInventory.removeItem(ItemStack(item, 3))
+		}
+
+		if (input[Key.K].pressed) {
+			item.color = TextColor.values().run { get(random.nextInt(size)).color }
 		}
 	}
 
@@ -51,7 +70,12 @@ object TestGUI : GUI() {
 		drawTexturedRectangle("widgets/hotbar_selected", hotbarLeft - 1f + (selectedSlot * 20f), -1f, 24f)
 
 //		drawTexturedRectangle((ItemType.diamondSword.proxy as ClientItemTypeProxy).sprite, hotbarLeft + 3f + 20f * 2, 3f, 16f, 16f)
-		drawItem(Item(ItemType.apple), 32, hotbarLeft + 3f + 20f * 2, 3f)
+//		drawItem(Item(ItemType.apple), 32, hotbarLeft + 3f + 20f * 2, 3f)
+		for (i in 0 until 9) {
+			val stack = TestInventory.content[i] ?: continue
+			drawStack(stack, hotbarLeft + 3f + 20f * i, 3f)
+		}
+
 
 //		val exp = Math.sin(System.currentTimeMillis() / 500.0).toFloat() * 0.5f + 0.5f
 		val exp = 0.5f
@@ -90,7 +114,7 @@ object TestGUI : GUI() {
 
 
 		for ((index, message) in chatMessages.withIndex()) {
-			if(index >= 20) break
+			if (index >= 20) break
 			val y = index * 9f + 39.5f
 
 			drawRectangle(0f, y, 326f, 9f, (clamp(message.timeRemaining, 0f, 2f) * 64).toLong())

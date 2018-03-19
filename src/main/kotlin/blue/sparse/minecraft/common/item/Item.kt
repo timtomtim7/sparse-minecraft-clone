@@ -46,4 +46,6 @@ data class Item<out T : ItemType>(val type: T, var data: Compound? = null) {
 		data = data ?: Compound()
 		return data!!
 	}
+
+	fun deepCopy() = Item(type, data?.deepCopy())
 }
