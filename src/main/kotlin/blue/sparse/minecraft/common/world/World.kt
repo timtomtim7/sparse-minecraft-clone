@@ -1,6 +1,8 @@
 package blue.sparse.minecraft.common.world
 
 import blue.sparse.math.vectors.ints.Vector3i
+import blue.sparse.minecraft.common.util.Proxy
+import blue.sparse.minecraft.common.util.ProxyProvider
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -9,6 +11,12 @@ class World(val name: String, val id: UUID = UUID.randomUUID()) {
 	private val regions = ConcurrentHashMap<Vector3i, Region>()
 	private val key = ThreadLocal.withInitial { Vector3i(0) }
 
+	val proxy by ProxyProvider.invoke<WorldProxy>(
+			"blue.sparse.minecraft.client.world.proxy.ClientWorldProxy",
+			"blue.sparse.minecraft.server.world.proxy.ServerWorldProxy",
+			this
+	)
+
 	fun getRegion(x: Int, y: Int, z: Int): Region {
 		val key = this.key.get()
 		key.assign(x, y, z)
@@ -16,12 +24,14 @@ class World(val name: String, val id: UUID = UUID.randomUUID()) {
 		return regions.getOrPut(key) { Region(this, key.clone()) }
 	}
 
+	//TODO: Look at all this mostly repeated code! Terrible.
+
 	fun getChunk(x: Int, y: Int, z: Int): Chunk? {
 		val worldRegionX = worldChunkToWorldRegion(x)
 		val worldRegionY = worldChunkToWorldRegion(y)
 		val worldRegionZ = worldChunkToWorldRegion(z)
 
-		val region = getRegion(x, y, z)
+		val region = getRegion(worldRegionX, worldRegionY, worldRegionZ)
 		val regionChunkX = worldChunkToRegionChunk(x)
 		val regionChunkY = worldChunkToRegionChunk(y)
 		val regionChunkZ = worldChunkToRegionChunk(z)
@@ -34,7 +44,7 @@ class World(val name: String, val id: UUID = UUID.randomUUID()) {
 		val worldRegionY = worldChunkToWorldRegion(y)
 		val worldRegionZ = worldChunkToWorldRegion(z)
 
-		val region = getRegion(x, y, z)
+		val region = getRegion(worldRegionX, worldRegionY, worldRegionZ)
 		val regionChunkX = worldChunkToRegionChunk(x)
 		val regionChunkY = worldChunkToRegionChunk(y)
 		val regionChunkZ = worldChunkToRegionChunk(z)
@@ -71,6 +81,8 @@ class World(val name: String, val id: UUID = UUID.randomUUID()) {
 	operator fun get(x: Int, y: Int, z: Int): BlockView? {
 		return getBlock(x, y, z)
 	}
+
+	abstract class WorldProxy(val world: World): Proxy
 
 	companion object {
 		internal fun worldChunkToRegionChunk(i: Int): Int {

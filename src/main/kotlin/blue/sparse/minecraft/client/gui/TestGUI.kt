@@ -2,14 +2,15 @@ package blue.sparse.minecraft.client.gui
 
 import blue.sparse.engine.SparseEngine
 import blue.sparse.engine.errors.glCall
-import blue.sparse.engine.util.MemoryUsage
 import blue.sparse.engine.window.input.Key
 import blue.sparse.math.clamp
 import blue.sparse.math.wrap
+import blue.sparse.minecraft.client.text.TextRenderer
 import blue.sparse.minecraft.common.inventory.TestInventory
-import blue.sparse.minecraft.common.item.*
+import blue.sparse.minecraft.common.item.Item
+import blue.sparse.minecraft.common.item.damage
+import blue.sparse.minecraft.common.item.impl.ItemIronPickaxe
 import blue.sparse.minecraft.common.text.Text
-import blue.sparse.minecraft.common.text.TextColor
 import blue.sparse.minecraft.common.util.random
 import org.lwjgl.opengl.GL11.*
 
@@ -20,7 +21,7 @@ object TestGUI : GUI() {
 
 	private val chatMessages = ArrayList<ChatMessage>()
 
-	private val item = Item(ItemType.chainmailChestplate)
+//	private val item = Item(ItemType.chainmailChestplate)
 
 	fun sendMessage(message: Text) {
 		chatMessages.add(0, ChatMessage(message, 30f))
@@ -45,17 +46,21 @@ object TestGUI : GUI() {
 
 		val input = SparseEngine.window.input
 		if (input[Key.U].pressed) {
-			TestInventory.addItem(item, 4)
-			sendMessage(Text.create("Added item $item, maxStackSize: ${item.type.maxStackSize}"))
-		}
-		if (input[Key.J].pressed) {
-			sendMessage(Text.create("Removing item $item"))
-			TestInventory.removeItem(ItemStack(item, 3))
-		}
+			val item = Item(ItemIronPickaxe)
+			item.color = random.nextInt(0xFFFFFF)
+			item.damage = random.nextInt(item.type.maxDurability)
 
-		if (input[Key.K].pressed) {
-			item.color = TextColor.values().run { get(random.nextInt(size)).color }
+			TestInventory.addItem(item)
+			sendMessage(Text.create("Added item ${item.type}"))
 		}
+//		if (input[Key.J].pressed) {
+//			sendMessage(Text.create("Removing item $item"))
+//			TestInventory.removeItem(ItemStack(item, 3))
+//		}
+
+//		if (input[Key.K].pressed) {
+//			item.color = TextColor.values().run { get(random.nextInt(size)).color }
+//		}
 
 		if(input[Key.KP_8].pressed) {
 			TestInventory.clear()
@@ -86,9 +91,21 @@ object TestGUI : GUI() {
 
 
 //		val exp = Math.sin(System.currentTimeMillis() / 500.0).toFloat() * 0.5f + 0.5f
-		val exp = 0.5f
+		val exp = 0.452f
 		drawTexturedRectangle("icons/exp_empty", hotbarLeft, 24f, 182f, 5f)
 		drawTexturedRectangle("icons/exp_full", hotbarLeft, 24f, 182f * exp, 5f, exp)
+
+		val level = 31
+		val levelString = level.toString()
+		val expTextWidth = TextRenderer.stringWidth(levelString)
+		val expTextLeft = (manager.right / 2) - (expTextWidth / 2)
+		val expTextBottom = 27f
+		drawString(levelString, expTextLeft-1f, expTextBottom, 0x000000, shadow = false)
+		drawString(levelString, expTextLeft, expTextBottom-1, 0x000000, shadow = false)
+		drawString(levelString, expTextLeft+1, expTextBottom, 0x000000, shadow = false)
+		drawString(levelString, expTextLeft, expTextBottom+1, 0x000000, shadow = false)
+		drawString(levelString, expTextLeft, expTextBottom, 0x80FF20, shadow = false)
+
 
 		for (i in 0 until 10) {
 			drawTexturedRectangle("icons/heart_black_outline", hotbarLeft + (i * 8), 30f, 9f)
@@ -108,17 +125,19 @@ object TestGUI : GUI() {
 		drawTexturedRectangle("icons/crosshair", manager.right / 2f - 16f / 2f, manager.top / 2f - 16f / 2f, 16f)
 		glCall { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) }
 
+		drawTexturedRectangle("title/sparse_edition", 1f, 1f, 128f, 16f, color = 0xFFFFFF44)
+
 		/*
 
 			<---------- TEXT START --------->
 
 		 */
 
-		drawString(String.format("FPS: %.1f", SparseEngine.frameRate), 1f, manager.top - 9)
-		drawString(String.format("MEM: %s", MemoryUsage.getMemoryUsedString()), 1f, manager.top - 18)
-
-		val (camX, camY, camZ) = SparseEngine.game.camera.transform.translation
-		drawString(String.format("POS: %.1f, %.1f, %.1f", camX, camY, camZ), 1f, manager.top - 27)
+//		drawString(String.format("FPS: %.1f", SparseEngine.frameRate), 1f, manager.top - 9)
+//		drawString(String.format("MEM: %s", MemoryUsage.getMemoryUsedString()), 1f, manager.top - 18)
+//
+//		val (camX, camY, camZ) = SparseEngine.game.camera.transform.translation
+//		drawString(String.format("POS: %.1f, %.1f, %.1f", camX, camY, camZ), 1f, manager.top - 27)
 
 
 		for ((index, message) in chatMessages.withIndex()) {

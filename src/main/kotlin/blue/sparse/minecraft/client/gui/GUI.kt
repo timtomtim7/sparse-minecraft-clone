@@ -1,12 +1,13 @@
 package blue.sparse.minecraft.client.gui
 
+import blue.sparse.math.clamp
 import blue.sparse.math.matrices.Matrix4f
 import blue.sparse.math.vectors.floats.*
 import blue.sparse.minecraft.client.TextureAtlas
 import blue.sparse.minecraft.client.item.proxy.ClientItemTypeProxy
 import blue.sparse.minecraft.client.text.TextRenderer
-import blue.sparse.minecraft.common.item.Item
-import blue.sparse.minecraft.common.item.ItemStack
+import blue.sparse.minecraft.common.item.*
+import blue.sparse.minecraft.common.item.impl.types.ItemTypeDurable
 import blue.sparse.minecraft.common.text.Text
 
 abstract class GUI {
@@ -84,11 +85,15 @@ abstract class GUI {
 		)
 	}
 
-	open fun drawRectangle(x: Float, y: Float, sizeX: Float, sizeY: Float, color: Long = 0xFFFFFFFF) {
+	fun drawRectangle(x: Float, y: Float, sizeX: Float, sizeY: Float, color: Long = 0xFFFFFFFF) {
+		drawRectangle(x, y, sizeX, sizeY, color.toInt().vectorFromIntRGBA())
+	}
+
+	open fun drawRectangle(x: Float, y: Float, sizeX: Float, sizeY: Float, color: Vector4f) {
 		Rectangle.drawRectangle(
 				Vector3f(x, y, 0f),
 				Vector2f(sizeX, sizeY),
-				color.toInt().vectorFromIntRGBA(),
+				color,
 				identity,
 				manager.projection
 		)
@@ -104,6 +109,23 @@ abstract class GUI {
 				identity,
 				manager.projection
 		)
+
+		val durable = item.safeCast<ItemTypeDurable>()
+		if(durable != null) {
+			val max = durable.type.maxDurability
+			val curr = durable.damage
+			if(curr != 0) {
+				val perc = clamp((max - curr).toFloat() / max.toFloat(), 0f, 1f)
+				drawRectangle(x+1f, y+1f, 14f, 2f, Vector4f(0f, 0f, 0f, 1f))
+				drawRectangle(x+1f, y+2f, perc * 14f, 1f, Vector4f(Vector3f(perc / 3f, 1f, 1f).HSBtoRGB(), 1f))
+			}
+		}
+
+//		if(item.type is ItemTypeDurable) {
+//			val max = item.type.maxDurability
+////			val t = item as Item<ItemTypeDurable>
+//		}
+
 		if (amount > 1) {
 			val textBegin = x + 16f - TextRenderer.stringWidth(amount.toString())
 			drawString(amount.toString(), textBegin, y)

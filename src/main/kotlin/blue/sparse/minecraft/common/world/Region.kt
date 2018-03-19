@@ -29,6 +29,7 @@ class Region(val world: World, position: Vector3i) {
 			return chunk
 
 		chunk = Chunk(this, key.clone())
+		chunks[chunk.position] = chunk
 		//TODO: Invoke world generator on chunk
 		return chunk
 	}

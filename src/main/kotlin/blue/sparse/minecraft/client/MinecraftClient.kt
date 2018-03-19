@@ -5,6 +5,8 @@ import blue.sparse.engine.SparseGame
 import blue.sparse.engine.asset.Asset
 import blue.sparse.engine.errors.glCall
 import blue.sparse.engine.render.camera.FirstPerson
+import blue.sparse.engine.render.resource.bind
+import blue.sparse.engine.render.resource.model.Model
 import blue.sparse.engine.render.resource.shader.ShaderProgram
 import blue.sparse.engine.window.input.Key
 import blue.sparse.math.matrices.Matrix4f
@@ -13,8 +15,10 @@ import blue.sparse.math.vectors.ints.Vector2i
 import blue.sparse.minecraft.client.gui.GUIManager
 import blue.sparse.minecraft.client.gui.TestGUI
 import blue.sparse.minecraft.client.item.ItemComponent
-import blue.sparse.minecraft.client.sky.OverworldSky
 import blue.sparse.minecraft.client.util.BlankShader
+import blue.sparse.minecraft.client.world.proxy.ClientChunkProxy
+import blue.sparse.minecraft.client.world.proxy.ClientWorldProxy
+import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.MinecraftProxy
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.item.Item
@@ -28,7 +32,7 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 
 	val atlas = TextureAtlas(Vector2i(1024, 512))
 
-	val sky = OverworldSky()
+//	val sky = OverworldSky()
 
 	var time = 0f
 		private set
@@ -37,6 +41,8 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 			Asset["minecraft/shaders/blocks.fs"],
 			Asset["minecraft/shaders/blocks.vs"]
 	)
+
+	lateinit var chunkModel: Model
 
 	init {
 		camera.apply {
@@ -64,16 +70,20 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 
 		GUIManager.open(TestGUI)
 
-//		chunk = Chunk().run {
-////			setBlockType(3, 3, 3, BlockType.dirt)
-////			setBlockType(3, 4, 3, BlockType.stone)
-////			setBlockType(5, 4, 5, BlockType.cobblestone)
-//			for(i in 0 until 32 * 3) {
-//				val spiral = SquareSpiral[i] + Vector2i(16, 16)
-//				setBlockType(spiral.x, i / 3, spiral.y, BlockType.cobblestone)
-//			}
-//			(proxy as ClientChunkProxy).generateOfflineModel().upload()
-//		}
+		val world = Minecraft.world
+
+		world.getOrGenerateBlock(5, 5, 5).type = BlockType.stone
+		world.getOrGenerateBlock(5, 6, 5).type = BlockType.cobblestone
+		world.getOrGenerateBlock(5, 7, 5).type = BlockType.cobblestone
+		world.getOrGenerateBlock(6, 7, 5).type = BlockType.cobblestone
+		world.getOrGenerateBlock(7, 7, 5).type = BlockType.cobblestone
+		world.getOrGenerateBlock(7, 7, 6).type = BlockType.cobblestone
+		world.getOrGenerateBlock(7, 7, 7).type = BlockType.dirt
+
+		val chunk = world.getChunk(0, 0, 0)!!
+		val chunkProxy = chunk.proxy as ClientChunkProxy
+		chunkProxy.generateOfflineModel()
+		chunkModel = chunkProxy.model!!
 
 //		val itemTypes = ItemType.registry.values
 //
@@ -92,7 +102,7 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 
 	override fun update(delta: Float) {
 		super.update(delta)
-		if(window.resized)
+		if (window.resized)
 			resetCameraProjection()
 
 		time += delta
@@ -106,7 +116,7 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 			glCall { GL11.glEnable(GL11.GL_CULL_FACE) }
 		}
 
-		if(input[Key.F9].pressed) {
+		if (input[Key.F9].pressed) {
 			ImageIO.write(atlas.texture.read(), "png", File("block_item_atlas.png"))
 			ImageIO.write(GUIManager.atlas.texture.read(), "png", File("gui_atlas.png"))
 		}
@@ -115,19 +125,18 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 	}
 
 	override fun render(delta: Float) {
+		val sky = (Minecraft.world.proxy as ClientWorldProxy).sky
 		sky.render(camera, delta)
 		scene.render(delta, camera, BlankShader.shader)
 
-//		chunkShader.bind {
-//			uniforms["uLightDirection"] = sky.sun.direction
-//			uniforms["uModel"] = Matrix4f.identity()
-//			uniforms["uViewProj"] = camera.viewProjectionMatrix
-//			atlas.texture.bind(0)
-//			uniforms["uTexture"] = 0
-//			chunk.render()
-//		}
-
-
+		chunkShader.bind {
+			uniforms["uLightDirection"] = sky.sun.direction
+			uniforms["uModel"] = Matrix4f.identity()
+			uniforms["uViewProj"] = camera.viewProjectionMatrix
+			atlas.texture.bind(0)
+			uniforms["uTexture"] = 0
+			chunkModel.render()
+		}
 
 		GUIManager.render(delta)
 	}

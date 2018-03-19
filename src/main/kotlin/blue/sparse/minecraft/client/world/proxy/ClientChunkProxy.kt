@@ -12,13 +12,17 @@ class ClientChunkProxy(chunk: Chunk): Chunk.ChunkProxy(chunk) {
 
 	var model: Model? = null
 		get() {
-			field = offline?.run { BasicModel(upload()) }
+			offline?.let {
+				field = BasicModel(it.upload())
+				offline = null
+			}
 			return field
 		}
 		private set
 
-	fun generateOfflineModel(): OfflineChunkModel {
-		return OfflineChunkModel(chunk)
+	fun generateOfflineModel() {
+		offline = OfflineChunkModel(chunk)
+		modelLastGenerated = System.currentTimeMillis()
 	}
 
 }

@@ -29,6 +29,8 @@ class CelestialBodyComponent(
 	init {
 //		transform.setScale(Vector3f(scale))
 //		println(scale)
+//		transform.rotateDeg(cross(rotationAxis, Vector3f(0f, 1f, 0f)), 45f)
+//		transform.rotateDeg(Vector3f(0f, 1f, 0f), 90f)
 		transform.rotateDeg(rotationAxis, initialRotation)
 	}
 
