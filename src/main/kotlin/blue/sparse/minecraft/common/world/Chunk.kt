@@ -1,5 +1,6 @@
 package blue.sparse.minecraft.common.world
 
+import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.util.Proxy
 import blue.sparse.minecraft.common.util.ProxyProvider
 
@@ -16,8 +17,36 @@ class Chunk {
 
 	val proxy by ProxyProvider.invoke<ChunkProxy>(
 			"blue.sparse.minecraft.client.world.proxy.ClientChunkProxy",
-			"blue.sparse.minecraft.server.world.proxy.ServerChunkProxy"
+			"blue.sparse.minecraft.server.world.proxy.ServerChunkProxy",
+			this
 	)
+
+	internal fun getBlockID(index: Int): Int {
+		return data[index] and 0xFFF
+	}
+
+	internal fun getBlockID(x: Int, y: Int, z: Int): Int {
+		return getBlockID(indexOfBlock(x, y, z))
+	}
+
+	fun getBlockType(index: Int): BlockType? {
+		return BlockType[getBlockID(index)]
+	}
+
+	fun getBlockType(x: Int, y: Int, z: Int): BlockType? {
+		return BlockType[getBlockID(x, y, z)]
+	}
+
+	fun setBlockType(x: Int, y: Int, z: Int, type: BlockType?) {
+		var data = getRaw(x, y, z)
+		data = (data.inv() or 0xFFF).inv() or (type?.id ?: 0)
+		setRaw(x, y, z, data)
+//		data = (data or 0xFFF).inv() or (type?.id ?: 0)
+	}
+
+	fun isEmpty(x: Int, y: Int, z: Int): Boolean {
+		return getBlockID(x, y, z) != 0
+	}
 
 	internal fun getRaw(index: Int): Int {
 		return data[index]
@@ -49,6 +78,7 @@ class Chunk {
 		const val BITS = 5
 		const val SIZE = 1 shl BITS
 		const val MASK = SIZE - 1
+		const val VOLUME = SIZE * SIZE * SIZE
 
 		fun indexOfBlock(x: Int, y: Int, z: Int): Int {
 			if (x < 0 || x >= SIZE || y < 0 || y >= SIZE || z < 0 || z >= SIZE) return -1

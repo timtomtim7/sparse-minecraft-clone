@@ -1,79 +1,80 @@
 package blue.sparse.minecraft.common.inventory
 
+import blue.sparse.minecraft.common.item.Item
 import blue.sparse.minecraft.common.item.ItemStack
+import kotlin.math.min
 
 abstract class Inventory(val size: Int, val content: Array<ItemStack<*>?> = Array(size) { null }) {
 
-    val full get() = content.filterNotNull().size > size
-    val empty get() = content.all { it == null }
-    val firstEmptySlot get() = content.indexOf(content.find { it == null })
+	val full get() = content.filterNotNull().size > size
+	val empty get() = content.all { it == null }
+	val firstEmptySlot get() = content.indexOf(content.find { it == null })
 
-    //  TODO: Come back after rendering is finished and fix data copyng bug
-    fun addItem(stack: ItemStack<*>) {
-        if (full || stack.amount <= 0)
-            return
+	fun addItem(item: Item<*>, amount: Int = 1) = addItem(ItemStack(item, amount))
 
-        val sameStacks = content.filter { it?.item == stack.item && it.item.type.maxStackSize > it.amount }.filterNotNull()
+	fun addItem(stack: ItemStack<*>) {
+		println("Attempting to add stack $stack")
+		if (full || stack.amount <= 0)
+			return
 
-        if (sameStacks.isEmpty() && !full) {
+		val sameStacks = content.filter { it?.item == stack.item && it.item.type.maxStackSize > it.amount }.filterNotNull()
 
-            val stackAmount = stack.amount / stack.item.type.maxStackSize
-            val extraAmount = stack.amount % stack.item.type.maxStackSize
+		if (sameStacks.isEmpty() && !full) {
+			val stackAmount = stack.amount / stack.item.type.maxStackSize
+			val extraAmount = stack.amount % stack.item.type.maxStackSize
 
-            for (x in 0 until stackAmount) {
-                if (firstEmptySlot >= 0)
-                    content[firstEmptySlot] = ItemStack(stack.item, stack.item.type.maxStackSize)
+			for (i in 0 until stackAmount) {
+				if (firstEmptySlot >= 0)
+					content[firstEmptySlot] = stack.deepCopy(stack.item.type.maxStackSize)
+//					content[firstEmptySlot] = ItemStack(stack.item.copy(), stack.item.type.maxStackSize)
+			}
 
-            }
+			if (firstEmptySlot >= 0)
+				content[firstEmptySlot] = stack.deepCopy(extraAmount)
+//				content[firstEmptySlot] = ItemStack(stack.item.copy(), extraAmount)
 
-            if (firstEmptySlot >= 0)
-                content[firstEmptySlot] = ItemStack(stack.item, extraAmount)
+			return
+		}
 
-            return
-        }
+		var leftOver = stack.amount
 
-        var leftOver = stack.amount
+		for (sameStack in sameStacks) {
+			if (leftOver == 0) return
 
-        for (sameStack in sameStacks) {
-            if (leftOver == 0) return
-            val amtUntilFull = sameStack.item.type.maxStackSize - sameStack.amount
-            if (leftOver >= amtUntilFull) {
-                sameStack.amount += leftOver - amtUntilFull
-                leftOver -= amtUntilFull
-            }
-        }
+			val amtUntilFull = sameStack.item.type.maxStackSize - sameStack.amount
+			if(amtUntilFull == 0) continue
 
-        if (leftOver > 0 && !full)
-            content[firstEmptySlot] = stack
-    }
+			val amt = min(leftOver, amtUntilFull)
+			sameStack.amount += amt
+			leftOver -= amt
+		}
 
-    fun removeItem(stack: ItemStack<*>) {
-        if (empty || stack.amount <= 0)
-            return
+		if (leftOver > 0 && !full)
+			content[firstEmptySlot] = stack.deepCopy(leftOver)
+//			content[firstEmptySlot] = ItemStack(stack.item.copy(), leftOver)
+	}
 
-        val sameStacks = content.filter { it?.item == stack.item && it.amount != 0 }.filterNotNull().reversed()
+	fun removeItem(stack: ItemStack<*>) {
+		if (empty || stack.amount <= 0)
+			return
 
-        var leftToRemove = stack.amount
+		val sameStacks = content.filter { it?.item == stack.item && it.amount != 0 }.filterNotNull().reversed()
 
-        for (sameStack in sameStacks) {
-            if (leftToRemove == 0) return
+		var leftToRemove = stack.amount
 
-            if (leftToRemove >= sameStack.amount) {
-                leftToRemove -= sameStack.amount
-                val index = content.lastIndexOf(sameStack)
-                if (index >= 0) {
-                    content[index] = null
-                    continue
-                }
-            }
-            sameStack.amount -= leftToRemove
-            break
-        }
-    }
+		for (sameStack in sameStacks) {
+			if (leftToRemove == 0) return
 
-    operator fun get(index: Int) = content[index]
-    operator fun set(index: Int, item: ItemStack<*>) {
-        content[index] = item
-    }
-
+			if (leftToRemove >= sameStack.amount) {
+				leftToRemove -= sameStack.amount
+				val index = content.lastIndexOf(sameStack)
+				if (index >= 0) {
+					content[index] = null
+					continue
+				}
+			}
+			sameStack.amount -= leftToRemove
+			break
+		}
+	}
 }

@@ -130,6 +130,18 @@ class Compound private constructor(
 	fun toJSON() = TagType.TagTypeCompound.toJSON(this)
 	fun toFormattedJSON() = TagType.TagTypeCompound.toFormattedJSON(this)
 
+	fun deepCopy(): Compound {
+		return Compound(backingMap.map { it.key to deepCopyTagValue(it.value) })
+	}
+
+	private fun deepCopyTagValue(value: Any): Any {
+		return when (value) {
+			is Collection<*> -> value.map { deepCopyTagValue(it!!) }
+			is Compound -> value.deepCopy()
+			else -> value
+		}
+	}
+
 	companion object {
 		fun read(input: InputStream, close: Boolean = false): Compound {
 			val dataInput = input as? DataInputStream ?: DataInputStream(input)

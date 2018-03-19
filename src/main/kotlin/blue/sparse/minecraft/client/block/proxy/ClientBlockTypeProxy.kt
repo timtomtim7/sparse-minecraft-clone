@@ -16,6 +16,13 @@ abstract class ClientBlockTypeProxy(blockType: BlockType) : BlockType.BlockTypeP
 	open val leftTexture: Asset get() = frontTexture
 	open val rightTexture: Asset get() = frontTexture
 
+	val frontSprite by lazy { MinecraftClient.proxy.atlas.getOrAddSprite(frontTexture) }
+	val backSprite by lazy { MinecraftClient.proxy.atlas.getOrAddSprite(backTexture) }
+	val topSprite by lazy { MinecraftClient.proxy.atlas.getOrAddSprite(topTexture) }
+	val bottomSprite by lazy { MinecraftClient.proxy.atlas.getOrAddSprite(bottomTexture) }
+	val leftSprite by lazy { MinecraftClient.proxy.atlas.getOrAddSprite(leftTexture) }
+	val rightSprite by lazy { MinecraftClient.proxy.atlas.getOrAddSprite(rightTexture) }
+
 	open fun generateItemModel(): Model? {
 		if (blockType.hasItem) {
 //			val texture = (blockType.item!!.proxy as ClientItemTypeProxy).texture
