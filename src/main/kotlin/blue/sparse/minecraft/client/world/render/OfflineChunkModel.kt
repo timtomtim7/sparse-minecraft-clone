@@ -5,29 +5,47 @@ import blue.sparse.math.vectors.floats.*
 import blue.sparse.math.vectors.shorts.Vector3s
 import blue.sparse.minecraft.client.block.proxy.ClientBlockTypeProxy
 import blue.sparse.minecraft.common.world.Chunk
+import blue.sparse.minecraft.common.world.chunkBlockToWorldBlock
 
 class OfflineChunkModel(private val chunk: Chunk) {
 
 	private val buffer = VertexBuffer()
 
 	private fun isSolid(x: Int, y: Int, z: Int): Boolean {
-		val index = Chunk.indexOfBlock(x, y, z)
-		if (index < 0 || index >= Chunk.VOLUME)
-			return false
 
-		return chunk.getBlockType(index)?.transparent != false
+		return chunk.world.getBlock(x, y, z)?.type != null
+
+//		val rx = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.x, chunk.regionChunkPosition.x, x)
+//		val ry = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.y, chunk.regionChunkPosition.y, y)
+//		val rz = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.z, chunk.regionChunkPosition.z, z)
+
+
+
+//		val index = Chunk.indexOfBlock(x, y, z)
+//		if (index < 0 || index >= Chunk.VOLUME)
+//			return false
+//
+//		return chunk.getBlockType(index)?.transparent != false
 	}
 
 	init {
+		val rcx = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.x, chunk.regionChunkPosition.x, 0)
+		val rcy = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.y, chunk.regionChunkPosition.y, 0)
+		val rcz = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.z, chunk.regionChunkPosition.z, 0)
+
 		for (i in 0 until Chunk.VOLUME) {
 			val x = Chunk.xFromIndex(i)
 			val y = Chunk.yFromIndex(i)
 			val z = Chunk.zFromIndex(i)
 
+			val rx = x + rcx
+			val ry = y + rcy
+			val rz = z + rcz
+
 			val blockType = chunk.getBlockType(x, y, z) ?: continue
 			val proxy = (blockType.proxy as ClientBlockTypeProxy)
 
-			println("DEBUG $x $y $z")
+//			println("DEBUG $x $y $z")
 
 			//z+ front
 			//z- back
@@ -36,14 +54,14 @@ class OfflineChunkModel(private val chunk: Chunk) {
 			//y+ top
 			//y- bottom
 
-			val px = isSolid(x + 1, y, z)
-			val py = isSolid(x, y + 1, z)
-			val pz = isSolid(x, y, z + 1)
-			val nx = isSolid(x - 1, y, z)
-			val ny = isSolid(x, y - 1, z)
-			val nz = isSolid(x, y, z - 1)
+			val px = !isSolid(rx + 1, ry, rz)
+			val py = !isSolid(rx, ry + 1, rz)
+			val pz = !isSolid(rx, ry, rz + 1)
+			val nx = !isSolid(rx - 1, ry, rz)
+			val ny = !isSolid(rx, ry - 1, rz)
+			val nz = !isSolid(rx, ry, rz - 1)
 
-			println("$px $py $pz $nx $ny $nz")
+//			println("$px $py $pz $nx $ny $nz")
 
 			val x0 = (x * 16).toShort()
 			val y0 = (y * 16).toShort()

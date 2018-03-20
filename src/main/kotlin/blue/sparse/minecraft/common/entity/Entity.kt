@@ -1,15 +1,36 @@
 package blue.sparse.minecraft.common.entity
 
 import blue.sparse.math.vectors.floats.Vector3f
+import blue.sparse.minecraft.common.entity.data.EntityData
 import blue.sparse.minecraft.common.world.World
 
 data class Entity<out T : EntityType>(val type: T, var position: Vector3f, var world: World) {
-    
-    fun onTick() {}
 
-    fun despawn(): Boolean = world.despawnEntity(this)
+	var timeSinceSpawned = 0f
+		private set
 
-    fun spawn(): Boolean = world.spawnEntity(this)
+    val data = type.createData()
+
+    fun despawn(): Boolean {
+		timeSinceSpawned = 0f
+		return world.despawnEntity(this)
+	}
+
+    fun spawn(): Boolean {
+		return world.spawnEntity(this)
+	}
+
+    fun update(delta: Float) {
+		timeSinceSpawned += delta
+        type.update(this, delta)
+    }
+
+    inline fun <reified T: EntityData> editData(body: T.() -> Unit) {
+        if(data !is T)
+            throw TypeCastException("${data::class.qualifiedName} cannot be cast to ${T::class.qualifiedName}")
+
+		data.apply(body)
+	}
 
     @Suppress("UNCHECKED_CAST")
     inline fun <reified N : EntityType> safeCast(): Entity<N>? {

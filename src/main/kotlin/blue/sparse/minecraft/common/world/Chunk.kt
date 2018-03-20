@@ -16,6 +16,23 @@ class Chunk(val region: Region, position: Vector3i) {
 	val regionChunkPosition: Vector3i = position
 		get() = field.clone()
 
+	val worldChunkPosition = run {
+		val wr = region.worldRegionPosition
+		val rc = regionChunkPosition
+		Vector3i(regionChunkToWorldChunk(wr.x, rc.x), regionChunkToWorldChunk(wr.y, rc.y), regionChunkToWorldChunk(wr.z, rc.z))
+	}
+		get() = field.clone()
+
+	val worldBlockPosition = run {
+		val wr = region.worldRegionPosition
+		val rc = regionChunkPosition
+		Vector3i(chunkBlockToWorldBlock(wr.x, rc.x, 0), chunkBlockToWorldBlock(wr.y, rc.y, 0),chunkBlockToWorldBlock(wr.z, rc.z, 0))
+	}
+		get() = field.clone()
+
+	val world: World
+		get() = region.world
+
 	//block type		12 bits 0xFFF
 	//block state		 4 bits 0xF
 	//block light 		 4 bits 0xF

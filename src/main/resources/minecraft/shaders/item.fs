@@ -33,8 +33,12 @@ void main() {
 //	vec2 rotatedCoord2 = (vTexCoord * ROTATION_MATRIX_NEGATIVE) * 8 + uEnchantTime;
 //	vec4 enchantColor = (texture2D(uEnchantTexture, rotatedCoord1) + texture2D(uEnchantTexture, rotatedCoord2)) * vec4(uEnchantColor, 1.0);
 //	vec4 enchantColor = texture2D(uEnchantTexture, rotatedCoord1) * vec4(uEnchantColor, 1.0);
-	vec4 enchantColor = mix(texture2D(uEnchantTexture, rotatedCoord1), texture2D(uEnchantTexture, rotatedCoord2), 0.5) * vec4(uEnchantColor, 1.0);
 //	color += enchantColor;
+
+	vec4 enchantColor = vec4(0);
+	if(uEnchantTime != 0) {
+		enchantColor = mix(texture2D(uEnchantTexture, rotatedCoord1), texture2D(uEnchantTexture, rotatedCoord2), 0.5) * vec4(uEnchantColor, 1.0);
+	}
 
 	float brightness = dot(vNormal, uLightDirection) * 0.5 + 0.5;
 	brightness = brightness * 0.6 + 0.4;

@@ -4,14 +4,13 @@ import blue.sparse.engine.SparseEngine
 import blue.sparse.engine.SparseGame
 import blue.sparse.engine.asset.Asset
 import blue.sparse.engine.errors.glCall
-import blue.sparse.engine.render.camera.FirstPerson
 import blue.sparse.engine.render.resource.bind
-import blue.sparse.engine.render.resource.model.Model
 import blue.sparse.engine.render.resource.shader.ShaderProgram
 import blue.sparse.engine.window.input.Key
 import blue.sparse.math.matrices.Matrix4f
 import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.math.vectors.ints.Vector2i
+import blue.sparse.minecraft.client.entity.proxy.ClientEntityTypeProxy
 import blue.sparse.minecraft.client.gui.GUIManager
 import blue.sparse.minecraft.client.gui.TestGUI
 import blue.sparse.minecraft.client.item.ItemComponent
@@ -21,9 +20,11 @@ import blue.sparse.minecraft.client.world.proxy.ClientWorldProxy
 import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.MinecraftProxy
 import blue.sparse.minecraft.common.block.BlockType
+import blue.sparse.minecraft.common.entity.EntityType
 import blue.sparse.minecraft.common.item.Item
 import blue.sparse.minecraft.common.item.ItemType
 import blue.sparse.minecraft.common.util.ProxyHolder
+import blue.sparse.minecraft.common.util.random
 import org.lwjgl.opengl.GL11
 import java.io.File
 import javax.imageio.ImageIO
@@ -42,12 +43,12 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 			Asset["minecraft/shaders/blocks.vs"]
 	)
 
-	lateinit var chunkModel: Model
+//	lateinit var chunkModel: Model
 
 	init {
 		camera.apply {
-			move(Vector3f(0f, 0f, 10f))
-			controller = FirstPerson(this, movementSpeed = 10.92f)
+			move(Vector3f(0f, 100f, 10f))
+			controller = MinecraftController(this, movementSpeed = 10.92f)
 		}
 	}
 
@@ -62,28 +63,37 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 	override fun postInit() {
 		ItemType
 		BlockType
-
-		val item = Item(ItemType.ironChestplate)
-		item.enchantColor = 0x00FF00
-		item.editNBT { list("ench", emptyList()) }
-		spawnItem(item, Vector3f(0f))
-
-		GUIManager.open(TestGUI)
+		EntityType
 
 		val world = Minecraft.world
 
-		world.getOrGenerateBlock(5, 5, 5).type = BlockType.stone
-		world.getOrGenerateBlock(5, 6, 5).type = BlockType.cobblestone
-		world.getOrGenerateBlock(5, 7, 5).type = BlockType.cobblestone
-		world.getOrGenerateBlock(6, 7, 5).type = BlockType.cobblestone
-		world.getOrGenerateBlock(7, 7, 5).type = BlockType.cobblestone
-		world.getOrGenerateBlock(7, 7, 6).type = BlockType.cobblestone
-		world.getOrGenerateBlock(7, 7, 7).type = BlockType.dirt
+//		val item = Item(ItemType.ironChestplate)
+//		item.enchantColor = 0x00FF00
+//		item.editNBT { list("ench", emptyList()) }
+//
+//		val entity = Entity(EntityTypeItem, Vector3f(20f), world)
+//		entity.editData<EntityTypeItem.Data> {
+//			stack = ItemStack(item)
+//		}
+//		world.spawnEntity(entity)
 
-		val chunk = world.getChunk(0, 0, 0)!!
-		val chunkProxy = chunk.proxy as ClientChunkProxy
-		chunkProxy.generateOfflineModel()
-		chunkModel = chunkProxy.model!!
+//		spawnItem(item, Vector3f(0f))
+
+		GUIManager.open(TestGUI)
+
+
+		for (x in -32..32) {
+			for (z in -32..32) {
+//				val maxY = ((Math.sin(x * 0.1) + Math.cos(z * 0.1)) * 8).toInt() + 16
+//				val maxY = (STBPerlin.stb_perlin_noise3(x * 0.04f, z * 0.04f, 0f, 1024, 1024, 1024) * 16).toInt() + 16
+				var maxY = 16
+				if(random.nextDouble() < 0.05)
+					maxY += 5
+				for (y in 0..maxY) {
+					world.getOrGenerateBlock(x, y, z).type = if(maxY - y < 4) BlockType.sand else BlockType.stone
+				}
+			}
+		}
 
 //		val itemTypes = ItemType.registry.values
 //
@@ -106,6 +116,7 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 			resetCameraProjection()
 
 		time += delta
+		Minecraft.world.update(delta)
 
 		val wireframeButton = input[Key.F]
 		if (wireframeButton.pressed) {
@@ -131,12 +142,28 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 
 		chunkShader.bind {
 			uniforms["uLightDirection"] = sky.sun.direction
-			uniforms["uModel"] = Matrix4f.identity()
 			uniforms["uViewProj"] = camera.viewProjectionMatrix
 			atlas.texture.bind(0)
 			uniforms["uTexture"] = 0
-			chunkModel.render()
+//			uniforms["uModel"] = Matrix4f.identity()
+			for (chunk in Minecraft.world.loadedChunks) {
+				uniforms["uModel"] = Matrix4f.translation(chunk.worldBlockPosition.toFloatVector())
+				val proxy = chunk.proxy as ClientChunkProxy
+				if (proxy.model == null)
+					proxy.generateOfflineModel()
+				proxy.model?.render()
+			}
+//			chunkModel.render()
 		}
+
+		for (entity in Minecraft.world.entities) {
+			val proxy = entity.type.proxy as ClientEntityTypeProxy
+			proxy.render(entity, camera, delta)
+		}
+
+		val bounds = (camera.controller as MinecraftController).bounds
+		bounds.debugRender(camera.transform.translation, Vector3f(1f, 0f, 0f))
+		Minecraft.world.debugRenderInteresections(bounds, camera.transform.translation, Vector3f(0f, 1f, 0f))
 
 		GUIManager.render(delta)
 	}

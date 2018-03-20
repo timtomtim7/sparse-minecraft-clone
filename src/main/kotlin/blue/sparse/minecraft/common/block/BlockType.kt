@@ -1,10 +1,13 @@
 package blue.sparse.minecraft.common.block
 
+import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.minecraft.common.block.impl.*
 import blue.sparse.minecraft.common.item.impl.types.ItemTypeBlock
 import blue.sparse.minecraft.common.util.*
 
 abstract class BlockType(val identifier: Identifier, val hasItem: Boolean = true) {
+	internal val id: Int
+
 	open val proxy: BlockTypeProxy by ProxyProvider<BlockTypeProxy>(
 			"blue.sparse.minecraft.client.block.proxy.Default",
 			"blue.sparse.minecraft.server.block.proxy.Default",
@@ -12,7 +15,8 @@ abstract class BlockType(val identifier: Identifier, val hasItem: Boolean = true
 	)
 
 	val item = if(hasItem) ItemTypeBlock(this) else null
-	internal val id: Int
+
+	open val boundingBox = AABB(Vector3f(0f), Vector3f(1f))
 
 	open val transparent: Boolean = false
 
@@ -46,5 +50,6 @@ abstract class BlockType(val identifier: Identifier, val hasItem: Boolean = true
 		val stone = BlockStone
 		val dirt = BlockDirt
 		val cobblestone = BlockCobblestone
+		val sand = BlockSand
 	}
 }

@@ -2,15 +2,19 @@ package blue.sparse.minecraft.client.gui
 
 import blue.sparse.engine.SparseEngine
 import blue.sparse.engine.errors.glCall
+import blue.sparse.engine.util.MemoryUsage
 import blue.sparse.engine.window.input.Key
 import blue.sparse.math.clamp
+import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.math.wrap
+import blue.sparse.minecraft.client.MinecraftClient
 import blue.sparse.minecraft.client.text.TextRenderer
+import blue.sparse.minecraft.common.Minecraft
+import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
 import blue.sparse.minecraft.common.inventory.TestInventory
 import blue.sparse.minecraft.common.item.Item
 import blue.sparse.minecraft.common.item.impl.ItemTypeIronIngot
 import blue.sparse.minecraft.common.text.Text
-import blue.sparse.minecraft.common.util.random
 import org.lwjgl.opengl.GL11.*
 
 object TestGUI : GUI() {
@@ -23,7 +27,7 @@ object TestGUI : GUI() {
 //	private val item = Item(ItemType.chainmailChestplate)
 
 	fun sendMessage(message: Text) {
-		chatMessages.add(0, ChatMessage(message, 30f))
+		chatMessages.add(0, ChatMessage(message, 10f))
 	}
 
 	fun sendMessage(message: String) {
@@ -46,7 +50,7 @@ object TestGUI : GUI() {
 		val input = SparseEngine.window.input
 		if (input[Key.U].pressed) {
 			val item = Item(ItemTypeIronIngot)
-			item.color = random.nextInt(0xFFFFFF)
+//			item.color = random.nextInt(0xFFFFFF)
 //			item.damage = random.nextInt(item.type.maxDurability)
 
 			TestInventory.addItem(item)
@@ -63,6 +67,21 @@ object TestGUI : GUI() {
 
 		if (input[Key.KP_8].pressed) {
 			TestInventory.clear()
+		}
+
+		if(input[Key.Y].pressed) {
+			val selectedItem = TestInventory[selectedSlot]
+			if(selectedItem != null) {
+				TestInventory[selectedSlot] = null
+				val entity = Minecraft.world.spawnEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
+				entity.editData<EntityTypeItem.Data> {
+					stack = selectedItem
+				}
+			}
+		}
+
+		if(input[Key.HOME].pressed) {
+			MinecraftClient.proxy.camera.transform.translate(Vector3f(0f, 1f, 0f))
 		}
 	}
 
@@ -132,11 +151,11 @@ object TestGUI : GUI() {
 
 		 */
 
-//		drawString(String.format("FPS: %.1f", SparseEngine.frameRate), 1f, manager.top - 9)
-//		drawString(String.format("MEM: %s", MemoryUsage.getMemoryUsedString()), 1f, manager.top - 18)
-//
-//		val (camX, camY, camZ) = SparseEngine.game.camera.transform.translation
-//		drawString(String.format("POS: %.1f, %.1f, %.1f", camX, camY, camZ), 1f, manager.top - 27)
+		drawString(String.format("FPS: %.1f", SparseEngine.frameRate), 1f, manager.top - 9)
+		drawString(String.format("MEM: %s", MemoryUsage.getMemoryUsedString()), 1f, manager.top - 18)
+
+		val (camX, camY, camZ) = SparseEngine.game.camera.transform.translation
+		drawString(String.format("POS: %.1f, %.1f, %.1f", camX, camY, camZ), 1f, manager.top - 27)
 
 
 		for ((index, message) in chatMessages.withIndex()) {

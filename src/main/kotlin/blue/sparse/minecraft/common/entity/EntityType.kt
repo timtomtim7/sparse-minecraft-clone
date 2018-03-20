@@ -1,7 +1,9 @@
 package blue.sparse.minecraft.common.entity
 
+import blue.sparse.minecraft.common.entity.data.EntityData
+import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
+import blue.sparse.minecraft.common.entity.impl.types.living.hostile.undead.zombie.EntityTypeZombie
 import blue.sparse.minecraft.common.util.*
-
 
 abstract class EntityType(val identifier: Identifier) {
 
@@ -19,8 +21,10 @@ abstract class EntityType(val identifier: Identifier) {
 
 	constructor(id: String) : this(Identifier(id))
 
-	open fun onTick(entity: Entity<*>) {
-		
+	open fun update(entity: Entity<*>, delta: Float) {}
+
+	open fun createData(): EntityData {
+		return EntityData.Default
 	}
 
 	companion object {
@@ -33,6 +37,7 @@ abstract class EntityType(val identifier: Identifier) {
 			registry[type.identifier] = type
 		}
 
-
+		val item = EntityTypeItem
+		val zombie = EntityTypeZombie
 	}
 }

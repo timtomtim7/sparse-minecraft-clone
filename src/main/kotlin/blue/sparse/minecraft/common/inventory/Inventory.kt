@@ -78,7 +78,7 @@ abstract class Inventory(val size: Int, val content: Array<ItemStack<*>?> = Arra
 	}
 
 	operator fun get(index: Int) = content[index]
-	operator fun set(index: Int, value: ItemStack<*>) {
+	operator fun set(index: Int, value: ItemStack<*>?) {
 		content[index] = value
 	}
 }

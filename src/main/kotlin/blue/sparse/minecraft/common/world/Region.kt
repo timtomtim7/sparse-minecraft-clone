@@ -11,6 +11,9 @@ class Region(val world: World, position: Vector3i) {
 	val worldRegionPosition: Vector3i = position
 		get() = field.clone()
 
+	val loadedChunks: Collection<Chunk>
+		get() = chunks.values
+
 	fun getChunk(x: Int, y: Int, z: Int): Chunk? {
 		boundsCheck(x, y, z)
 

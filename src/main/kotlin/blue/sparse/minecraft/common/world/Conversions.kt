@@ -30,6 +30,14 @@ internal fun regionBlockToChunkBlock(rb: Int): Int {
 	return rb and Chunk.MASK
 }
 
+internal fun regionBlockToWorldBlock(wr: Int, rb: Int): Int {
+	return (wr shl (Region.BITS + Chunk.BITS)) or rb
+}
+
+internal fun chunkBlockToWorldBlock(wr: Int, rc: Int, cb: Int): Int {
+	return regionBlockToWorldBlock(wr, chunkBlockToRegionBlock(rc, cb))
+}
+
 internal fun worldChunkToRegionChunk(wc: Int): Int {
 	return wc and Region.MASK
 }
