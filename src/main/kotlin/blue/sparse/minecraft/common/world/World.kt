@@ -1,6 +1,9 @@
 package blue.sparse.minecraft.common.world
 
+import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.math.vectors.ints.Vector3i
+import blue.sparse.minecraft.common.entity.Entity
+import blue.sparse.minecraft.common.entity.EntityType
 import blue.sparse.minecraft.common.util.Proxy
 import blue.sparse.minecraft.common.util.ProxyProvider
 import java.util.UUID
@@ -8,97 +11,113 @@ import java.util.concurrent.ConcurrentHashMap
 
 class World(val name: String, val id: UUID = UUID.randomUUID()) {
 
-	private val regions = ConcurrentHashMap<Vector3i, Region>()
-	private val key = ThreadLocal.withInitial { Vector3i(0) }
+    private val regions = ConcurrentHashMap<Vector3i, Region>()
+    private val key = ThreadLocal.withInitial { Vector3i(0) }
 
-	val proxy by ProxyProvider.invoke<WorldProxy>(
-			"blue.sparse.minecraft.client.world.proxy.ClientWorldProxy",
-			"blue.sparse.minecraft.server.world.proxy.ServerWorldProxy",
-			this
-	)
+    val proxy by ProxyProvider.invoke<WorldProxy>(
+            "blue.sparse.minecraft.client.world.proxy.ClientWorldProxy",
+            "blue.sparse.minecraft.server.world.proxy.ServerWorldProxy",
+            this
+    )
 
-	fun getRegion(x: Int, y: Int, z: Int): Region {
-		val key = this.key.get()
-		key.assign(x, y, z)
+    private val entities = HashSet<Entity<*>>()
 
-		return regions.getOrPut(key) { Region(this, key.clone()) }
-	}
+    fun getRegion(x: Int, y: Int, z: Int): Region {
+        val key = this.key.get()
+        key.assign(x, y, z)
 
-	//TODO: Look at all this mostly repeated code! Terrible.
+        return regions.getOrPut(key) { Region(this, key.clone()) }
+    }
 
-	fun getChunk(x: Int, y: Int, z: Int): Chunk? {
-		val worldRegionX = worldChunkToWorldRegion(x)
-		val worldRegionY = worldChunkToWorldRegion(y)
-		val worldRegionZ = worldChunkToWorldRegion(z)
+    fun <T : EntityType> spawnEntity(entityType: T, position: Vector3f): Entity<T> {
+        val entity = Entity(entityType, position, this)
+        spawnEntity(entity)
+        return entity
+    }
 
-		val region = getRegion(worldRegionX, worldRegionY, worldRegionZ)
-		val regionChunkX = worldChunkToRegionChunk(x)
-		val regionChunkY = worldChunkToRegionChunk(y)
-		val regionChunkZ = worldChunkToRegionChunk(z)
+    fun spawnEntity(entity: Entity<*>): Boolean {
+        return entities.add(entity)
+    }
 
-		return region.getChunk(regionChunkX, regionChunkY, regionChunkZ)
-	}
+    fun despawnEntity(entity: Entity<*>): Boolean {
+        return entities.remove(entity)
+    }
 
-	fun getOrGenerateChunk(x: Int, y: Int, z: Int): Chunk {
-		val worldRegionX = worldChunkToWorldRegion(x)
-		val worldRegionY = worldChunkToWorldRegion(y)
-		val worldRegionZ = worldChunkToWorldRegion(z)
+    //TODO: Look at all this mostly repeated code! Terrible.
 
-		val region = getRegion(worldRegionX, worldRegionY, worldRegionZ)
-		val regionChunkX = worldChunkToRegionChunk(x)
-		val regionChunkY = worldChunkToRegionChunk(y)
-		val regionChunkZ = worldChunkToRegionChunk(z)
+    fun getChunk(x: Int, y: Int, z: Int): Chunk? {
+        val worldRegionX = worldChunkToWorldRegion(x)
+        val worldRegionY = worldChunkToWorldRegion(y)
+        val worldRegionZ = worldChunkToWorldRegion(z)
 
-		return region.getOrGenerateChunk(regionChunkX, regionChunkY, regionChunkZ)
-	}
+        val region = getRegion(worldRegionX, worldRegionY, worldRegionZ)
+        val regionChunkX = worldChunkToRegionChunk(x)
+        val regionChunkY = worldChunkToRegionChunk(y)
+        val regionChunkZ = worldChunkToRegionChunk(z)
 
-	fun getBlock(x: Int, y: Int, z: Int): BlockView? {
-		val worldChunkX = worldBlockToWorldChunk(x)
-		val worldChunkY = worldBlockToWorldChunk(y)
-		val worldChunkZ = worldBlockToWorldChunk(z)
+        return region.getChunk(regionChunkX, regionChunkY, regionChunkZ)
+    }
 
-		val chunk = getChunk(worldChunkX, worldChunkY, worldChunkZ) ?: return null
-		val chunkBlockX = worldBlockToChunkBlock(x)
-		val chunkBlockY = worldBlockToChunkBlock(y)
-		val chunkBlockZ = worldBlockToChunkBlock(z)
+    fun getOrGenerateChunk(x: Int, y: Int, z: Int): Chunk {
+        val worldRegionX = worldChunkToWorldRegion(x)
+        val worldRegionY = worldChunkToWorldRegion(y)
+        val worldRegionZ = worldChunkToWorldRegion(z)
 
-		return chunk[chunkBlockX, chunkBlockY, chunkBlockZ]
-	}
+        val region = getRegion(worldRegionX, worldRegionY, worldRegionZ)
+        val regionChunkX = worldChunkToRegionChunk(x)
+        val regionChunkY = worldChunkToRegionChunk(y)
+        val regionChunkZ = worldChunkToRegionChunk(z)
 
-	fun getOrGenerateBlock(x: Int, y: Int, z: Int): BlockView {
-		val worldChunkX = worldBlockToWorldChunk(x)
-		val worldChunkY = worldBlockToWorldChunk(y)
-		val worldChunkZ = worldBlockToWorldChunk(z)
+        return region.getOrGenerateChunk(regionChunkX, regionChunkY, regionChunkZ)
+    }
 
-		val chunk = getOrGenerateChunk(worldChunkX, worldChunkY, worldChunkZ)
-		val chunkBlockX = worldBlockToChunkBlock(x)
-		val chunkBlockY = worldBlockToChunkBlock(y)
-		val chunkBlockZ = worldBlockToChunkBlock(z)
+    fun getBlock(x: Int, y: Int, z: Int): BlockView? {
+        val worldChunkX = worldBlockToWorldChunk(x)
+        val worldChunkY = worldBlockToWorldChunk(y)
+        val worldChunkZ = worldBlockToWorldChunk(z)
 
-		return chunk[chunkBlockX, chunkBlockY, chunkBlockZ]
-	}
+        val chunk = getChunk(worldChunkX, worldChunkY, worldChunkZ) ?: return null
+        val chunkBlockX = worldBlockToChunkBlock(x)
+        val chunkBlockY = worldBlockToChunkBlock(y)
+        val chunkBlockZ = worldBlockToChunkBlock(z)
 
-	operator fun get(x: Int, y: Int, z: Int): BlockView? {
-		return getBlock(x, y, z)
-	}
+        return chunk[chunkBlockX, chunkBlockY, chunkBlockZ]
+    }
 
-	abstract class WorldProxy(val world: World): Proxy
+    fun getOrGenerateBlock(x: Int, y: Int, z: Int): BlockView {
+        val worldChunkX = worldBlockToWorldChunk(x)
+        val worldChunkY = worldBlockToWorldChunk(y)
+        val worldChunkZ = worldBlockToWorldChunk(z)
 
-	companion object {
-		internal fun worldChunkToRegionChunk(i: Int): Int {
-			return i and Region.MASK
-		}
+        val chunk = getOrGenerateChunk(worldChunkX, worldChunkY, worldChunkZ)
+        val chunkBlockX = worldBlockToChunkBlock(x)
+        val chunkBlockY = worldBlockToChunkBlock(y)
+        val chunkBlockZ = worldBlockToChunkBlock(z)
 
-		internal fun worldChunkToWorldRegion(i: Int): Int {
-			return i shr Region.BITS
-		}
+        return chunk[chunkBlockX, chunkBlockY, chunkBlockZ]
+    }
 
-		internal fun worldBlockToChunkBlock(i: Int): Int {
-			return i and Chunk.MASK
-		}
+    operator fun get(x: Int, y: Int, z: Int): BlockView? {
+        return getBlock(x, y, z)
+    }
 
-		internal fun worldBlockToWorldChunk(i: Int): Int {
-			return i shr Chunk.BITS
-		}
-	}
+    abstract class WorldProxy(val world: World) : Proxy
+
+    companion object {
+        internal fun worldChunkToRegionChunk(i: Int): Int {
+            return i and Region.MASK
+        }
+
+        internal fun worldChunkToWorldRegion(i: Int): Int {
+            return i shr Region.BITS
+        }
+
+        internal fun worldBlockToChunkBlock(i: Int): Int {
+            return i and Chunk.MASK
+        }
+
+        internal fun worldBlockToWorldChunk(i: Int): Int {
+            return i shr Chunk.BITS
+        }
+    }
 }

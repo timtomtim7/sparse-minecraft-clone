@@ -3,9 +3,13 @@ package blue.sparse.minecraft.common.entity
 import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.minecraft.common.world.World
 
-
 data class Entity<out T : EntityType>(val type: T, var position: Vector3f, var world: World) {
+    
+    fun onTick() {}
 
+    fun despawn(): Boolean = world.despawnEntity(this)
+
+    fun spawn(): Boolean = world.spawnEntity(this)
 
     @Suppress("UNCHECKED_CAST")
     inline fun <reified N : EntityType> safeCast(): Entity<N>? {

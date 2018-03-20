@@ -2,20 +2,26 @@ package blue.sparse.minecraft.common.entity
 
 import blue.sparse.minecraft.common.util.*
 
+
 abstract class EntityType(val identifier: Identifier) {
+
+	abstract class EntityTypeProxy(val entityType: EntityType) : Proxy
+
 	open val proxy: EntityTypeProxy by ProxyProvider<EntityTypeProxy>(
 			"blue.sparse.minecraft.client.entity.proxy.Default",
 			"blue.sparse.minecraft.server.entity.proxy.Default",
 			this
 	)
 
-	constructor(id: String) : this(Identifier(id))
-
 	init {
         register(this)
 	}
 
-	abstract class EntityTypeProxy(val entityType: EntityType) : Proxy
+	constructor(id: String) : this(Identifier(id))
+
+	open fun onTick(entity: Entity<*>) {
+		
+	}
 
 	companion object {
 		internal val registry = LinkedHashMap<Identifier, EntityType>()
