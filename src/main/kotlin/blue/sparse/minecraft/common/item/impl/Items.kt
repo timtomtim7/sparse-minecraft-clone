@@ -12,6 +12,14 @@ import blue.sparse.minecraft.common.item.impl.types.tools.ItemTypeWeapon
 /**
  * EDIBLE ITEM TYPES
  */
+
+/*
+
+if(item.type == ItemTypeDiamondSword) {
+    val durability = item.type.durability
+}
+
+ */
 object ItemApple:               ItemTypeEdible("apple")
 object ItemAppleGolden:         ItemTypeEdible("apple_golden")
 object ItemBeefCooked:          ItemTypeEdible("beef_cooked")
@@ -95,11 +103,11 @@ object ItemIronPickaxe:         ItemTypeTool("iron_pickaxe", 251)
 object ItemStonePickaxe:        ItemTypeTool("stone_pickaxe", 132)
 object ItemWoodPickaxe:         ItemTypeTool("wood_pickaxe", 60)
 
-object ItemDiamondAxe:          ItemTypeTool("diamond_axe", 1562)
-object ItemGoldAxe:             ItemTypeTool("gold_axe", 33)
-object ItemIronAxe:             ItemTypeTool("iron_axe", 251)
-object ItemStoneAxe:            ItemTypeTool("stone_axe", 132)
-object ItemWoodAxe:             ItemTypeTool("wood_axe", 60)
+object ItemDiamondAxe:          ItemTypeWeapon("diamond_axe", 1562)
+object ItemGoldAxe:             ItemTypeWeapon("gold_axe", 33)
+object ItemIronAxe:             ItemTypeWeapon("iron_axe", 251)
+object ItemStoneAxe:            ItemTypeWeapon("stone_axe", 132)
+object ItemWoodAxe:             ItemTypeWeapon("wood_axe", 60)
 
 object ItemDiamondShovel:       ItemTypeTool("diamond_shovel", 1562)
 object ItemGoldShovel:          ItemTypeTool("gold_shovel", 33)
@@ -261,4 +269,3 @@ object ItemSugar: ItemType("sugar")
 object ItemTotem: ItemType("totem")
 object ItemWheat: ItemType("wheat")
 object ItemWoodenArmorStand: ItemType("wooden_armorstand")
-
