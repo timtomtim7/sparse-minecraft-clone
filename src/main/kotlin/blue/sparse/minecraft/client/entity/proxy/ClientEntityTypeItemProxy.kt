@@ -29,7 +29,9 @@ class ClientEntityTypeItemProxy(type: EntityType) : ClientEntityTypeProxy(type) 
 
 		transform.setScale(if (item.type is ItemTypeBlock) blockScale else itemScale)
 		transform.setRotation(Quaternion4f(rotationAxis, Math.toRadians(entity.timeSinceSpawned * 40.0).toFloat()))
-		transform.setTranslation(entity.position + Vector3f(0f, (Math.sin(entity.timeSinceSpawned.toDouble()).toFloat() * 0.5f + 0.5f) * (4f / 16f), 0f))
+		val bobbing = (Math.sin(entity.timeSinceSpawned.toDouble() * 1.25).toFloat() * 0.5f + 0.5f) * (4f / 16f) + (2f / 16f)
+
+		transform.setTranslation(entity.position + Vector3f(0f, bobbing, 0f))
 
 		shader.bind {
 			uniforms["uLightDirection"] = (Minecraft.world.proxy as ClientWorldProxy).sky.sun.direction

@@ -9,6 +9,8 @@ data class Entity<out T : EntityType>(val type: T, var position: Vector3f, var w
 	var timeSinceSpawned = 0f
 		private set
 
+	var velocity = Vector3f(0f)
+
     val data = type.createData()
 
     fun despawn(): Boolean {
@@ -22,6 +24,32 @@ data class Entity<out T : EntityType>(val type: T, var position: Vector3f, var w
 
     fun update(delta: Float) {
 		timeSinceSpawned += delta
+
+		velocity.y -= 16f * delta
+
+//		val drag = 0.02f
+//		velocity.timesAssign(Math.pow(drag.toDouble(), delta.toDouble()).toFloat())
+//		velocity = clamp(velocity, -78.4f, 78.4f)
+
+		val bounds = type.bounds
+		val movement = velocity * delta
+		val unaffected = world.testBlockIntersections(bounds, position, movement)
+
+		bounds.debugRender(position, Vector3f(1f))
+
+		velocity = movement / delta
+
+		if(unaffected.any { it == 0f }) {
+
+			val affected = Vector3f(1f) - unaffected
+			val friction = unaffected * 0.8f
+			friction += affected
+
+			velocity.timesAssign(friction)
+
+		}
+		position.plusAssign(movement)
+
         type.update(this, delta)
     }
 

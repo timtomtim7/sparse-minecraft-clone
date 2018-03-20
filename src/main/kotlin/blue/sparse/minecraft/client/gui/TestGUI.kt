@@ -13,6 +13,8 @@ import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
 import blue.sparse.minecraft.common.inventory.TestInventory
 import blue.sparse.minecraft.common.item.Item
+import blue.sparse.minecraft.common.item.ItemStack
+import blue.sparse.minecraft.common.item.impl.ItemTypeApple
 import blue.sparse.minecraft.common.item.impl.ItemTypeIronIngot
 import blue.sparse.minecraft.common.text.Text
 import org.lwjgl.opengl.GL11.*
@@ -70,14 +72,21 @@ object TestGUI : GUI() {
 		}
 
 		if(input[Key.Y].pressed) {
-			val selectedItem = TestInventory[selectedSlot]
-			if(selectedItem != null) {
-				TestInventory[selectedSlot] = null
-				val entity = Minecraft.world.spawnEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
-				entity.editData<EntityTypeItem.Data> {
-					stack = selectedItem
-				}
+
+			val entity = Minecraft.world.spawnEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
+			entity.velocity = MinecraftClient.proxy.camera.transform.rotation.forward * 10f
+			entity.editData<EntityTypeItem.Data> {
+				stack = ItemStack(ItemTypeApple)
 			}
+
+//			val selectedItem = TestInventory[selectedSlot]
+//			if(selectedItem != null) {
+//				TestInventory[selectedSlot] = null
+//				val entity = Minecraft.world.spawnEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
+//				entity.editData<EntityTypeItem.Data> {
+//					stack = selectedItem
+//				}
+//			}
 		}
 
 		if(input[Key.HOME].pressed) {

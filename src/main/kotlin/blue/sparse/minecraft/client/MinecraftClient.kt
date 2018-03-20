@@ -15,6 +15,7 @@ import blue.sparse.minecraft.client.gui.GUIManager
 import blue.sparse.minecraft.client.gui.TestGUI
 import blue.sparse.minecraft.client.item.ItemComponent
 import blue.sparse.minecraft.client.util.BlankShader
+import blue.sparse.minecraft.client.util.Debug
 import blue.sparse.minecraft.client.world.proxy.ClientChunkProxy
 import blue.sparse.minecraft.client.world.proxy.ClientWorldProxy
 import blue.sparse.minecraft.common.Minecraft
@@ -26,6 +27,8 @@ import blue.sparse.minecraft.common.item.ItemType
 import blue.sparse.minecraft.common.util.ProxyHolder
 import blue.sparse.minecraft.common.util.random
 import org.lwjgl.opengl.GL11
+import org.lwjgl.opengl.GL11.*
+import org.lwjgl.stb.STBPerlin
 import java.io.File
 import javax.imageio.ImageIO
 
@@ -47,8 +50,8 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 
 	init {
 		camera.apply {
-			move(Vector3f(0f, 100f, 10f))
-			controller = MinecraftController(this, movementSpeed = 10.92f)
+			move(Vector3f(0f, -30f, 10f))
+			controller = MinecraftController(this, movementSpeed = 7f)
 		}
 	}
 
@@ -85,12 +88,15 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 		for (x in -32..32) {
 			for (z in -32..32) {
 //				val maxY = ((Math.sin(x * 0.1) + Math.cos(z * 0.1)) * 8).toInt() + 16
-//				val maxY = (STBPerlin.stb_perlin_noise3(x * 0.04f, z * 0.04f, 0f, 1024, 1024, 1024) * 16).toInt() + 16
-				var maxY = 16
-				if(random.nextDouble() < 0.05)
+				var maxY = (STBPerlin.stb_perlin_noise3(x * 0.04f, z * 0.04f, 0f, 1024, 1024, 1024) * 16).toInt() + 16
+//				var maxY = 16
+				if(random.nextDouble() < 0.01)
 					maxY += 5
 				for (y in 0..maxY) {
-					world.getOrGenerateBlock(x, y, z).type = if(maxY - y < 4) BlockType.sand else BlockType.stone
+					world.getOrGenerateBlock(x, y, z).type = if(maxY - y < 4)
+						if(random.nextDouble() < 0.1) BlockType.dirt else BlockType.sand
+					else
+						if(random.nextDouble() < 0.1) BlockType.cobblestone else BlockType.stone
 				}
 			}
 		}
@@ -161,9 +167,14 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 			proxy.render(entity, camera, delta)
 		}
 
+		glCall { glEnable(GL_BLEND) }
+		glCall { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) }
+		Debug.renderTemp()
+		glCall { glDisable(GL_BLEND) }
+
 		val bounds = (camera.controller as MinecraftController).bounds
 		bounds.debugRender(camera.transform.translation, Vector3f(1f, 0f, 0f))
-		Minecraft.world.debugRenderInteresections(bounds, camera.transform.translation, Vector3f(0f, 1f, 0f))
+//		Minecraft.world.debugRenderInteresections(bounds, camera.transform.translation, Vector3f(0f, 1f, 0f))
 
 		GUIManager.render(delta)
 	}

@@ -1,5 +1,6 @@
 package blue.sparse.minecraft.common.entity
 
+import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.minecraft.common.entity.data.EntityData
 import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
 import blue.sparse.minecraft.common.entity.impl.types.living.hostile.undead.zombie.EntityTypeZombie
@@ -14,6 +15,8 @@ abstract class EntityType(val identifier: Identifier) {
 			"blue.sparse.minecraft.server.entity.proxy.Default",
 			this
 	)
+
+	open val bounds = AABB(Vector3f(-0.5f), Vector3f(0.5f))
 
 	init {
         register(this)

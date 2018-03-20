@@ -4,3 +4,4 @@ import java.util.concurrent.ThreadLocalRandom
 
 val random: ThreadLocalRandom
 	get() = ThreadLocalRandom.current()
+

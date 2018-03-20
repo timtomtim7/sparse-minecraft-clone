@@ -1,6 +1,5 @@
 package blue.sparse.minecraft.common.world
 
-import blue.sparse.engine.SparseEngine
 import blue.sparse.math.vectors.floats.*
 import blue.sparse.math.vectors.ints.Vector3i
 import blue.sparse.minecraft.common.entity.Entity
@@ -35,68 +34,74 @@ class World(val name: String, val id: UUID = UUID.randomUUID()) {
 		return regions.getOrPut(key) { Region(this, key.clone()) }
 	}
 
-    fun <T : EntityType> spawnEntity(entityType: T, position: Vector3f): Entity<T> {
-        val entity = Entity(entityType, position, this)
-        spawnEntity(entity)
-        return entity
-    }
+	fun <T : EntityType> spawnEntity(entityType: T, position: Vector3f): Entity<T> {
+		val entity = Entity(entityType, position, this)
+		spawnEntity(entity)
+		return entity
+	}
 
-    fun spawnEntity(entity: Entity<*>): Boolean {
-        return _entities.add(entity)
-    }
+	fun spawnEntity(entity: Entity<*>): Boolean {
+		return _entities.add(entity)
+	}
 
-    fun despawnEntity(entity: Entity<*>): Boolean {
-        return _entities.remove(entity)
-    }
+	fun despawnEntity(entity: Entity<*>): Boolean {
+		return _entities.remove(entity)
+	}
 
 	fun update(delta: Float) {
 		entities.forEach { it.update(delta) }
 	}
 
-    //TODO: Look at all this mostly repeated code! Terrible.
+	//TODO: Look at all this mostly repeated code! Terrible.
+
+	inline fun outwardsBlockLoop(min: Vector3i, max: Vector3i, body: (Int, Int, Int) -> Unit) {
+		val start = (max - min) / 2 + min
+
+		val xLength = max.x - min.x
+		val yLength = max.y - min.y
+		val zLength = max.z - min.z
+
+		for(x in 0 until xLength) {
+			val xOffset = (x / 2) * ((x % 2) * 2 - 1)
+
+			for(y in 0 until yLength) {
+				val yOffset = (y / 2) * ((y % 2) * 2 - 1)
+
+				for(z in 0 until zLength) {
+					val zOffset = (z / 2) * ((z % 2) * 2 - 1)
+
+					body(start.x + xOffset, start.y + yOffset, start.z + zOffset)
+				}
+			}
+		}
+	}
 
 	fun testBlockIntersections(bounds: AABB, position: Vector3f, movement: Vector3f): Vector3f {
 		val min = floor(bounds.min + position - 1f).toIntVector()
 		val max = ceil(bounds.max + position + 1f).toIntVector()
 
-//		val result = Vector3f(1f)
-		val result = movement
+//		val afterMin = floor(bounds.min + position - movement - 1f).toIntVector()
+//		val afterMax = ceil(bounds.max + position - movement + 1f).toIntVector()
 
-		for(x in min.x..max.x) {
-			for(y in min.y..max.y) {
-				for(z in min.z..max.z) {
-					val type = getBlock(x, y, z)?.type ?: continue
-					val blockBounds = type.boundingBox
-					val blockPosition = Vector3f(x.toFloat(), y.toFloat(), z.toFloat())
+		val volume = (max - min).run { x * y * z }
 
-					blockBounds.testIntersection(blockPosition, movement, bounds, position)
-					if(result.all { it == 0f })
-						return result
-				}
-			}
+		val result = Vector3f(1f)
+
+		for(i in 0 until volume) {
+			val pos = BlockLoop[i, (max - min) / 2 + min]
+			val type = getBlock(pos.x, pos.y, pos.z)?.type ?: continue
+			val blockBounds = type.boundingBox
+			val blockPosition = pos.toFloatVector()
+
+			val unaffected = blockBounds.testIntersection(blockPosition, movement, bounds, position)
+			result *= unaffected
+			blockBounds.debugRender(blockPosition, unaffected)
+
+			if (movement.all { it == 0f })
+				return movement
 		}
 
 		return result
-	}
-
-	internal fun debugRenderInteresections(bounds: AABB, position: Vector3f, color: Vector3f) {
-		val min = floor(bounds.min + position - 1f).toIntVector()
-		val max = ceil(bounds.max + position + 1f).toIntVector()
-
-//		val result = Vector3f(1f)
-		for(x in min.x..max.x) {
-			for(y in min.y..max.y) {
-				for(z in min.z..max.z) {
-					val type = getBlock(x, y, z)?.type ?: continue
-					val blockBounds = type.boundingBox
-					val blockPosition = Vector3f(x.toFloat(), y.toFloat(), z.toFloat())
-
-					val intersection = blockBounds.testIntersection(blockPosition, SparseEngine.game.camera.transform.rotation.forward, bounds, position)
-					blockBounds.debugRender(blockPosition, intersection)
-
-				}
-			}
-		}
 	}
 
 	fun getChunk(x: Int, y: Int, z: Int): Chunk? {
@@ -155,7 +160,7 @@ class World(val name: String, val id: UUID = UUID.randomUUID()) {
 		return getBlock(x, y, z)
 	}
 
-	abstract class WorldProxy(val world: World): Proxy
+	abstract class WorldProxy(val world: World) : Proxy
 
 	companion object {
 		internal fun worldChunkToRegionChunk(i: Int): Int {

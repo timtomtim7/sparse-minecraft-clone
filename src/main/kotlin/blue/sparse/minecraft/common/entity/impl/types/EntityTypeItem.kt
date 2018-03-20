@@ -1,9 +1,11 @@
 package blue.sparse.minecraft.common.entity.impl.types
 
+import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.entity.EntityType
 import blue.sparse.minecraft.common.entity.data.EntityData
 import blue.sparse.minecraft.common.item.ItemStack
+import blue.sparse.minecraft.common.util.AABB
 import blue.sparse.minecraft.common.util.ProxyProvider
 
 object EntityTypeItem : EntityType("item") {
@@ -14,10 +16,12 @@ object EntityTypeItem : EntityType("item") {
 			this
 	)
 
+	override val bounds = AABB(Vector3f(-0.25f / 2f), Vector3f(0.25f) / 2f)
+
 	override fun createData(): EntityData {
 		return Data(ItemStack(BlockType.stone.item!!))
 	}
 
-	class Data(var stack: ItemStack<*>): EntityData
+	class Data(var stack: ItemStack<*>) : EntityData
 
 }

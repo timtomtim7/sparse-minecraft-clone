@@ -1,5 +1,6 @@
 package blue.sparse.minecraft.common.util
 
+import blue.sparse.math.abs
 import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.minecraft.client.util.Debug
 
@@ -11,76 +12,65 @@ class AABB(min: Vector3f, max: Vector3f) {
 		get() = field.clone()
 
 	fun testIntersection(thisPosition: Vector3f, movement: Vector3f, other: AABB, otherPosition: Vector3f): Vector3f {
-		// the bounding box where you are
-		val aMin = min + thisPosition
-		val aMax = max + thisPosition
+		// This bounding box but moved into position
+		val thisMin = min + thisPosition
+		val thisMax = max + thisPosition
 
-		// the bounding box you might collide with
-		val bMin = other.min + otherPosition
-		val bMax = other.max + otherPosition
+		// The bounding box you might collide with
+		val otherMin = other.min + otherPosition
+		val otherMax = other.max + otherPosition
 
-		// the bounding box where you will be on X
-		val mxMin = aMin - Vector3f(movement.x, 0f, 0f)
-		val mxMax = aMax - Vector3f(movement.x, 0f, 0f)
+		// The axes that are unaffected by this test will have a value of 1, whereas axes that have been affected will have a value of 0.
+		// To begin with, we haven't modified any axes, so they're all 1.
+		val unaffectedAxes = Vector3f(1f)
 
-		if (intersects(mxMin, mxMax, bMin, bMax))
-			movement.x = axisCollide(aMin.x, aMax.x, bMin.x, bMax.x, movement.x)
+		// The axes to detect collision on. This is 3D, so the first 3
+		val axes = arrayListOf(0, 1, 2) // "axes" is the plural of "axis"
 
-		// the bounding box where you will be on Y
-		val myMin = aMin - Vector3f(movement.x, movement.y, 0f)
-		val myMax = aMax - Vector3f(movement.x, movement.y, 0f)
+		// Sort the axes by which would result in the least movement if it were being collided with.
+		axes.sortBy { abs(axisCollisionOffset(thisMin[it], thisMax[it], otherMin[it], otherMax[it], movement[it])) }
 
-		if (intersects(myMin, myMax, bMin, bMax))
-			movement.y = axisCollide(aMin.y, aMax.y, bMin.y, bMax.y, movement.y)
+		// Keep track of which movement axes have already been modified so that future axes will take those into account aswell.
+		val modifiedMovement = Vector3f(0f)
 
-		// the bounding box where you will be on Z
-		val mzMin = aMin - Vector3f(movement.x, movement.y, movement.z)
-		val mzMax = aMax - Vector3f(movement.x, movement.y, movement.z)
+		for (axis in axes) {
+			// Generate a vector pointing in the direction of the axis
+			val axisVector = Vector3f(0f)
+			axisVector[axis] = 1f
 
-		if (intersects(mzMin, mzMax, bMin, bMax))
-			movement.z = axisCollide(aMin.z, aMax.z, bMin.z, bMax.z, movement.z)
+			// The bounding box where you will be after moving in this axis and previous axes.
+			val modifiedMin = thisMin - (modifiedMovement + movement * axisVector)
+			val modifiedMax = thisMax - (modifiedMovement + movement * axisVector)
 
-//		val mxyMin = aMin - Vector3f(movement.x, movement.y, 0f)
-//		val mxyMax = aMax - Vector3f(movement.x, movement.y, 0f)
-//		if (intersects(mxyMin, mxyMax, bMin, bMax))
-//			movement.x = axisCollide(aMin.x, aMax.x, bMin.x, bMax.x, movement.x)
-//
-//		val myzMin = aMin - Vector3f(0f, movement.y, movement.z)
-//		val myzMax = aMax - Vector3f(0f, movement.y, movement.z)
-//		if (intersects(myzMin, myzMax, bMin, bMax))
-//			movement.y = axisCollide(aMin.y, aMax.y, bMin.y, bMax.y, movement.y)
-//
-//		val mxzMin = aMin - Vector3f(movement.x, 0f, movement.z)
-//		val mxzMax = aMax - Vector3f(movement.x, 0f, movement.z)
-//		if (intersects(mxzMin, mxzMax, bMin, bMax))
-//			movement.z = axisCollide(aMin.z, aMax.z, bMin.z, bMax.z, movement.z)
+			if (intersects(modifiedMin, modifiedMax, otherMin, otherMax)) {
+				// The offset from the collided axis
+				val offset = axisCollisionOffset(thisMin[axis], thisMax[axis], otherMin[axis], otherMax[axis], movement[axis])
 
-//		val fMin = aMin - movement
-//		val fMax = aMax - movement
-//		if (intersects(fMin, fMax, bMin, bMax)) {
-//			movement.x = axisCollide(aMin.x, aMax.x, bMin.x, bMax.x, movement.x)
-//			movement.y = axisCollide(aMin.y, aMax.y, bMin.y, bMax.y, movement.y)
-//			movement.z = axisCollide(aMin.z, aMax.z, bMin.z, bMax.z, movement.z)
-//		}
+				// Move it by the offset so that it is perfectly on the boundary of colliding
+				movement[axis] = offset
+				modifiedMovement[axis] = offset
+				unaffectedAxes[axis] = 0f
+			}
+		}
 
-		return movement
+		return unaffectedAxes
 	}
 
 	private fun intersects(aMin: Vector3f, aMax: Vector3f, bMin: Vector3f, bMax: Vector3f): Boolean {
-		return  aMin.x < bMax.x && aMax.x > bMin.x &&
+		return aMin.x < bMax.x && aMax.x > bMin.x &&
 				aMin.y < bMax.y && aMax.y > bMin.y &&
 				aMin.z < bMax.z && aMax.z > bMin.z
 	}
 
-	private fun axisCollide(aMin: Float, aMax: Float, bMin: Float, bMax: Float, movement: Float): Float {
-		if(movement != 0f) {
+	private fun axisCollisionOffset(aMin: Float, aMax: Float, bMin: Float, bMax: Float, movement: Float): Float {
+		if (movement != 0f) {
 			val dest: Float
 			val from: Float
 			if (movement > 0f) {
-				dest = bMax
+				dest = bMax + 0.001f
 				from = aMin
 			} else {
-				dest = bMin
+				dest = bMin - 0.001f
 				from = aMax
 			}
 			val diff = from - dest
@@ -90,27 +80,13 @@ class AABB(min: Vector3f, max: Vector3f) {
 	}
 
 	internal fun debugRender(position: Vector3f, color: Vector3f = Vector3f(1f, 0f, 0f)) {
-		val min = min + position
-		val max = max + position
+		Debug.addTempCube(min + position, max + position, color)
+	}
 
-		Debug.drawLine(min, Vector3f(max.x, min.y, min.z), color)
-		Debug.drawLine(min, Vector3f(min.x, max.y, min.z), color)
-		Debug.drawLine(min, Vector3f(min.x, min.y, max.z), color)
-
-		Debug.drawLine(max, Vector3f(min.x, max.y, max.z), color)
-		Debug.drawLine(max, Vector3f(max.x, min.y, max.z), color)
-		Debug.drawLine(max, Vector3f(max.x, max.y, min.z), color)
-
-//		Debug.drawLine(Vector3f(min.x, min.y, min.z), Vector3f(min.x, min.z, min.z))
-//
-//		Debug.drawLine(Vector3f(min.x, min.y, min.z), Vector3f(min.x, min.z, min.z))
-//		Debug.drawLine(Vector3f(min.x, min.y, min.z), Vector3f(min.x, min.z, min.z))
-//		Debug.drawLine(Vector3f(min.x, min.y, min.z), Vector3f(min.x, min.z, min.z))
-//		Debug.drawLine(Vector3f(min.x, min.y, min.z), Vector3f(min.x, min.z, min.z))
-//
-//		Debug.drawLine(Vector3f(min.x, min.y, min.z), Vector3f(min.x, min.z, min.z))
-//		Debug.drawLine(Vector3f(min.x, min.y, min.z), Vector3f(min.x, min.z, min.z))
-//		Debug.drawLine(Vector3f(min.x, min.y, min.z), Vector3f(min.x, min.z, min.z))
-//		Debug.drawLine(Vector3f(min.x, min.y, min.z), Vector3f(min.x, min.z, min.z))
+	companion object {
+		fun ofSize(width: Float, height: Float): AABB {
+			val vector = Vector3f(width, height, width)
+			return AABB(vector / -2f, vector / 2f)
+		}
 	}
 }
