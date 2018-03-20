@@ -12,7 +12,7 @@ abstract class EntityType(val identifier: Identifier) {
 	constructor(id: String) : this(Identifier(id))
 
 	init {
-		register(this)
+        register(this)
 	}
 
 	abstract class EntityTypeProxy(val entityType: EntityType) : Proxy
