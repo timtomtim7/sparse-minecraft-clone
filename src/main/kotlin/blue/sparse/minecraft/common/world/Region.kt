@@ -8,8 +8,8 @@ class Region(val world: World, position: Vector3i) {
 	private val chunks = ConcurrentHashMap<Vector3i, Chunk>()
 	private val key = ThreadLocal.withInitial { Vector3i(0) }
 
-	val position: Vector3i
-		get() = position.clone()
+	val worldRegionPosition: Vector3i = position
+		get() = field.clone()
 
 	fun getChunk(x: Int, y: Int, z: Int): Chunk? {
 		boundsCheck(x, y, z)
@@ -29,7 +29,7 @@ class Region(val world: World, position: Vector3i) {
 			return chunk
 
 		chunk = Chunk(this, key.clone())
-		chunks[chunk.position] = chunk
+		chunks[chunk.regionChunkPosition] = chunk
 		//TODO: Invoke world generator on chunk
 		return chunk
 	}
@@ -43,5 +43,21 @@ class Region(val world: World, position: Vector3i) {
 			if(x < 0 || y < 0 || z < 0 || x >= SIZE || y >= SIZE || z >= SIZE)
 				throw IllegalArgumentException("Chunk coordinates out of range ($SIZE): $x, $y, $z")
 		}
+
+//		internal fun regionChunkToWorldChunk(r: Int, i: Int): Int {
+//			return (r shl BITS) or i
+//		}
+//
+//		internal fun worldChunkToWorldRegion(i: Int): Int {
+//			return i shr Region.BITS
+//		}
+//
+//		internal fun worldBlockToChunkBlock(i: Int): Int {
+//			return i and Chunk.MASK
+//		}
+//
+//		internal fun worldBlockToWorldChunk(i: Int): Int {
+//			return i shr Chunk.BITS
+//		}
 	}
 }

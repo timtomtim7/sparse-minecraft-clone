@@ -8,8 +8,7 @@ import blue.sparse.math.wrap
 import blue.sparse.minecraft.client.text.TextRenderer
 import blue.sparse.minecraft.common.inventory.TestInventory
 import blue.sparse.minecraft.common.item.Item
-import blue.sparse.minecraft.common.item.damage
-import blue.sparse.minecraft.common.item.impl.ItemIronPickaxe
+import blue.sparse.minecraft.common.item.impl.ItemTypeIronIngot
 import blue.sparse.minecraft.common.text.Text
 import blue.sparse.minecraft.common.util.random
 import org.lwjgl.opengl.GL11.*
@@ -46,9 +45,9 @@ object TestGUI : GUI() {
 
 		val input = SparseEngine.window.input
 		if (input[Key.U].pressed) {
-			val item = Item(ItemIronPickaxe)
+			val item = Item(ItemTypeIronIngot)
 			item.color = random.nextInt(0xFFFFFF)
-			item.damage = random.nextInt(item.type.maxDurability)
+//			item.damage = random.nextInt(item.type.maxDurability)
 
 			TestInventory.addItem(item)
 			sendMessage(Text.create("Added item ${item.type}"))
@@ -62,7 +61,7 @@ object TestGUI : GUI() {
 //			item.color = TextColor.values().run { get(random.nextInt(size)).color }
 //		}
 
-		if(input[Key.KP_8].pressed) {
+		if (input[Key.KP_8].pressed) {
 			TestInventory.clear()
 		}
 	}
@@ -100,10 +99,10 @@ object TestGUI : GUI() {
 		val expTextWidth = TextRenderer.stringWidth(levelString)
 		val expTextLeft = (manager.right / 2) - (expTextWidth / 2)
 		val expTextBottom = 27f
-		drawString(levelString, expTextLeft-1f, expTextBottom, 0x000000, shadow = false)
-		drawString(levelString, expTextLeft, expTextBottom-1, 0x000000, shadow = false)
-		drawString(levelString, expTextLeft+1, expTextBottom, 0x000000, shadow = false)
-		drawString(levelString, expTextLeft, expTextBottom+1, 0x000000, shadow = false)
+		drawString(levelString, expTextLeft - 1f, expTextBottom, 0x000000, shadow = false)
+		drawString(levelString, expTextLeft, expTextBottom - 1, 0x000000, shadow = false)
+		drawString(levelString, expTextLeft + 1, expTextBottom, 0x000000, shadow = false)
+		drawString(levelString, expTextLeft, expTextBottom + 1, 0x000000, shadow = false)
 		drawString(levelString, expTextLeft, expTextBottom, 0x80FF20, shadow = false)
 
 

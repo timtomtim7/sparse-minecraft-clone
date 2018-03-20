@@ -13,6 +13,18 @@ group 'blue.sparse'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'kotlin'
+apply plugin: 'application'
+
+mainClassName = "blue.sparse.minecraft.client.MainKt"
+applicationDefaultJvmArgs = [
+        "-Xmx3G",
+        "-XX:+UnlockExperimentalVMOptions",
+        "-XX:+UseG1GC",
+        "-XX:G1NewSizePercent=20",
+        "-XX:G1ReservePercent=20",
+        "-XX:MaxGCPauseMillis=50",
+        "-XX:G1HeapRegionSize=16M"
+]
 
 repositories {
     mavenCentral()

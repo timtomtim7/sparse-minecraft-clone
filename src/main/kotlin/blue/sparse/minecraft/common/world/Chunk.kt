@@ -7,12 +7,13 @@ import blue.sparse.minecraft.common.util.ProxyProvider
 
 class Chunk(val region: Region, position: Vector3i) {
 
-	private val data = IntArray(SIZE * SIZE * SIZE)
+	private var data: IntArray? = null// = IntArray(SIZE * SIZE * SIZE)
+	private var filled: Int = 0
 
 	var lastChangedMillis: Long = System.currentTimeMillis()
 		private set
 
-	val position: Vector3i = position
+	val regionChunkPosition: Vector3i = position
 		get() = field.clone()
 
 	//block type		12 bits 0xFFF
@@ -30,7 +31,7 @@ class Chunk(val region: Region, position: Vector3i) {
 	)
 
 	internal fun getBlockID(index: Int): Int {
-		return data[index] and 0xFFF
+		return (data?.get(index) ?: filled) and 0xFFF
 	}
 
 	internal fun getBlockID(x: Int, y: Int, z: Int): Int {
@@ -58,19 +59,19 @@ class Chunk(val region: Region, position: Vector3i) {
 
 	internal fun getRaw(index: Int): Int {
 		lastChangedMillis = System.currentTimeMillis()
-		return data[index]
+		return data?.get(index) ?: filled
 	}
 
 	internal fun getRaw(x: Int, y: Int, z: Int): Int {
-		return data[indexOfBlock(x, y, z)]
+		return data?.get(indexOfBlock(x, y, z)) ?: filled
 	}
 
 	internal fun setRaw(index: Int, value: Int) {
-		data[index] = value
+		ensureData()[index] = value
 	}
 
 	internal fun setRaw(x: Int, y: Int, z: Int, value: Int) {
-		data[indexOfBlock(x, y, z)] = value
+		ensureData()[indexOfBlock(x, y, z)] = value
 	}
 
 	operator fun get(index: Int): BlockView {
@@ -79,6 +80,14 @@ class Chunk(val region: Region, position: Vector3i) {
 
 	operator fun get(x: Int, y: Int, z: Int): BlockView {
 		return BlockView(this, x, y, z)
+	}
+
+	private fun ensureData(): IntArray {
+		data?.let { return it }
+
+		val array = IntArray(SIZE * SIZE * SIZE) { filled }
+		data = array
+		return array
 	}
 
 	abstract class ChunkProxy(val chunk: Chunk): Proxy

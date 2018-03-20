@@ -25,4 +25,7 @@ class ClientChunkProxy(chunk: Chunk): Chunk.ChunkProxy(chunk) {
 		modelLastGenerated = System.currentTimeMillis()
 	}
 
+	fun canGenerateModel(): Boolean {
+		return true
+	}
 }
