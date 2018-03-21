@@ -1,6 +1,9 @@
 package blue.sparse.minecraft.common.world
 
 import blue.sparse.math.vectors.ints.Vector3i
+import blue.sparse.minecraft.common.block.BlockType
+import blue.sparse.minecraft.common.util.random
+import org.lwjgl.stb.STBPerlin
 import java.util.concurrent.ConcurrentHashMap
 
 class Region(val world: World, position: Vector3i) {
@@ -22,6 +25,16 @@ class Region(val world: World, position: Vector3i) {
 		return chunks[key]
 	}
 
+	private val ores = arrayOf(
+			BlockType.coalOre,
+			BlockType.ironOre,
+			BlockType.goldOre,
+			BlockType.lapisOre,
+			BlockType.redstoneOre,
+			BlockType.diamondOre,
+			BlockType.emeraldOre
+	)
+
 	fun getOrGenerateChunk(x: Int, y: Int, z: Int): Chunk {
 		boundsCheck(x, y, z)
 
@@ -34,6 +47,41 @@ class Region(val world: World, position: Vector3i) {
 		chunk = Chunk(this, key.clone())
 		chunks[chunk.regionChunkPosition] = chunk
 		//TODO: Invoke world generator on chunk
+		val pos = chunk.worldChunkPosition
+		if(pos.y < 0) {
+			chunk.fill(BlockType.stone)
+
+			val random = random
+
+			for(bx in 0 until Chunk.SIZE) {
+				for (by in 0 until Chunk.SIZE) {
+					for (bz in 0 until Chunk.SIZE) {
+						if(random.nextDouble() < 0.9)
+							continue
+
+						chunk.setBlockType(bx, by, bz, ores.random())
+					}
+				}
+			}
+
+		} else if(pos.y == 0) {
+			val wb = chunk.worldBlockPosition
+
+			for(bx in 0 until Chunk.SIZE) {
+				for (bz in 0 until Chunk.SIZE) {
+					val rx = wb.x + bx
+					val rz = wb.z + bz
+
+					val maxY = (STBPerlin.stb_perlin_noise3(rx * 0.05f, 0f, rz * 0.05f, 1024, 1024, 1024) * 8 + 8).toInt()
+
+					for (by in 0..maxY) {
+						chunk.setBlockType(bx, by, bz, BlockType.dirt)
+					}
+				}
+			}
+		} else{
+			chunk.fill(null)
+		}
 		return chunk
 	}
 

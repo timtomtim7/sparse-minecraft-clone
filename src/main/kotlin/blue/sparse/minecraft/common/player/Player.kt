@@ -9,28 +9,34 @@ import blue.sparse.minecraft.common.player.gamemode.GameMode
 import blue.sparse.minecraft.common.player.gamemode.GameModeSurvival
 import blue.sparse.minecraft.common.world.World
 
-open class Player(protected var entity: Entity<EntityTypePlayer>? = null) {
+abstract class Player(entity: Entity<EntityTypePlayer>? = null) {
 
-    val inventory = Inventory(InventoryTypePlayer)//.apply { /* LOAD FROM WHEREVER */ }
-    var walkSpeed = 4.317f
-    var sprintSpeed = walkSpeed * 1.3f
-    var sneakSpeed = walkSpeed * 0.3f
-    var gameMode: GameMode = GameModeSurvival
-    var hunger: Int = 20
-    var saturation: Float = 0f
+	open var entity = entity
+		protected set
 
-    var isFlying: Boolean = false
-    var isSprinting: Boolean = false
-    var isSneaking: Boolean = false
+	val inventory = Inventory(InventoryTypePlayer)//.apply { /* LOAD FROM WHEREVER */ }
 
-    var canFly: Boolean = false
+	var walkSpeed = 4.317f
+	var sprintSpeed = walkSpeed * 1.3f
+	var sneakSpeed = walkSpeed * 0.3f
 
-    fun sendMessage(vararg message: Any?) {
-        TODO("send a message")
-    }
+	var gameMode: GameMode = GameModeSurvival
+	var hunger: Int = 20
+	var saturation: Float = 0f
 
-    fun teleport(location: Vector3f, world: World) {
-        entity?.position = location.clone()
-    }
+	var isFlying: Boolean = false
+	var isSprinting: Boolean = false
+	var isSneaking: Boolean = false
+
+	var canFly: Boolean = false
+
+	open fun sendMessage(vararg message: Any?) {}
+
+	open fun teleport(position: Vector3f, world: World) {
+		entity?.run {
+			this.world = world
+			this.position = position.clone()
+		}
+	}
 
 }

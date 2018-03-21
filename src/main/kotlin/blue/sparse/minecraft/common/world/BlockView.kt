@@ -1,8 +1,16 @@
 package blue.sparse.minecraft.common.world
 
+import blue.sparse.math.vectors.ints.Vector3i
 import blue.sparse.minecraft.common.block.BlockType
 
 class BlockView(val chunk: Chunk, val xInChunk: Int, val yInChunk: Int, val zInChunk: Int) {
+
+	val x: Int = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.x, chunk.regionChunkPosition.x, xInChunk)
+	val y: Int = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.y, chunk.regionChunkPosition.y, yInChunk)
+	val z: Int = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.z, chunk.regionChunkPosition.z, zInChunk)
+
+	val position: Vector3i
+		get() = Vector3i(x, y, z)
 
 	internal var raw: Int
 		get() = chunk.getRaw(xInChunk, yInChunk, zInChunk)

@@ -1,9 +1,10 @@
 package blue.sparse.minecraft.common.world
 
+import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.math.vectors.ints.Vector3i
+import blue.sparse.minecraft.client.player.ClientPlayer
 import blue.sparse.minecraft.common.block.BlockType
-import blue.sparse.minecraft.common.util.Proxy
-import blue.sparse.minecraft.common.util.ProxyProvider
+import blue.sparse.minecraft.common.util.*
 
 class Chunk(val region: Region, position: Vector3i) {
 
@@ -46,6 +47,11 @@ class Chunk(val region: Region, position: Vector3i) {
 			"blue.sparse.minecraft.server.world.proxy.ServerChunkProxy",
 			this
 	)
+
+	fun fill(type: BlockType?) {
+		data = null
+		filled = type?.id ?: 0
+	}
 
 	internal fun getBlockID(index: Int): Int {
 		return (data?.get(index) ?: filled) and 0xFFF
@@ -110,10 +116,27 @@ class Chunk(val region: Region, position: Vector3i) {
 		return array
 	}
 
+	internal fun debugBoundingBox() {
+		val bounds = AABB(Vector3f(0f), Vector3f(SIZE.toFloat()))
+		val pos = worldBlockPosition.toFloatVector()
+
+		ClientPlayer.entity?.let { entity ->
+			val entityBounds = entity.type.bounds
+
+			val color = if(bounds.isIntersecting(pos, entityBounds, entity.position))
+				Vector3f(1f, 0f, 0f)
+			else Vector3f(1f, 1f, 0f)
+
+
+			bounds.debugRender(pos, color)
+		}
+
+	}
+
 	abstract class ChunkProxy(val chunk: Chunk): Proxy
 
 	companion object {
-		const val BITS = 4
+		const val BITS = 5
 		const val SIZE = 1 shl BITS
 		const val MASK = SIZE - 1
 		const val VOLUME = SIZE * SIZE * SIZE

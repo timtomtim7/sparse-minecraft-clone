@@ -18,6 +18,8 @@ abstract class EntityType(val identifier: Identifier) {
 
 	open val bounds = AABB(Vector3f(-0.5f), Vector3f(0.5f))
 
+	open val gravity: Float = 16f
+
 	init {
         register(this)
 	}

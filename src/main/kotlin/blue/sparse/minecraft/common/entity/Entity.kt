@@ -1,8 +1,11 @@
 package blue.sparse.minecraft.common.entity
 
-import blue.sparse.math.vectors.floats.Quaternion4f
-import blue.sparse.math.vectors.floats.Vector3f
+import blue.sparse.math.vectors.floats.*
+import blue.sparse.math.vectors.ints.Vector3i
 import blue.sparse.minecraft.common.entity.data.EntityData
+import blue.sparse.minecraft.common.entity.impl.types.living.EntityTypeLiving
+import blue.sparse.minecraft.common.util.TargetBlock
+import blue.sparse.minecraft.common.world.BlockView
 import blue.sparse.minecraft.common.world.World
 
 class Entity<out T : EntityType>(val type: T, var world: World, var position: Vector3f = Vector3f(0f, 0f, 0f), var rotation: Quaternion4f = Quaternion4f()) {
@@ -13,6 +16,12 @@ class Entity<out T : EntityType>(val type: T, var world: World, var position: Ve
 	var velocity = Vector3f(0f)
 
     val data = type.createData()
+
+	val blockPosition: Vector3i
+		get() = floor(position).toIntVector()
+
+	val block: BlockView
+		get() = blockPosition.run { world.getOrGenerateBlock(x, y, z) }
 
     fun despawn(): Boolean {
 		timeSinceSpawned = 0f
@@ -26,10 +35,9 @@ class Entity<out T : EntityType>(val type: T, var world: World, var position: Ve
     fun update(delta: Float) {
 		timeSinceSpawned += delta
 
-		velocity.y -= 16f * delta
-
-//		val drag = 0.02f
-//		velocity.timesAssign(Math.pow(drag.toDouble(), delta.toDouble()).toFloat())
+		val drag = 0.4f
+		velocity.timesAssign(Math.pow(drag.toDouble(), delta.toDouble()).toFloat())
+		velocity.y -= type.gravity * delta
 //		velocity = clamp(velocity, -78.4f, 78.4f)
 
 		val bounds = type.bounds
@@ -39,20 +47,29 @@ class Entity<out T : EntityType>(val type: T, var world: World, var position: Ve
 //		bounds.debugRender(position, Vector3f(1f))
 
 		velocity = movement / delta
+		position.plusAssign(movement)
 
 		if(unaffected.any { it == 0f }) {
 
 			val affected = Vector3f(1f) - unaffected
-			val friction = unaffected * 0.8f
+			val friction = unaffected * 0.9f
 			friction += affected
 
 			velocity.timesAssign(friction)
 
 		}
-		position.plusAssign(movement)
 
         type.update(this, delta)
     }
+
+	fun getTargetBlock(maxDistance: Float): TargetBlock? {
+		val eyeHeight = if(type is EntityTypeLiving) type.eyeHeight else 0f
+
+		val origin = position + Vector3f(0f, eyeHeight, 0f)
+		val direction = rotation.forward
+
+		return world.getTargetBlock(origin, direction, maxDistance)
+	}
 
     inline fun <reified T: EntityData> editData(body: T.() -> Unit) {
         if(data !is T)

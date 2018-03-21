@@ -5,7 +5,6 @@ import blue.sparse.engine.errors.glCall
 import blue.sparse.engine.util.MemoryUsage
 import blue.sparse.engine.window.input.Key
 import blue.sparse.math.clamp
-import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.math.wrap
 import blue.sparse.minecraft.client.MinecraftClient
 import blue.sparse.minecraft.client.text.TextRenderer
@@ -53,7 +52,7 @@ object TestGUI : GUI() {
 
 			val item = Item(arrayOf(ItemType.ironIngot, ItemType.goldIngot, ItemType.emerald, ItemType.diamond, ItemType.coal).random())
 
-			TestInventory.addItem(item)
+//			TestInventory.addItem(item)
 			sendMessage(Text.create("Added item ${item.type}"))
 		}
 
@@ -63,38 +62,38 @@ object TestGUI : GUI() {
 				selectedSlot = i
 		}
 
-		if (input[Key.KP_8].pressed) {
-			TestInventory.clear()
-		}
-		if(input[Key.KP_5].pressed) {
-			Minecraft.world.entities.toList().forEach { it.despawn() }
-		}
+//		if (input[Key.KP_8].pressed) {
+//			TestInventory.clear()
+//		}
+//		if(input[Key.KP_5].pressed) {
+//			Minecraft.world.entities.toList().forEach { it.despawn() }
+//		}
 
-		if(input[Key.Y].pressed) {
+		if(input[Key.Y].pressed || input[Key.Y].heldTime >= 2f) {
 			val entity = Minecraft.world.spawnEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
 			entity.velocity = MinecraftClient.proxy.camera.transform.rotation.forward * 10f
 			entity.editData<EntityTypeItem.Data> {
 				stack = ItemStack(ItemTypeApple)
 			}
 		}
-		if(input[Key.Q].pressed) {
-			val selectedItem = TestInventory[selectedSlot]
-			if(selectedItem != null) {
-				selectedItem.amount--
-				if(selectedItem.amount <= 0)
-					TestInventory[selectedSlot] = null
+//		if(input[Key.Q].pressed) {
+//			val selectedItem = TestInventory[selectedSlot]
+//			if(selectedItem != null) {
+//				selectedItem.amount--
+//				if(selectedItem.amount <= 0)
+//					TestInventory[selectedSlot] = null
+//
+//				val entity = Minecraft.world.spawnEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
+//				entity.velocity = MinecraftClient.proxy.camera.transform.rotation.forward * 10f
+//				entity.editData<EntityTypeItem.Data> {
+//					stack = selectedItem.deepCopy(1)
+//				}
+//			}
+//		}
 
-				val entity = Minecraft.world.spawnEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
-				entity.velocity = MinecraftClient.proxy.camera.transform.rotation.forward * 10f
-				entity.editData<EntityTypeItem.Data> {
-					stack = selectedItem.deepCopy(1)
-				}
-			}
-		}
-
-		if(input[Key.HOME].pressed) {
-			MinecraftClient.proxy.camera.transform.translate(Vector3f(0f, 1f, 0f))
-		}
+//		if(input[Key.HOME].pressed) {
+//			MinecraftClient.proxy.camera.transform.translate(Vector3f(0f, 1f, 0f))
+//		}
 	}
 
 	override fun render(delta: Float) {
@@ -112,12 +111,10 @@ object TestGUI : GUI() {
 
 		drawTexturedRectangle("widgets/hotbar_selected", hotbarLeft - 1f + (selectedSlot * 20f), -1f, 24f)
 
-//		drawTexturedRectangle((ItemType.diamondSword.proxy as ClientItemTypeProxy).sprite, hotbarLeft + 3f + 20f * 2, 3f, 16f, 16f)
-//		drawItem(Item(ItemType.apple), 32, hotbarLeft + 3f + 20f * 2, 3f)
-		for (i in 0 until 9) {
-			val stack = TestInventory[i] ?: continue
-			drawStack(stack, hotbarLeft + 3f + 20f * i, 3f)
-		}
+//		for (i in 0 until 9) {
+//			val stack = TestInventory[i] ?: continue
+//			drawStack(stack, hotbarLeft + 3f + 20f * i, 3f)
+//		}
 
 
 //		val exp = Math.sin(System.currentTimeMillis() / 500.0).toFloat() * 0.5f + 0.5f

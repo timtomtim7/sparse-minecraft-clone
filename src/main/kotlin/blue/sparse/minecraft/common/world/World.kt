@@ -35,7 +35,7 @@ class World(val name: String, val id: UUID = UUID.randomUUID()) {
 	}
 
 	fun <T : EntityType> spawnEntity(entityType: T, position: Vector3f): Entity<T> {
-		val entity = Entity(entityType, position, this)
+		val entity = Entity(entityType, this, position)
 		spawnEntity(entity)
 		return entity
 	}
@@ -128,6 +128,41 @@ class World(val name: String, val id: UUID = UUID.randomUUID()) {
 		val chunkBlockZ = worldBlockToChunkBlock(z)
 
 		return chunk[chunkBlockX, chunkBlockY, chunkBlockZ]
+	}
+
+	fun getTargetBlock(origin: Vector3f, direction: Vector3f, maxDistance: Float): TargetBlock? {
+		val step = 0.1f
+		val steps = (maxDistance / step).toInt()
+
+		val position = origin.clone()
+
+//		Debug.addTempLine(position, position + direction)
+
+		var last = floor(position).toIntVector()
+
+		for(i in 1..steps) {
+			val vec = floor(position).toIntVector()
+			val block = getBlock(vec.x, vec.y, vec.z)
+//			println(vec.joinToString())
+
+			if(block?.type != null) {
+				val diff = last - vec
+				if(diff.x != 0 && diff.y != 0)
+					diff.x = 0
+				if(diff.y != 0 && diff.z != 0)
+					diff.z = 0
+
+//				println(diff)
+
+				val face = BlockFace[diff] ?: continue
+				return TargetBlock(block, face)
+			}
+
+			last = vec
+			position += direction * step
+		}
+
+		return null
 	}
 
 	operator fun get(x: Int, y: Int, z: Int): BlockView? {
