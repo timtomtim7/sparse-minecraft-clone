@@ -5,10 +5,11 @@ import blue.sparse.math.vectors.ints.Vector3i
 import blue.sparse.minecraft.common.entity.Entity
 import blue.sparse.minecraft.common.entity.EntityType
 import blue.sparse.minecraft.common.util.*
+import blue.sparse.minecraft.common.world.generator.ChunkGenerator
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
-class World(val name: String, val id: UUID = UUID.randomUUID()) {
+class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: ChunkGenerator) {
 
 	private val regions = ConcurrentHashMap<Vector3i, Region>()
 	private val key = ThreadLocal.withInitial { Vector3i(0) }

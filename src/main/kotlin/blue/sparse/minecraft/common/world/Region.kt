@@ -2,8 +2,7 @@ package blue.sparse.minecraft.common.world
 
 import blue.sparse.math.vectors.ints.Vector3i
 import blue.sparse.minecraft.common.block.BlockType
-import blue.sparse.minecraft.common.util.random
-import org.lwjgl.stb.STBPerlin
+import blue.sparse.minecraft.common.world.generator.ChunkGenerator
 import java.util.concurrent.ConcurrentHashMap
 
 class Region(val world: World, position: Vector3i) {
@@ -44,44 +43,20 @@ class Region(val world: World, position: Vector3i) {
 		if(chunk != null)
 			return chunk
 
-		chunk = Chunk(this, key.clone())
+		val blocks = ChunkGenerator.blocks.get()
+		blocks.fill(null)
+		val worldRegion = worldRegionPosition
+		val position = Vector3i(
+				regionChunkToWorldChunk(worldRegion.x, x),
+				regionChunkToWorldChunk(worldRegion.y, y),
+				regionChunkToWorldChunk(worldRegion.z, z)
+		)
+		world.generator.generate(position, blocks)
+
+		val data = IntArray(Chunk.VOLUME) { blocks[it]?.rawID ?: 0 }
+		chunk = Chunk(this, key.clone(), data)
 		chunks[chunk.regionChunkPosition] = chunk
-		//TODO: Invoke world generator on chunk
-		val pos = chunk.worldChunkPosition
-		if(pos.y < 0) {
-			chunk.fill(BlockType.stone)
 
-			val random = random
-
-			for(bx in 0 until Chunk.SIZE) {
-				for (by in 0 until Chunk.SIZE) {
-					for (bz in 0 until Chunk.SIZE) {
-						if(random.nextDouble() < 0.9)
-							continue
-
-						chunk.setBlockType(bx, by, bz, ores.random())
-					}
-				}
-			}
-
-		} else if(pos.y == 0) {
-			val wb = chunk.worldBlockPosition
-
-			for(bx in 0 until Chunk.SIZE) {
-				for (bz in 0 until Chunk.SIZE) {
-					val rx = wb.x + bx
-					val rz = wb.z + bz
-
-					val maxY = (STBPerlin.stb_perlin_noise3(rx * 0.05f, 0f, rz * 0.05f, 1024, 1024, 1024) * 8 + 8).toInt()
-
-					for (by in 0..maxY) {
-						chunk.setBlockType(bx, by, bz, BlockType.dirt)
-					}
-				}
-			}
-		} else{
-			chunk.fill(null)
-		}
 		return chunk
 	}
 
@@ -94,21 +69,5 @@ class Region(val world: World, position: Vector3i) {
 			if(x < 0 || y < 0 || z < 0 || x >= SIZE || y >= SIZE || z >= SIZE)
 				throw IllegalArgumentException("Chunk coordinates out of range ($SIZE): $x, $y, $z")
 		}
-
-//		internal fun regionChunkToWorldChunk(r: Int, i: Int): Int {
-//			return (r shl BITS) or i
-//		}
-//
-//		internal fun worldChunkToWorldRegion(i: Int): Int {
-//			return i shr Region.BITS
-//		}
-//
-//		internal fun worldBlockToChunkBlock(i: Int): Int {
-//			return i and Chunk.MASK
-//		}
-//
-//		internal fun worldBlockToWorldChunk(i: Int): Int {
-//			return i shr Chunk.BITS
-//		}
 	}
 }

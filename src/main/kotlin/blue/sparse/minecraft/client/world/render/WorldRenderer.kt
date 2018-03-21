@@ -16,7 +16,7 @@ import blue.sparse.minecraft.common.world.*
 
 class WorldRenderer(val world: World) {
 
-	val renderDistance = PlayerChunks(ClientPlayer, 8, 2)
+	val renderDistance = PlayerChunks(ClientPlayer, 4, 2)
 
 	fun render(delta: Float) {
 		val camera = MinecraftClient.proxy.camera
@@ -50,7 +50,7 @@ class WorldRenderer(val world: World) {
 					proxy.generateOfflineModel()
 				}
 
-				proxy.model?.render()
+				proxy.model?.render()/* ?: chunk.debugBoundingBox()*/
 			}
 		}
 

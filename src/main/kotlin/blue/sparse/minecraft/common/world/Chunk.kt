@@ -6,10 +6,12 @@ import blue.sparse.minecraft.client.player.ClientPlayer
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.util.*
 
-class Chunk(val region: Region, position: Vector3i) {
+class Chunk internal constructor(val region: Region, position: Vector3i, data: IntArray?) {
 
-	private var data: IntArray? = null// = IntArray(SIZE * SIZE * SIZE)
+	private var data: IntArray? = data// = IntArray(SIZE * SIZE * SIZE)
 	private var filled: Int = 0
+
+	constructor(region: Region, position: Vector3i): this(region, position, null)
 
 	var lastChangedMillis: Long = System.currentTimeMillis()
 		private set
