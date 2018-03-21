@@ -12,11 +12,10 @@ import blue.sparse.minecraft.client.text.TextRenderer
 import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
 import blue.sparse.minecraft.common.inventory.TestInventory
-import blue.sparse.minecraft.common.item.Item
-import blue.sparse.minecraft.common.item.ItemStack
+import blue.sparse.minecraft.common.item.*
 import blue.sparse.minecraft.common.item.impl.ItemTypeApple
-import blue.sparse.minecraft.common.item.impl.ItemTypeIronIngot
 import blue.sparse.minecraft.common.text.Text
+import blue.sparse.minecraft.common.util.random
 import org.lwjgl.opengl.GL11.*
 
 object TestGUI : GUI() {
@@ -51,42 +50,47 @@ object TestGUI : GUI() {
 
 		val input = SparseEngine.window.input
 		if (input[Key.U].pressed) {
-			val item = Item(ItemTypeIronIngot)
-//			item.color = random.nextInt(0xFFFFFF)
-//			item.damage = random.nextInt(item.type.maxDurability)
+//			val item = Item(ItemTypeIronIngot)
+
+			val item = Item(arrayOf(ItemType.ironIngot, ItemType.goldIngot, ItemType.emerald, ItemType.diamond, ItemType.coal).random())
 
 			TestInventory.addItem(item)
 			sendMessage(Text.create("Added item ${item.type}"))
 		}
-//		if (input[Key.J].pressed) {
-//			sendMessage(Text.create("Removing item $item"))
-//			TestInventory.removeItem(ItemStack(item, 3))
-//		}
 
-//		if (input[Key.K].pressed) {
-//			item.color = TextColor.values().run { get(random.nextInt(size)).color }
-//		}
+		for(i in 0 until 9) {
+			val key = Key[Key.NUM_1.id + i]
+			if(input[key].pressed)
+				selectedSlot = i
+		}
 
 		if (input[Key.KP_8].pressed) {
 			TestInventory.clear()
 		}
+		if(input[Key.KP_5].pressed) {
+			Minecraft.world.entities.toList().forEach { it.despawn() }
+		}
 
 		if(input[Key.Y].pressed) {
-
 			val entity = Minecraft.world.spawnEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
 			entity.velocity = MinecraftClient.proxy.camera.transform.rotation.forward * 10f
 			entity.editData<EntityTypeItem.Data> {
 				stack = ItemStack(ItemTypeApple)
 			}
+		}
+		if(input[Key.Q].pressed) {
+			val selectedItem = TestInventory[selectedSlot]
+			if(selectedItem != null) {
+				selectedItem.amount--
+				if(selectedItem.amount <= 0)
+					TestInventory[selectedSlot] = null
 
-//			val selectedItem = TestInventory[selectedSlot]
-//			if(selectedItem != null) {
-//				TestInventory[selectedSlot] = null
-//				val entity = Minecraft.world.spawnEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
-//				entity.editData<EntityTypeItem.Data> {
-//					stack = selectedItem
-//				}
-//			}
+				val entity = Minecraft.world.spawnEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
+				entity.velocity = MinecraftClient.proxy.camera.transform.rotation.forward * 10f
+				entity.editData<EntityTypeItem.Data> {
+					stack = selectedItem.deepCopy(1)
+				}
+			}
 		}
 
 		if(input[Key.HOME].pressed) {
@@ -152,7 +156,7 @@ object TestGUI : GUI() {
 		drawTexturedRectangle("icons/crosshair", manager.right / 2f - 16f / 2f, manager.top / 2f - 16f / 2f, 16f)
 		glCall { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) }
 
-		drawTexturedRectangle("title/sparse_edition", 1f, 1f, 128f, 16f, color = 0xFFFFFF44)
+		drawTexturedRectangle("title/sparse_edition", manager.right - 120f, 1f, 128f, 16f, color = 0xFFFFFF44)
 
 		/*
 
@@ -160,11 +164,15 @@ object TestGUI : GUI() {
 
 		 */
 
-		drawString(String.format("FPS: %.1f", SparseEngine.frameRate), 1f, manager.top - 9)
-		drawString(String.format("MEM: %s", MemoryUsage.getMemoryUsedString()), 1f, manager.top - 18)
+		fun line(i: Int) = manager.top - 9 * i
+
+		drawString(String.format("FPS: %.1f", SparseEngine.frameRate), 1f, line(1))
+		drawString(String.format("MEM: %s", MemoryUsage.getMemoryUsedString()), 1f, line(2))
 
 		val (camX, camY, camZ) = SparseEngine.game.camera.transform.translation
-		drawString(String.format("POS: %.1f, %.1f, %.1f", camX, camY, camZ), 1f, manager.top - 27)
+		drawString(String.format("POS: %.1f, %.1f, %.1f", camX, camY, camZ), 1f, line(3))
+
+		drawString("ENT: ${Minecraft.world.entities.size}", 1f, line(4))
 
 
 		for ((index, message) in chatMessages.withIndex()) {

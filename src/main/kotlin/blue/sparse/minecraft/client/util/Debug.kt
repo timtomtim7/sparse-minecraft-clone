@@ -22,20 +22,20 @@ object Debug {
 		fun render()
 	}
 
-	data class Line(val start: Vector3f, val end: Vector3f, val color: Vector3f, val lineWidth: Float): DebugElement {
+	data class Line(val start: Vector3f, val end: Vector3f, val color: Vector3f, val lineWidth: Float) : DebugElement {
 		override fun render() {
 			drawLine(start, end, color, lineWidth)
 		}
 	}
 
-	data class Cube(val start: Vector3f, val end: Vector3f, val color: Vector3f, val lineWidth: Float): DebugElement {
+	data class Cube(val start: Vector3f, val end: Vector3f, val color: Vector3f, val lineWidth: Float) : DebugElement {
 		override fun render() {
 			drawCube(start, end, color, lineWidth)
 		}
 	}
 
 	fun addTempLine(start: Vector3f, end: Vector3f, color: Vector3f = Vector3f(1f, 0f, 0f), lineWidth: Float = 4f) {
-		temp.add(Line(start, end,  color, lineWidth))
+		temp.add(Line(start, end, color, lineWidth))
 	}
 
 	fun addTempCube(start: Vector3f, end: Vector3f, color: Vector3f = Vector3f(0f, 0f, 1f), lineWidth: Float = 4f) {
@@ -43,7 +43,10 @@ object Debug {
 	}
 
 	fun renderTemp() {
+		glCall { glEnable(GL_BLEND) }
+		glCall { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA) }
 		temp.forEach(DebugElement::render)
+		glCall { glDisable(GL_BLEND) }
 		temp.clear()
 	}
 

@@ -11,6 +11,18 @@ class AABB(min: Vector3f, max: Vector3f) {
 	val max: Vector3f = max
 		get() = field.clone()
 
+	fun isIntersecting(thisPosition: Vector3f, other: AABB, otherPosition: Vector3f): Boolean {
+		// This bounding box but moved into position
+		val thisMin = min + thisPosition
+		val thisMax = max + thisPosition
+
+		// The bounding box you might collide with
+		val otherMin = other.min + otherPosition
+		val otherMax = other.max + otherPosition
+
+		return intersects(thisMin, thisMax, otherMin, otherMax)
+	}
+
 	fun testIntersection(thisPosition: Vector3f, movement: Vector3f, other: AABB, otherPosition: Vector3f): Vector3f {
 		// This bounding box but moved into position
 		val thisMin = min + thisPosition
@@ -79,8 +91,8 @@ class AABB(min: Vector3f, max: Vector3f) {
 		return 0f
 	}
 
-	internal fun debugRender(position: Vector3f, color: Vector3f = Vector3f(1f, 0f, 0f)) {
-		Debug.addTempCube(min + position, max + position, color)
+	internal fun debugRender(position: Vector3f, color: Vector3f = Vector3f(1f, 0f, 0f)){
+		Debug.addTempCube(min + position, max + position, color, 2f)
 	}
 
 	companion object {

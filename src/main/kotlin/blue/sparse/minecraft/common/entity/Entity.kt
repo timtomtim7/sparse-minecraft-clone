@@ -4,7 +4,7 @@ import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.minecraft.common.entity.data.EntityData
 import blue.sparse.minecraft.common.world.World
 
-data class Entity<out T : EntityType>(val type: T, var position: Vector3f, var world: World) {
+class Entity<out T : EntityType>(val type: T, var position: Vector3f, var world: World) {
 
 	var timeSinceSpawned = 0f
 		private set
@@ -35,7 +35,7 @@ data class Entity<out T : EntityType>(val type: T, var position: Vector3f, var w
 		val movement = velocity * delta
 		val unaffected = world.testBlockIntersections(bounds, position, movement)
 
-		bounds.debugRender(position, Vector3f(1f))
+//		bounds.debugRender(position, Vector3f(1f))
 
 		velocity = movement / delta
 

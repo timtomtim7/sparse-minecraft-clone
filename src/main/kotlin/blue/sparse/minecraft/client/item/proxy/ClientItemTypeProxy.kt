@@ -2,9 +2,8 @@ package blue.sparse.minecraft.client.item.proxy
 
 import blue.sparse.engine.asset.Asset
 import blue.sparse.math.vectors.floats.Vector3f
-import blue.sparse.minecraft.client.MinecraftClient
 import blue.sparse.minecraft.client.item.render.ItemModelGenerator
-import blue.sparse.minecraft.common.Minecraft
+import blue.sparse.minecraft.client.world.render.WorldRenderer
 import blue.sparse.minecraft.common.item.Item
 import blue.sparse.minecraft.common.item.ItemType
 
@@ -12,8 +11,7 @@ abstract class ClientItemTypeProxy(itemType: ItemType) : ItemType.ItemTypeProxy(
 	abstract val texture: Asset
 
 	val sprite by lazy {
-		val atlas = (Minecraft.proxy as MinecraftClient).atlas
-		atlas.getOrAddSprite(texture.path, texture.readImage())
+		WorldRenderer.atlas.getOrAddSprite(texture.path, texture.readImage())
 	}
 
 	open fun getColor(item: Item<*>): Vector3f {
@@ -29,8 +27,7 @@ abstract class ClientItemTypeProxy(itemType: ItemType) : ItemType.ItemTypeProxy(
 
 	open val model by lazy {
 		val image = texture.readImage()
-		val atlas = (Minecraft.proxy as MinecraftClient).atlas
-		val sprite = atlas.getOrAddSprite(texture.path, image)
+		val sprite = WorldRenderer.atlas.getOrAddSprite(texture.path, image)
 
 		ItemModelGenerator.generateModel(image, sprite.textureCoords, sprite.atlas.size)
 	}

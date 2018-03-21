@@ -52,36 +52,9 @@ class World(val name: String, val id: UUID = UUID.randomUUID()) {
 		entities.forEach { it.update(delta) }
 	}
 
-	//TODO: Look at all this mostly repeated code! Terrible.
-
-	inline fun outwardsBlockLoop(min: Vector3i, max: Vector3i, body: (Int, Int, Int) -> Unit) {
-		val start = (max - min) / 2 + min
-
-		val xLength = max.x - min.x
-		val yLength = max.y - min.y
-		val zLength = max.z - min.z
-
-		for(x in 0 until xLength) {
-			val xOffset = (x / 2) * ((x % 2) * 2 - 1)
-
-			for(y in 0 until yLength) {
-				val yOffset = (y / 2) * ((y % 2) * 2 - 1)
-
-				for(z in 0 until zLength) {
-					val zOffset = (z / 2) * ((z % 2) * 2 - 1)
-
-					body(start.x + xOffset, start.y + yOffset, start.z + zOffset)
-				}
-			}
-		}
-	}
-
 	fun testBlockIntersections(bounds: AABB, position: Vector3f, movement: Vector3f): Vector3f {
 		val min = floor(bounds.min + position - 1f).toIntVector()
 		val max = ceil(bounds.max + position + 1f).toIntVector()
-
-//		val afterMin = floor(bounds.min + position - movement - 1f).toIntVector()
-//		val afterMax = ceil(bounds.max + position - movement + 1f).toIntVector()
 
 		val volume = (max - min).run { x * y * z }
 
@@ -95,7 +68,7 @@ class World(val name: String, val id: UUID = UUID.randomUUID()) {
 
 			val unaffected = blockBounds.testIntersection(blockPosition, movement, bounds, position)
 			result *= unaffected
-			blockBounds.debugRender(blockPosition, unaffected)
+//			blockBounds.debugRender(blockPosition, unaffected)
 
 			if (movement.all { it == 0f })
 				return movement
@@ -104,6 +77,7 @@ class World(val name: String, val id: UUID = UUID.randomUUID()) {
 		return result
 	}
 
+	//TODO: Look at all this mostly repeated code! Terrible.
 	fun getChunk(x: Int, y: Int, z: Int): Chunk? {
 		val worldRegionX = worldChunkToWorldRegion(x)
 		val worldRegionY = worldChunkToWorldRegion(y)

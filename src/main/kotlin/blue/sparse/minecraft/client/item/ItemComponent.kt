@@ -8,9 +8,9 @@ import blue.sparse.engine.render.resource.shader.ShaderProgram
 import blue.sparse.engine.render.scene.component.Transformed
 import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.math.vectors.floats.vectorFromIntRGB
-import blue.sparse.minecraft.client.MinecraftClient
 import blue.sparse.minecraft.client.item.proxy.ClientItemTypeProxy
 import blue.sparse.minecraft.client.world.proxy.ClientWorldProxy
+import blue.sparse.minecraft.client.world.render.WorldRenderer
 import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.item.Item
 import blue.sparse.minecraft.common.item.impl.types.ItemTypeBlock
@@ -56,7 +56,7 @@ class ItemComponent(val item: Item<*>, val position: Vector3f) : Transformed() {
 			uniforms["uEnchantColor"] = enchantColor
 			uniforms["uEnchantTime"] = time * 0.2f
 
-			(Minecraft.proxy as MinecraftClient).atlas.texture.bind(0)
+			WorldRenderer.atlas.texture.bind(0)
 			(item.type.proxy as ClientItemTypeProxy).model.render()
 		}
 	}

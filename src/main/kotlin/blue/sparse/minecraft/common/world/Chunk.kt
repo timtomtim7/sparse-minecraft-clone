@@ -75,7 +75,6 @@ class Chunk(val region: Region, position: Vector3i) {
 	}
 
 	internal fun getRaw(index: Int): Int {
-		lastChangedMillis = System.currentTimeMillis()
 		return data?.get(index) ?: filled
 	}
 
@@ -84,11 +83,15 @@ class Chunk(val region: Region, position: Vector3i) {
 	}
 
 	internal fun setRaw(index: Int, value: Int) {
-		ensureData()[index] = value
+		val data = ensureData()
+		if(data[index] != value) {
+			lastChangedMillis = System.currentTimeMillis()
+			data[index] = value
+		}
 	}
 
 	internal fun setRaw(x: Int, y: Int, z: Int, value: Int) {
-		ensureData()[indexOfBlock(x, y, z)] = value
+		setRaw(indexOfBlock(x, y, z), value)
 	}
 
 	operator fun get(index: Int): BlockView {
@@ -110,7 +113,7 @@ class Chunk(val region: Region, position: Vector3i) {
 	abstract class ChunkProxy(val chunk: Chunk): Proxy
 
 	companion object {
-		const val BITS = 5
+		const val BITS = 4
 		const val SIZE = 1 shl BITS
 		const val MASK = SIZE - 1
 		const val VOLUME = SIZE * SIZE * SIZE

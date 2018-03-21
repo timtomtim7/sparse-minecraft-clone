@@ -6,10 +6,10 @@ import blue.sparse.engine.render.resource.bind
 import blue.sparse.engine.render.resource.shader.ShaderProgram
 import blue.sparse.math.matrices.Matrix4f
 import blue.sparse.math.vectors.floats.*
-import blue.sparse.minecraft.client.MinecraftClient
 import blue.sparse.minecraft.client.gui.GUIManager
 import blue.sparse.minecraft.client.gui.Rectangle
 import blue.sparse.minecraft.client.util.BlankModel
+import blue.sparse.minecraft.client.world.render.WorldRenderer
 import blue.sparse.minecraft.common.text.Text
 import blue.sparse.minecraft.common.util.random
 import java.awt.image.BufferedImage
@@ -200,7 +200,7 @@ object TextRenderer {
 	}
 
 	private fun drawIcon(path: String, origin: Vector3f, scale: Float, modelMatrix: Matrix4f, viewProjectionMatrix: Matrix4f) {
-		val sprite = MinecraftClient.proxy.atlas["$path.png"] ?: GUIManager.atlas.getOrAddSprite("$path.png")
+		val sprite = WorldRenderer.atlas["$path.png"] ?: GUIManager.atlas.getOrAddSprite("$path.png")
 
 		Rectangle.drawTexturedRectangle(
 				origin,

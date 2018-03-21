@@ -7,6 +7,8 @@ import blue.sparse.engine.window.Window
 import blue.sparse.engine.window.input.*
 import blue.sparse.math.vectors.floats.*
 import blue.sparse.minecraft.common.Minecraft
+import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
+import blue.sparse.minecraft.common.inventory.TestInventory
 import blue.sparse.minecraft.common.util.AABB
 
 class MinecraftController(camera: Camera, private val mouseSensitivity: Float = 0.17f, private val movementSpeed: Float = 6f) : CameraController(camera) {
@@ -30,6 +32,13 @@ class MinecraftController(camera: Camera, private val mouseSensitivity: Float = 
 
 		freeLook(input)
 		freeMove(delta, input)
+
+		Minecraft.world.entities.filter { it.type == EntityTypeItem && it.timeSinceSpawned >= 0.5f }.filter {
+			bounds.isIntersecting(camera.transform.translation, it.type.bounds, it.position)
+		}.forEach {
+			TestInventory.addItem((it.data as EntityTypeItem.Data).stack)
+			it.despawn()
+		}
 	}
 
 	private fun freeMove(delta: Float, input: Input) {
@@ -52,7 +61,7 @@ class MinecraftController(camera: Camera, private val mouseSensitivity: Float = 
 			val rotated = normalize((normalize(wasdMovement) * camera.transform.rotation))
 
 			if (input[Key.TAB].held) speed *= 2
-			if (input[Key.Q].held) speed *= 8
+//			if (input[Key.Q].held) speed *= 8
 
 			val movement = rotated * speed
 			Minecraft.world.testBlockIntersections(bounds, camera.transform.translation, movement)

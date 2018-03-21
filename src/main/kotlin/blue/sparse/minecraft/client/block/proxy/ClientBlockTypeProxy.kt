@@ -2,9 +2,8 @@ package blue.sparse.minecraft.client.block.proxy
 
 import blue.sparse.engine.asset.Asset
 import blue.sparse.engine.render.resource.model.Model
-import blue.sparse.minecraft.client.MinecraftClient
 import blue.sparse.minecraft.client.item.render.BlockItemModelGenerator
-import blue.sparse.minecraft.common.Minecraft
+import blue.sparse.minecraft.client.world.render.WorldRenderer
 import blue.sparse.minecraft.common.block.BlockType
 
 abstract class ClientBlockTypeProxy(blockType: BlockType) : BlockType.BlockTypeProxy(blockType) {
@@ -16,17 +15,17 @@ abstract class ClientBlockTypeProxy(blockType: BlockType) : BlockType.BlockTypeP
 	open val leftTexture: Asset get() = frontTexture
 	open val rightTexture: Asset get() = frontTexture
 
-	val frontSprite by lazy { MinecraftClient.proxy.atlas.getOrAddSprite(frontTexture) }
-	val backSprite by lazy { MinecraftClient.proxy.atlas.getOrAddSprite(backTexture) }
-	val topSprite by lazy { MinecraftClient.proxy.atlas.getOrAddSprite(topTexture) }
-	val bottomSprite by lazy { MinecraftClient.proxy.atlas.getOrAddSprite(bottomTexture) }
-	val leftSprite by lazy { MinecraftClient.proxy.atlas.getOrAddSprite(leftTexture) }
-	val rightSprite by lazy { MinecraftClient.proxy.atlas.getOrAddSprite(rightTexture) }
+	val frontSprite by lazy { WorldRenderer.atlas.getOrAddSprite(frontTexture) }
+	val backSprite by lazy { WorldRenderer.atlas.getOrAddSprite(backTexture) }
+	val topSprite by lazy { WorldRenderer.atlas.getOrAddSprite(topTexture) }
+	val bottomSprite by lazy { WorldRenderer.atlas.getOrAddSprite(bottomTexture) }
+	val leftSprite by lazy { WorldRenderer.atlas.getOrAddSprite(leftTexture) }
+	val rightSprite by lazy { WorldRenderer.atlas.getOrAddSprite(rightTexture) }
 
 	open fun generateItemModel(): Model? {
 		if (blockType.hasItem) {
 //			val texture = (blockType.item!!.proxy as ClientItemTypeProxy).texture
-			val atlas = (Minecraft.proxy as MinecraftClient).atlas
+			val atlas = WorldRenderer.atlas
 //			val spriteLeft = atlas.getOrAddSprite(texture.path, texture)
 			val spriteFront = atlas.getOrAddSprite(frontTexture)
 			val spriteBack = atlas.getOrAddSprite(backTexture)

@@ -7,9 +7,9 @@ import blue.sparse.engine.render.resource.bind
 import blue.sparse.engine.render.resource.shader.ShaderProgram
 import blue.sparse.math.FloatTransform
 import blue.sparse.math.vectors.floats.*
-import blue.sparse.minecraft.client.MinecraftClient
 import blue.sparse.minecraft.client.item.proxy.ClientItemTypeProxy
 import blue.sparse.minecraft.client.world.proxy.ClientWorldProxy
+import blue.sparse.minecraft.client.world.render.WorldRenderer
 import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.entity.Entity
 import blue.sparse.minecraft.common.entity.EntityType
@@ -43,7 +43,7 @@ class ClientEntityTypeItemProxy(type: EntityType) : ClientEntityTypeProxy(type) 
 			uniforms["uEnchantColor"] = item.enchantColor.vectorFromIntRGB()
 			uniforms["uEnchantTime"] = 0f
 
-			(Minecraft.proxy as MinecraftClient).atlas.texture.bind(0)
+			WorldRenderer.atlas.texture.bind(0)
 			(item.type.proxy as ClientItemTypeProxy).model.render()
 		}
 	}
