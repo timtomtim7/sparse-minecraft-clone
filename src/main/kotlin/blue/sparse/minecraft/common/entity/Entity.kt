@@ -1,10 +1,11 @@
 package blue.sparse.minecraft.common.entity
 
+import blue.sparse.math.vectors.floats.Quaternion4f
 import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.minecraft.common.entity.data.EntityData
 import blue.sparse.minecraft.common.world.World
 
-class Entity<out T : EntityType>(val type: T, var position: Vector3f, var world: World) {
+class Entity<out T : EntityType>(val type: T, var world: World, var position: Vector3f = Vector3f(0f, 0f, 0f), var rotation: Quaternion4f = Quaternion4f()) {
 
 	var timeSinceSpawned = 0f
 		private set

@@ -11,7 +11,6 @@ import blue.sparse.minecraft.client.MinecraftClient
 import blue.sparse.minecraft.client.text.TextRenderer
 import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
-import blue.sparse.minecraft.common.inventory.TestInventory
 import blue.sparse.minecraft.common.item.*
 import blue.sparse.minecraft.common.item.impl.ItemTypeApple
 import blue.sparse.minecraft.common.text.Text

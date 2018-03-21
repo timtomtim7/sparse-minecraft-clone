@@ -8,11 +8,11 @@ import blue.sparse.engine.window.input.*
 import blue.sparse.math.vectors.floats.*
 import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
-import blue.sparse.minecraft.common.inventory.TestInventory
 import blue.sparse.minecraft.common.util.AABB
 
 class MinecraftController(camera: Camera, private val mouseSensitivity: Float = 0.17f, private val movementSpeed: Float = 6f) : CameraController(camera) {
 	private var lastMousePos = Vector2f(0f)
+	private val gravity = Vector3f(0f, -1f, 0f)
 
 	val bounds = AABB(Vector3f(-0.3f, -1.62f, -0.3f), Vector3f(0.3f, 1.8f - 1.62f, 0.3f))
 
@@ -36,7 +36,6 @@ class MinecraftController(camera: Camera, private val mouseSensitivity: Float = 
 		Minecraft.world.entities.filter { it.type == EntityTypeItem && it.timeSinceSpawned >= 0.5f }.filter {
 			bounds.isIntersecting(camera.transform.translation, it.type.bounds, it.position)
 		}.forEach {
-			TestInventory.addItem((it.data as EntityTypeItem.Data).stack)
 			it.despawn()
 		}
 	}
@@ -50,9 +49,9 @@ class MinecraftController(camera: Camera, private val mouseSensitivity: Float = 
 		if (input[Key.D].held) wasdMovement += Vector3f(1f, 0f, 0f)
 		if (input[Key.A].held) wasdMovement += Vector3f(-1f, 0f, 0f)
 //        if (input[Key.SPACE].held) verticalMovement += Vector3f(0f, 1f, 0f)
-		if (input[Key.SPACE].held) wasdMovement += Vector3f(0f, 1f, 0f)
+		if (input[Key.SPACE].pressed) wasdMovement += Vector3f(0f, 1f, 0f)
 //        if (input[Key.LEFT_SHIFT].held) verticalMovement += Vector3f(0f, -1f, 0f)
-		if (input[Key.LEFT_SHIFT].held) wasdMovement += Vector3f(0f, -1f, 0f)
+//		if (input[Key.LEFT_SHIFT].held) wasdMovement += Vector3f(0f, -1f, 0f)
 
 		var speed = movementSpeed * delta
 
@@ -66,7 +65,7 @@ class MinecraftController(camera: Camera, private val mouseSensitivity: Float = 
 			val movement = rotated * speed
 			Minecraft.world.testBlockIntersections(bounds, camera.transform.translation, movement)
 
-			camera.transform.translate(movement)
+			camera.transform.translate(movement * gravity)
 		}
 
 //        if (verticalMovement.any { it != 0f }) {

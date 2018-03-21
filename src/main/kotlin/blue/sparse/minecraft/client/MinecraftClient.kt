@@ -15,6 +15,7 @@ import blue.sparse.minecraft.client.world.render.WorldRenderer
 import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.MinecraftProxy
 import blue.sparse.minecraft.common.block.BlockType
+import blue.sparse.minecraft.common.entity.Entity
 import blue.sparse.minecraft.common.entity.EntityType
 import blue.sparse.minecraft.common.item.ItemType
 import blue.sparse.minecraft.common.util.ProxyHolder
@@ -23,71 +24,73 @@ import javax.imageio.ImageIO
 
 class MinecraftClient : SparseGame(), MinecraftProxy {
 
-	var time = 0f
-		private set
+    var viewEntity: Entity<*>? = null
 
-	init {
-		camera.apply {
-			move(Vector3f(0f, -30f, 10f))
-			controller = MinecraftController(this, movementSpeed = 7f)
-		}
-	}
+    var time = 0f
+        private set
 
-	private fun resetCameraProjection() {
-		camera.projection = Matrix4f.perspective(100f, window.aspectRatio, 0.1f, 1000f)
-	}
+    init {
+        camera.apply {
+            move(Vector3f(0f, -30f, 10f))
+            controller = MinecraftController(this, movementSpeed = 7f)
+        }
+    }
 
-	override fun postInit() {
-		ItemType
-		BlockType
-		EntityType
+    private fun resetCameraProjection() {
+        camera.projection = Matrix4f.perspective(100f, window.aspectRatio, 0.1f, 1000f)
+    }
 
-		GUIManager.open(TestGUI)
-	}
+    override fun postInit() {
+        ItemType
+        BlockType
+        EntityType
 
-	override fun update(delta: Float) {
-		super.update(delta)
-		time += delta
+        GUIManager.open(TestGUI)
+    }
 
-		if (window.resized)
-			resetCameraProjection()
+    override fun update(delta: Float) {
+        super.update(delta)
+        time += delta
 
-		if (input[Key.F9].pressed) {
-			ImageIO.write(WorldRenderer.atlas.texture.read(), "png", File("block_item_atlas.png"))
-			ImageIO.write(GUIManager.atlas.texture.read(), "png", File("gui_atlas.png"))
-		}
+        if (window.resized)
+            resetCameraProjection()
 
-		if (input[Key.F8].pressed) {
-			Minecraft.regenerateWorld()
-		}
+        if (input[Key.F9].pressed) {
+            ImageIO.write(WorldRenderer.atlas.texture.read(), "png", File("block_item_atlas.png"))
+            ImageIO.write(GUIManager.atlas.texture.read(), "png", File("gui_atlas.png"))
+        }
 
-		if (input[MouseButton.RIGHT].pressed || input[MouseButton.RIGHT].heldTime >= 1f) {
-			val pos = floor(camera.transform.translation + camera.transform.rotation.forward * 5f).toIntVector()
-			Minecraft.world.getOrGenerateBlock(pos.x, pos.y, pos.z).type = BlockType.diamondBlock
-		}
+        if (input[Key.F8].pressed) {
+            Minecraft.regenerateWorld()
+        }
 
-		if (input[MouseButton.LEFT].pressed || input[MouseButton.LEFT].heldTime >= 1f) {
-			val pos = floor(camera.transform.translation + camera.transform.rotation.forward * 5f).toIntVector()
-			Minecraft.world.getBlock(pos.x, pos.y, pos.z)?.type = null
-		}
+        if (input[MouseButton.RIGHT].pressed || input[MouseButton.RIGHT].heldTime >= 1f) {
+            val pos = floor(camera.transform.translation + camera.transform.rotation.forward * 5f).toIntVector()
+            Minecraft.world.getOrGenerateBlock(pos.x, pos.y, pos.z).type = BlockType.diamondBlock
+        }
 
-		Minecraft.world.update(delta)
-		GUIManager.update(delta)
-	}
+        if (input[MouseButton.LEFT].pressed || input[MouseButton.LEFT].heldTime >= 1f) {
+            val pos = floor(camera.transform.translation + camera.transform.rotation.forward * 5f).toIntVector()
+            Minecraft.world.getBlock(pos.x, pos.y, pos.z)?.type = null
+        }
 
-	override fun render(delta: Float) {
-		(Minecraft.world.proxy as ClientWorldProxy).renderer.render(delta)
+        Minecraft.world.update(delta)
+        GUIManager.update(delta)
+    }
 
-		Debug.renderTemp()
+    override fun render(delta: Float) {
+        (Minecraft.world.proxy as ClientWorldProxy).renderer.render(delta)
+
+        Debug.renderTemp()
 //		(camera.controller as MinecraftController).bounds.debugRender(camera.transform.translation, Vector3f(0f, 0.333f, 1f))
 
-		GUIManager.render(delta)
-	}
+        GUIManager.render(delta)
+    }
 
-	companion object : ProxyHolder<MinecraftClient> {
+    companion object : ProxyHolder<MinecraftClient> {
 
-		override val proxy: MinecraftClient
-			get() = SparseEngine.game as MinecraftClient
+        override val proxy: MinecraftClient
+            get() = SparseEngine.game as MinecraftClient
 
-	}
+    }
 }
