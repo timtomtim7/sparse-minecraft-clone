@@ -33,7 +33,7 @@ class AABB(min: Vector3f, max: Vector3f) {
 		val otherMax = other.max + otherPosition
 
 		// The axes that are unaffected by this test will have a value of 1, whereas axes that have been affected will have a value of 0.
-		// To begin with, we haven't modified any axes, so they're all 1.
+		// To begin with, no axes have been modified, so they're all 1.
 		val unaffectedAxes = Vector3f(1f)
 
 		// The axes to detect collision on. This is 3D, so the first 3
@@ -42,7 +42,7 @@ class AABB(min: Vector3f, max: Vector3f) {
 		// Sort the axes by which would result in the least movement if it were being collided with.
 		axes.sortBy { abs(axisCollisionOffset(thisMin[it], thisMax[it], otherMin[it], otherMax[it], movement[it])) }
 
-		// Keep track of which movement axes have already been modified so that future axes will take those into account aswell.
+		// Keep track of which movement axes have already been modified so that future axes will take those into account as well.
 		val modifiedMovement = Vector3f(0f)
 
 		for (axis in axes) {

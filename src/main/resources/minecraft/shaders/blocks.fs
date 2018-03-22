@@ -14,5 +14,6 @@ void main() {
 	float brightness = dot(vNormal, uLightDirection) * 0.5 + 0.5;
 	brightness = brightness * 0.6 + 0.4;
 
+	//TODO: Transparency is probably a bit confused by this
 	fColor = texture2D(uTexture, vTexCoord) * vec4(vColor, 1.0) * brightness;
 }

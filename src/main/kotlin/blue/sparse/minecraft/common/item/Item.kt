@@ -38,6 +38,8 @@ data class Item<T : ItemType>(val type: T, var data: Compound? = null) {
 
 	fun deepCopy() = Item(type, data?.deepCopy())
 
+	fun stack(amount: Int = 1) = ItemStack(this, amount)
+
 	@Suppress("UNCHECKED_CAST")
 	inline fun <reified N: ItemType> safeCast(): Item<N>? {
 		if(!N::class.isInstance(type))

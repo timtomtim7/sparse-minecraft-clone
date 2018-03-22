@@ -2,6 +2,7 @@ package blue.sparse.minecraft.client
 
 import blue.sparse.engine.SparseEngine
 import blue.sparse.engine.SparseGame
+import blue.sparse.engine.errors.glCall
 import blue.sparse.engine.window.Window
 import blue.sparse.engine.window.input.Key
 import blue.sparse.engine.window.input.MouseButton
@@ -21,6 +22,7 @@ import blue.sparse.minecraft.common.entity.EntityType
 import blue.sparse.minecraft.common.entity.impl.types.living.EntityTypePlayer
 import blue.sparse.minecraft.common.item.ItemType
 import blue.sparse.minecraft.common.util.ProxyHolder
+import org.lwjgl.opengl.GL11
 import java.io.File
 import javax.imageio.ImageIO
 
@@ -108,6 +110,16 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 	}
 
 	override fun render(delta: Float) {
+		engine.clear()
+		val wireframeButton = input[Key.F]
+		if (wireframeButton.pressed) {
+			glCall { GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_LINE) }
+			glCall { GL11.glDisable(GL11.GL_CULL_FACE) }
+		} else if (wireframeButton.released) {
+			glCall { GL11.glPolygonMode(GL11.GL_FRONT_AND_BACK, GL11.GL_FILL) }
+			glCall { GL11.glEnable(GL11.GL_CULL_FACE) }
+		}
+
 		(Minecraft.world.proxy as ClientWorldProxy).renderer.render(delta)
 
 		Debug.renderTemp()

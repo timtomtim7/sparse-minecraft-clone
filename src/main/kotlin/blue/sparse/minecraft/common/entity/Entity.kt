@@ -36,17 +36,19 @@ class Entity<out T : EntityType>(val type: T, var world: World, var position: Ve
 		timeSinceSpawned += delta
 
 		val drag = 0.4f
-		velocity.timesAssign(Math.pow(drag.toDouble(), delta.toDouble()).toFloat())
-		velocity.y -= type.gravity * delta
+		var vel = velocity.clone()
+
+		vel.timesAssign(Math.pow(drag.toDouble(), delta.toDouble()).toFloat())
+		vel.y -= type.gravity * delta
 //		velocity = clamp(velocity, -78.4f, 78.4f)
 
 		val bounds = type.bounds
-		val movement = velocity * delta
+		val movement = vel * delta
 		val unaffected = world.testBlockIntersections(bounds, position, movement)
 
 //		bounds.debugRender(position, Vector3f(1f))
 
-		velocity = movement / delta
+		vel = movement / delta
 		position.plusAssign(movement)
 
 		if(unaffected.any { it == 0f }) {
@@ -55,9 +57,10 @@ class Entity<out T : EntityType>(val type: T, var world: World, var position: Ve
 			val friction = unaffected * 0.9f
 			friction += affected
 
-			velocity.timesAssign(friction)
-
+			vel.timesAssign(friction)
 		}
+
+		velocity = vel
 
         type.update(this, delta)
     }

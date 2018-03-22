@@ -11,6 +11,7 @@ import blue.sparse.minecraft.client.player.ClientPlayer
 import blue.sparse.minecraft.client.text.TextRenderer
 import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
+import blue.sparse.minecraft.common.inventory.impl.Section
 import blue.sparse.minecraft.common.item.*
 import blue.sparse.minecraft.common.item.impl.ItemTypeApple
 import blue.sparse.minecraft.common.text.Text
@@ -79,11 +80,11 @@ object TestGUI : GUI() {
 			}
 		}
 		if(input[Key.Q].pressed || input[Key.Q].heldTime >= 1f) {
-			val selectedItem = ClientPlayer.inventory[selectedSlot]
+			val selectedItem = ClientPlayer.inventory[Section.Key.Hotbar][selectedSlot]
 			if(selectedItem != null) {
 				selectedItem.amount--
 				if(selectedItem.amount <= 0)
-					ClientPlayer.inventory[selectedSlot] = null
+					ClientPlayer.inventory[Section.Key.Hotbar][selectedSlot] = null
 
 				val entity = Minecraft.world.spawnEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
 				entity.velocity = MinecraftClient.proxy.camera.transform.rotation.forward * 10f
@@ -114,7 +115,7 @@ object TestGUI : GUI() {
 		drawTexturedRectangle("widgets/hotbar_selected", hotbarLeft - 1f + (selectedSlot * 20f), -1f, 24f)
 
 		for (i in 0 until 9) {
-			val stack = ClientPlayer.inventory[i] ?: continue
+			val stack = ClientPlayer.inventory[Section.Key.Hotbar][i] ?: continue
 			drawStack(stack, hotbarLeft + 3f + 20f * i, 3f)
 		}
 

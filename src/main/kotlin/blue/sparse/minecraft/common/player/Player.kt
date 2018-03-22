@@ -4,7 +4,7 @@ import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.minecraft.common.entity.Entity
 import blue.sparse.minecraft.common.entity.impl.types.living.EntityTypePlayer
 import blue.sparse.minecraft.common.inventory.Inventory
-import blue.sparse.minecraft.common.inventory.types.InventoryTypePlayer
+import blue.sparse.minecraft.common.inventory.impl.types.InventoryTypePlayer
 import blue.sparse.minecraft.common.player.gamemode.GameMode
 import blue.sparse.minecraft.common.player.gamemode.GameModeSurvival
 import blue.sparse.minecraft.common.world.World

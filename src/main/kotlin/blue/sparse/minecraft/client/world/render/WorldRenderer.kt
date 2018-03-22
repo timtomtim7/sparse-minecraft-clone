@@ -50,6 +50,10 @@ class WorldRenderer(val world: World) {
 					proxy.generateOfflineModel()
 				}
 
+				if(ClientPlayer.entity?.let { it in chunk } == true) {
+					chunk.debugBoundingBox()
+				}
+
 				proxy.model?.render()/* ?: chunk.debugBoundingBox()*/
 			}
 		}

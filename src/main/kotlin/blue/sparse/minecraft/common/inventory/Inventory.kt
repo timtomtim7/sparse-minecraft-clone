@@ -1,88 +1,117 @@
 package blue.sparse.minecraft.common.inventory
 
-import blue.sparse.minecraft.common.inventory.types.InventoryType
+import blue.sparse.minecraft.common.inventory.impl.Section
+import blue.sparse.minecraft.common.inventory.impl.types.InventoryType
 import blue.sparse.minecraft.common.item.Item
 import blue.sparse.minecraft.common.item.ItemStack
-import kotlin.math.min
 
-class Inventory<out T : InventoryType>(val type: T) {
-    //im lazy
-    val size = type.slotCount
+class Inventory(val type: InventoryType) : Iterable<ItemStack<*>?> {
 
-    val content: Array<ItemStack<*>?> = Array(type.slotCount) { null }
-    val full get() = content.filterNotNull().size > size
-    val empty get() = content.all { it == null }
-    val firstEmptySlot get() = content.indexOf(content.find { it == null })
+	val size = type.slotCount
 
-    fun addItem(item: Item<*>, amount: Int = 1) = addItem(ItemStack(item, amount))
+	private val _sections = LinkedHashMap<Section.Key, Section>()
+	private val _inputSections = ArrayList<Section>()
+	private val _outputSections = ArrayList<Section>()
 
-    fun addItem(stack: ItemStack<*>) {
-        if (full || stack.amount <= 0)
-            return
+	val sections: List<Section>
+		get() = _sections.values.toList()
 
-        val sameStacks = content.filter { it?.item == stack.item && it.item.type.maxStackSize > it.amount }.filterNotNull()
+	val outputSections: List<Section>
+		get() = _outputSections
 
-        if (sameStacks.isEmpty() && !full) {
-            val stackAmount = stack.amount / stack.item.type.maxStackSize
-            val extraAmount = stack.amount % stack.item.type.maxStackSize
+	val inputSections: List<Section>
+		get() = _inputSections
 
-            for (i in 0 until stackAmount) {
-                if (firstEmptySlot >= 0)
-                    content[firstEmptySlot] = stack.deepCopy(stack.item.type.maxStackSize)
-            }
+	init {
+		for (secDef in type.sections) {
+			val section = Section(secDef)
+			_sections[secDef.key] = section
+			if (secDef.input) _inputSections.add(section)
+			if (secDef.output) _outputSections.add(section)
+		}
+	}
 
-            if (firstEmptySlot >= 0 && extraAmount > 0)
-                content[firstEmptySlot] = stack.deepCopy(extraAmount)
-            return
-        }
+	operator fun contains(key: Section.Key): Boolean {
+		return _sections.containsKey(key)
+	}
 
-        var leftOver = stack.amount
+	operator fun get(key: Section.Key): Section {
+		return _sections[key] ?: throw IllegalArgumentException("Inventory does not contain section with key $key")
+	}
 
-        for (sameStack in sameStacks) {
-            if (leftOver == 0) return
+	operator fun contains(stack: ItemStack<*>): Boolean {
+		return _sections.values.any { stack in it }
+	}
 
-            val amtUntilFull = sameStack.item.type.maxStackSize - sameStack.amount
-            if (amtUntilFull == 0) continue
+	fun containsInInput(stack: ItemStack<*>): Boolean {
+		return _inputSections.any { stack in it }
+	}
 
-            val amt = min(leftOver, amtUntilFull)
-            sameStack.amount += amt
-            leftOver -= amt
-        }
+	fun containsInOutput(stack: ItemStack<*>): Boolean {
+		return _outputSections.any { stack in it }
+	}
 
-        if (leftOver > 0 && !full)
-            content[firstEmptySlot] = stack.deepCopy(leftOver)
-    }
+	fun addStack(stack: ItemStack<*>, inputOnly: Boolean = true): Int {
+		val sections = if (inputOnly) _inputSections else _sections.values
 
-    fun removeItem(stack: ItemStack<*>) {
-        if (empty || stack.amount <= 0)
-            return
+		val clonedStack = stack.deepCopy()
 
-        val sameStacks = content.filter { it?.item == stack.item && it.amount != 0 }.filterNotNull().reversed()
+		for (section in sections) {
+			if (clonedStack.amount <= 0)
+				break
 
-        var leftToRemove = stack.amount
+			clonedStack.amount = section.addStack(clonedStack)
+		}
 
-        for (sameStack in sameStacks) {
-            if (leftToRemove == 0) return
+		return clonedStack.amount
+	}
 
-            if (leftToRemove >= sameStack.amount) {
-                leftToRemove -= sameStack.amount
-                val index = content.lastIndexOf(sameStack)
-                if (index >= 0) {
-                    content[index] = null
-                    continue
-                }
-            }
-            sameStack.amount -= leftToRemove
-            break
-        }
-    }
+	fun addItem(item: Item<*>, amount: Int = 1, inputOnly: Boolean = true): Int {
+		return addStack(item.stack(amount), inputOnly)
+	}
 
-    fun clear() {
-        content.fill(null)
-    }
+	fun removeStack(stack: ItemStack<*>, outputOnly: Boolean = true): Int {
+		val sections = if (outputOnly) _outputSections else _sections.values
 
-    operator fun get(index: Int) = content[index]
-    operator fun set(index: Int, value: ItemStack<*>?) {
-        content[index] = value
-    }
+		val clonedStack = stack.deepCopy()
+
+		for (section in sections) {
+			if (clonedStack.amount <= 0)
+				break
+
+			clonedStack.amount = section.removeStack(clonedStack)
+		}
+
+		return clonedStack.amount
+	}
+
+	fun removeItem(item: Item<*>, amount: Int = 1, outputOnly: Boolean = true): Int {
+		return removeStack(item.stack(amount), outputOnly)
+	}
+
+	operator fun plusAssign(stack: ItemStack<*>) {
+		addStack(stack)
+	}
+
+	operator fun plusAssign(item: Item<*>) {
+		addItem(item)
+	}
+
+	operator fun minusAssign(stack: ItemStack<*>) {
+		removeStack(stack)
+	}
+
+	operator fun minusAssign(item: Item<*>) {
+		removeItem(item)
+	}
+
+	fun clear() {
+		_sections.values.forEach(Section::clear)
+	}
+
+	override fun iterator(): Iterator<ItemStack<*>?> {
+		return _sections.values.fold<Section, Sequence<ItemStack<*>?>?>(null) { i, v ->
+			v.asSequence() + (i ?: emptySequence())
+		}!!.iterator()
+	}
 }

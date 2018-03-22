@@ -42,6 +42,6 @@ class TickingThread(name: String, private val onTick: (Float) -> Unit) : Thread(
 	}
 
 	companion object {
-		const val TARGET_TICK_RATE = 20.0
+		const val TARGET_TICK_RATE = 60.0
 	}
 }

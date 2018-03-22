@@ -20,7 +20,8 @@ class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: C
 			this
 	)
 
-	private val _entities = HashSet<Entity<*>>()
+//	private val _entities = HashSet<Entity<*>>()
+	private val _entities = ConcurrentHashMap.newKeySet<Entity<*>>()
 
 	val entities: Set<Entity<*>>
 		get() = _entities
@@ -131,6 +132,7 @@ class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: C
 		return chunk[chunkBlockX, chunkBlockY, chunkBlockZ]
 	}
 
+	//TODO: Use a system which doesn't risk skipping blocks
 	fun getTargetBlock(origin: Vector3f, direction: Vector3f, maxDistance: Float): TargetBlock? {
 		val step = 0.1f
 		val steps = (maxDistance / step).toInt()

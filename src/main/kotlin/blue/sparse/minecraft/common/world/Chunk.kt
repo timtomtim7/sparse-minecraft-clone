@@ -4,6 +4,7 @@ import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.math.vectors.ints.Vector3i
 import blue.sparse.minecraft.client.player.ClientPlayer
 import blue.sparse.minecraft.common.block.BlockType
+import blue.sparse.minecraft.common.entity.Entity
 import blue.sparse.minecraft.common.util.*
 
 class Chunk internal constructor(val region: Region, position: Vector3i, data: IntArray?) {
@@ -116,6 +117,15 @@ class Chunk internal constructor(val region: Region, position: Vector3i, data: I
 		val array = IntArray(SIZE * SIZE * SIZE) { filled }
 		data = array
 		return array
+	}
+
+	operator fun contains(entity: Entity<*>): Boolean {
+		val bounds = AABB(Vector3f(0f), Vector3f(SIZE.toFloat()))
+		val pos = worldBlockPosition.toFloatVector()
+
+		val entityBounds = entity.type.bounds
+
+		return bounds.isIntersecting(pos, entityBounds, entity.position)
 	}
 
 	internal fun debugBoundingBox() {
