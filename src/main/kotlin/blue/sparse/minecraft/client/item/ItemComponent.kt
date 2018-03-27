@@ -64,6 +64,6 @@ class ItemComponent(val item: Item<*>, val position: Vector3f) : Transformed() {
 	companion object {
 		val enchantTexture = Texture(Asset["minecraft/textures/misc/enchanted_item_glint.png"])
 
-		val shader = ShaderProgram(Asset["minecraft/shaders/item.fs"], Asset["minecraft/shaders/item.vs"])
+		val shader = ShaderProgram(Asset["minecraft/shaders/entity/item.fs"], Asset["minecraft/shaders/entity/item.vs"])
 	}
 }

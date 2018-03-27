@@ -13,13 +13,13 @@ object Rectangle {
 	private val repeatingShader = ShaderProgram(
 			Asset["minecraft/shaders/repeating_colored.fs"],
 			Asset["minecraft/shaders/nothing.vs"],
-			Asset["minecraft/shaders/repeating_rectangle.gs"]
+			Asset["minecraft/shaders/gui/repeating_rectangle.gs"]
 	)
 
 	private val coloredShader = ShaderProgram(
 			Asset["minecraft/shaders/colored.fs"],
 			Asset["minecraft/shaders/nothing.vs"],
-			Asset["minecraft/shaders/rectangle.gs"]
+			Asset["minecraft/shaders/gui/rectangle.gs"]
 	)
 
 	fun drawRectangle(

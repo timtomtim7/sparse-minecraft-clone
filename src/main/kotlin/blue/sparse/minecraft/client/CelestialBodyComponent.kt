@@ -30,7 +30,7 @@ class CelestialBodyComponent(
 //		transform.setScale(Vector3f(scale))
 //		println(scale)
 //		transform.rotateDeg(cross(rotationAxis, Vector3f(0f, 1f, 0f)), 45f)
-		transform.rotateDeg(Vector3f(0f, 1f, 0f), 15f)
+//		transform.rotateDeg(Vector3f(0f, 1f, 0f), 15f)
 		transform.rotateDeg(rotationAxis, initialRotation)
 	}
 
@@ -63,7 +63,7 @@ class CelestialBodyComponent(
 
 	companion object {
 		private val model: IndexedModel
-		private val shader = ShaderProgram(Asset["minecraft/shaders/celestial.fs"], Asset["minecraft/shaders/celestial.vs"])
+		private val shader = ShaderProgram(Asset["minecraft/shaders/world/sky/celestial.fs"], Asset["minecraft/shaders/world/sky/celestial.vs"])
 
 		init {
 			val array = VertexArray()

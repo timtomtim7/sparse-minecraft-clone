@@ -36,6 +36,10 @@ class AABB(min: Vector3f, max: Vector3f) {
 		// To begin with, no axes have been modified, so they're all 1.
 		val unaffectedAxes = Vector3f(1f)
 
+		// If they're already inside a block, let them get out of it. (And don't send them flying)
+		if (intersects(thisMin, thisMax, otherMin, otherMax))
+			return unaffectedAxes
+
 		// The axes to detect collision on. This is 3D, so the first 3
 		val axes = arrayListOf(0, 1, 2) // "axes" is the plural of "axis"
 

@@ -37,7 +37,10 @@ class WorldRenderer(val world: World) {
 					return chunk
 
 				generate--
-				return world.getOrGenerateChunk(pos.x, pos.y, pos.z)
+//				println("Generate $pos")
+				val generated = world.getOrGenerateChunk(pos.x, pos.y, pos.z)
+				generated.debugBoundingBox()
+				return generated
 			}
 
 			for(chunkPosition in renderDistance) {
@@ -46,13 +49,15 @@ class WorldRenderer(val world: World) {
 				uniforms["uModel"] = Matrix4f.translation(chunk.worldBlockPosition.toFloatVector())
 				val proxy = chunk.proxy as ClientChunkProxy
 
-				if(proxy.shouldGenerateModel && proxy.canGenerateModel) {
+				if(generate > 0 && proxy.shouldGenerateModel && proxy.canGenerateModel) {
+//					println("Model $chunkPosition")
+					generate--
 					proxy.generateOfflineModel()
 				}
 
-				if(ClientPlayer.entity?.let { it in chunk } == true) {
-					chunk.debugBoundingBox()
-				}
+//				if(ClientPlayer.entity?.let { it in chunk } == true) {
+//					chunk.debugBoundingBox()
+//				}
 
 				proxy.model?.render()/* ?: chunk.debugBoundingBox()*/
 			}
@@ -68,8 +73,8 @@ class WorldRenderer(val world: World) {
 		val atlas = TextureAtlas(Vector2i(1024, 512))
 
 		val chunkShader = ShaderProgram(
-				Asset["minecraft/shaders/blocks.fs"],
-				Asset["minecraft/shaders/blocks.vs"]
+				Asset["minecraft/shaders/world/blocks.fs"],
+				Asset["minecraft/shaders/world/blocks.vs"]
 		)
 
 	}

@@ -30,7 +30,7 @@ abstract class BlockType(val identifier: Identifier, val hasItem: Boolean = true
 	abstract class BlockTypeProxy(val blockType: BlockType) : Proxy
 
 	companion object {
-		private val registry = LinkedHashMap<Identifier, BlockType>()
+		internal val registry = LinkedHashMap<Identifier, BlockType>()
 		private val idRegistry = LinkedHashMap<Int, BlockType>()
 
 		private fun register(type: BlockType) {

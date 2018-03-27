@@ -33,7 +33,14 @@ class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: C
 		val key = this.key.get()
 		key.assign(x, y, z)
 
-		return regions.getOrPut(key) { Region(this, key.clone()) }
+		var region = regions[key]
+		if(region == null) {
+			val copiedKey = key.clone()
+			region = Region(this, copiedKey)
+			regions[copiedKey] = region
+		}
+
+		return region
 	}
 
 	fun <T : EntityType> spawnEntity(entityType: T, position: Vector3f): Entity<T> {
@@ -170,6 +177,10 @@ class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: C
 
 	operator fun get(x: Int, y: Int, z: Int): BlockView? {
 		return getBlock(x, y, z)
+	}
+
+	operator fun get(blockPosition: Vector3i): BlockView? {
+		return getBlock(blockPosition.x, blockPosition.y, blockPosition.z)
 	}
 
 	abstract class WorldProxy(val world: World) : Proxy

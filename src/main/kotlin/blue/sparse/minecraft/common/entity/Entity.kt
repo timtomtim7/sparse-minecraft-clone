@@ -2,13 +2,33 @@ package blue.sparse.minecraft.common.entity
 
 import blue.sparse.math.vectors.floats.*
 import blue.sparse.math.vectors.ints.Vector3i
+import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.entity.data.EntityData
 import blue.sparse.minecraft.common.entity.impl.types.living.EntityTypeLiving
 import blue.sparse.minecraft.common.util.TargetBlock
 import blue.sparse.minecraft.common.world.BlockView
 import blue.sparse.minecraft.common.world.World
 
-class Entity<out T : EntityType>(val type: T, var world: World, var position: Vector3f = Vector3f(0f, 0f, 0f), var rotation: Quaternion4f = Quaternion4f()) {
+class Entity<out T : EntityType>(
+		val type: T,
+		var world: World,
+		position: Vector3f = Vector3f(0f, 0f, 0f),
+		rotation: Quaternion4f = Quaternion4f()
+) {
+
+	var rotation = rotation
+	var position = position
+
+	var lastPosition = position.clone()
+		get() = field.clone()
+		private set
+
+	var lastRotation = rotation.clone()
+		get() = field.clone()
+		private set
+
+	val interpolatedPosition: Vector3f
+		get() = lerp(lastPosition, position, Minecraft.partialTicks)
 
 	var timeSinceSpawned = 0f
 		private set
@@ -40,6 +60,7 @@ class Entity<out T : EntityType>(val type: T, var world: World, var position: Ve
 
 		vel.timesAssign(Math.pow(drag.toDouble(), delta.toDouble()).toFloat())
 		vel.y -= type.gravity * delta
+
 //		velocity = clamp(velocity, -78.4f, 78.4f)
 
 		val bounds = type.bounds
@@ -49,14 +70,18 @@ class Entity<out T : EntityType>(val type: T, var world: World, var position: Ve
 //		bounds.debugRender(position, Vector3f(1f))
 
 		vel = movement / delta
+		lastPosition = position.clone()
 		position.plusAssign(movement)
 
 		if(unaffected.any { it == 0f }) {
 
 			val affected = Vector3f(1f) - unaffected
-			val friction = unaffected * 0.9f
+			val friction = unaffected * 0.02f
 			friction += affected
 
+			friction.x = Math.pow(friction.x.toDouble(), delta.toDouble()).toFloat()
+			friction.y = Math.pow(friction.y.toDouble(), delta.toDouble()).toFloat()
+			friction.z = Math.pow(friction.z.toDouble(), delta.toDouble()).toFloat()
 			vel.timesAssign(friction)
 		}
 

@@ -22,11 +22,17 @@ object ClientPlayer : Player() {
 			freeLook(input)
     }
 
+	fun resetMousePosition(input: Input) {
+		lastMousePos = input.mousePosition
+	}
+
     private fun freeMove(input: Input, delta: Float) {
         val entity = entity ?: return
 
 		if (input[Key.HOME].pressed) {
 			entity.position = Vector3f(0f, 100f, 0f)
+			while(entity.world[entity.blockPosition]?.type != null)
+				entity.position.y += 1.5f
 			return
 		}
 

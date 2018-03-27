@@ -36,7 +36,7 @@ object TextRenderer {
 //		BasicModel(array)
 //	}
 
-	private val shader = ShaderProgram(Asset["minecraft/shaders/textured_colored.fs"], Asset["minecraft/shaders/nothing.vs"], Asset["minecraft/shaders/text.gs"])
+	private val shader = ShaderProgram(Asset["minecraft/shaders/textured_colored.fs"], Asset["minecraft/shaders/nothing.vs"], Asset["minecraft/shaders/gui/text.gs"])
 
 	private val texture: Texture
 
@@ -54,8 +54,6 @@ object TextRenderer {
 		val order = Asset["minecraft/font_atlas_order.txt"].readText()
 		val charMaxWidth = image.width / 16
 		val charMaxHeight = image.height / 16
-
-		println("$charMaxWidth $charMaxHeight")
 
 		//The ascii image is 16 chars by 16 chars
 		for (x in 0 until 16) {

@@ -21,7 +21,7 @@ class OverworldSky : Sky {
 	val sun = CelestialBodyComponent(sunTexture, scale = 0.8f, initialRotation = -45f)
 	val moon = CelestialBodyComponent(moonTexture, scale = 0.65f, initialRotation = -180f + -45f)
 
-	val skybox = ShaderSkybox(Asset["minecraft/shaders/sky.fs"]) {
+	val skybox = ShaderSkybox(Asset["minecraft/shaders/world/sky/sky.fs"]) {
 		uniforms["uSunDirection"] = sun.transform.rotation.forward
 		uniforms["uGravity"] = Vector3f(0f, -1f, 0f)
 	}

@@ -23,6 +23,9 @@ object Minecraft {
 
 	private lateinit var thread: TickingThread
 
+	val partialTicks: Float
+		get() = thread.partialTicks.toFloat()
+
 	fun init(side: Side) {
 		if (this::side.isInitialized)
 			throw IllegalStateException("Already initialized")
@@ -36,11 +39,12 @@ object Minecraft {
 	}
 
 	fun onTick(delta: Float) {
-//		if(this::world.isInitialized)
-//			world.update(delta)
+		if(this::world.isInitialized)
+			world.update(delta)
 	}
 
 	fun regenerateWorld() {
+		println("REGENERATING WORLD")
 		val world = World("overworld", generator = TestChunkGenerator)
 		Minecraft.world = world
 

@@ -31,7 +31,7 @@ class ClientEntityTypeItemProxy(type: EntityType) : ClientEntityTypeProxy(type) 
 		transform.setRotation(Quaternion4f(rotationAxis, Math.toRadians(entity.timeSinceSpawned * 40.0).toFloat()))
 		val bobbing = (Math.sin(entity.timeSinceSpawned.toDouble() * 1.25).toFloat() * 0.5f + 0.5f) * (4f / 16f) + (2f / 16f)
 
-		transform.setTranslation(entity.position + Vector3f(0f, bobbing, 0f))
+		transform.setTranslation(entity.interpolatedPosition + Vector3f(0f, bobbing, 0f))
 
 		shader.bind {
 			uniforms["uLightDirection"] = (Minecraft.world.proxy as ClientWorldProxy).sky.sun.direction
@@ -56,6 +56,6 @@ class ClientEntityTypeItemProxy(type: EntityType) : ClientEntityTypeProxy(type) 
 
 		val enchantTexture = Texture(Asset["minecraft/textures/misc/enchanted_item_glint.png"])
 
-		val shader = ShaderProgram(Asset["minecraft/shaders/item.fs"], Asset["minecraft/shaders/item.vs"])
+		val shader = ShaderProgram(Asset["minecraft/shaders/entity/item.fs"], Asset["minecraft/shaders/entity/item.vs"])
 	}
 }

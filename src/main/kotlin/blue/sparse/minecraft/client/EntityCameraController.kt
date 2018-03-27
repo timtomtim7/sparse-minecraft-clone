@@ -11,7 +11,7 @@ class EntityCameraController(camera: Camera, val viewEntity: Entity<*>) : Camera
     override fun update(delta: Float) {
         val eyeHeight = (viewEntity.type as? EntityTypeLiving)?.eyeHeight ?: 0f
 
-		camera.transform.setTranslation(viewEntity.position + Vector3f(0f, eyeHeight, 0f))
+		camera.transform.setTranslation(viewEntity.interpolatedPosition + Vector3f(0f, eyeHeight, 0f))
         camera.transform.setRotation(viewEntity.rotation)
     }
 

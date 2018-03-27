@@ -12,8 +12,6 @@ class Chunk internal constructor(val region: Region, position: Vector3i, data: I
 	private var data: IntArray? = data// = IntArray(SIZE * SIZE * SIZE)
 	private var filled: Int = 0
 
-	constructor(region: Region, position: Vector3i): this(region, position, null)
-
 	var lastChangedMillis: Long = System.currentTimeMillis()
 		private set
 
@@ -50,6 +48,12 @@ class Chunk internal constructor(val region: Region, position: Vector3i, data: I
 			"blue.sparse.minecraft.server.world.proxy.ServerChunkProxy",
 			this
 	)
+
+	constructor(region: Region, position: Vector3i): this(region, position, null)
+
+	init {
+//		println("Generating chunk $worldChunkPosition on thread ${Thread.currentThread().name}")
+	}
 
 	fun fill(type: BlockType?) {
 		data = null

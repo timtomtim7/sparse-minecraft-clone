@@ -5,15 +5,19 @@ import blue.sparse.math.util.FrequencyTimer
 
 class TickingThread(name: String, private val onTick: (Float) -> Unit) : Thread(name) {
 
+	private val tickTimer = FrequencyTimer(1.0 / TARGET_TICK_RATE)
+
 	var ticking: Boolean = false
 		private set
 
 	var tickRate: Double = TARGET_TICK_RATE
 		private set
 
+	val partialTicks: Double
+		get() = tickTimer.count
+
 	override fun run() {
 		var tickCounter = 0.0
-		val tickTimer = FrequencyTimer(1.0 / TARGET_TICK_RATE)
 		val secondTimer = FrequencyTimer(1.0)
 
 		val deltaTimer = DeltaTimer()
@@ -42,6 +46,6 @@ class TickingThread(name: String, private val onTick: (Float) -> Unit) : Thread(
 	}
 
 	companion object {
-		const val TARGET_TICK_RATE = 60.0
+		const val TARGET_TICK_RATE = 20.0
 	}
 }

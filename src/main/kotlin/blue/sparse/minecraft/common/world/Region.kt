@@ -1,7 +1,6 @@
 package blue.sparse.minecraft.common.world
 
 import blue.sparse.math.vectors.ints.Vector3i
-import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.world.generator.ChunkGenerator
 import java.util.concurrent.ConcurrentHashMap
 
@@ -16,6 +15,11 @@ class Region(val world: World, position: Vector3i) {
 	val loadedChunks: Collection<Chunk>
 		get() = chunks.values
 
+	init {
+		println("Constructing region $position on thread ${Thread.currentThread().name}")
+		Exception().printStackTrace()
+	}
+
 	fun getChunk(x: Int, y: Int, z: Int): Chunk? {
 		boundsCheck(x, y, z)
 
@@ -23,16 +27,6 @@ class Region(val world: World, position: Vector3i) {
 		key.assign(x, y, z)
 		return chunks[key]
 	}
-
-	private val ores = arrayOf(
-			BlockType.coalOre,
-			BlockType.ironOre,
-			BlockType.goldOre,
-			BlockType.lapisOre,
-			BlockType.redstoneOre,
-			BlockType.diamondOre,
-			BlockType.emeraldOre
-	)
 
 	fun getOrGenerateChunk(x: Int, y: Int, z: Int): Chunk {
 		boundsCheck(x, y, z)
@@ -53,8 +47,13 @@ class Region(val world: World, position: Vector3i) {
 		)
 		world.generator.generate(position, blocks)
 
-		val data = IntArray(Chunk.VOLUME) { blocks[it]?.rawID ?: 0 }
+		val first = blocks.first()
+		val filled = blocks.all { it == first }
+
+		val data = if(filled) null else IntArray(Chunk.VOLUME) { blocks[it]?.rawID ?: 0 }
 		chunk = Chunk(this, key.clone(), data)
+		if(filled)
+			chunk.fill(first?.type)
 		chunks[chunk.regionChunkPosition] = chunk
 
 		return chunk
