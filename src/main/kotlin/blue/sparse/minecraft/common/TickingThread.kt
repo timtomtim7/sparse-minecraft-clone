@@ -22,8 +22,8 @@ class TickingThread(name: String, private val onTick: (Float) -> Unit) : Thread(
 
 		val deltaTimer = DeltaTimer()
 		ticking = true
-		while(ticking) {
-			if(!tickTimer.use())
+		while (ticking) {
+			if (!tickTimer.use())
 				continue
 
 			val delta = deltaTimer.deltaFloat()
@@ -32,7 +32,7 @@ class TickingThread(name: String, private val onTick: (Float) -> Unit) : Thread(
 			tickCounter++
 			tickRate = tickCounter / secondTimer.count
 
-			if(secondTimer.use()) {
+			if (secondTimer.use()) {
 				val ms = 1000.0 / tickRate
 
 				System.out.printf("TPS: %2.3f | MS: %5.2f%n", tickRate, ms)

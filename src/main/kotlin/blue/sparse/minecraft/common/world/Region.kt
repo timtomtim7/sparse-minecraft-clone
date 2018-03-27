@@ -15,11 +15,6 @@ class Region(val world: World, position: Vector3i) {
 	val loadedChunks: Collection<Chunk>
 		get() = chunks.values
 
-	init {
-		println("Constructing region $position on thread ${Thread.currentThread().name}")
-		Exception().printStackTrace()
-	}
-
 	fun getChunk(x: Int, y: Int, z: Int): Chunk? {
 		boundsCheck(x, y, z)
 
