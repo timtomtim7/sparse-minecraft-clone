@@ -2,6 +2,7 @@ package blue.sparse.minecraft.common.world
 
 import blue.sparse.math.vectors.floats.*
 import blue.sparse.math.vectors.ints.Vector3i
+import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.entity.Entity
 import blue.sparse.minecraft.common.entity.EntityType
 import blue.sparse.minecraft.common.util.*
@@ -58,6 +59,18 @@ class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: C
 	}
 
 	fun update(delta: Float) {
+		var generate = 1
+		for (player in Minecraft.players) {
+			val renderDistance = player.renderDistance
+			for(chunkPos in renderDistance) {
+				if(getChunk(chunkPos.x, chunkPos.y, chunkPos.z) != null || generate <= 0)
+					continue
+
+				getOrGenerateChunk(chunkPos.x, chunkPos.y, chunkPos.z)
+				generate--
+			}
+		}
+
 		entities.forEach { it.update(delta) }
 	}
 

@@ -1,0 +1,14 @@
+{
+  "cubes": [{
+    "origin": [0, 0, 0],
+    "size": [16, 16, 16],
+    "faceData": [
+      {"faces": "X+", "textures": [{"asset": "$textures.X+"}]},
+      {"faces": "Y+", "textures": [{"asset": "$textures.Y+"}]},
+      {"faces": "Z+", "textures": [{"asset": "$textures.Z+"}]},
+      {"faces": "X-", "textures": [{"asset": "$textures.X-"}]},
+      {"faces": "Y-", "textures": [{"asset": "$textures.Y-"}]},
+      {"faces": "Z-", "textures": [{"asset": "$textures.Z-"}]}
+    ]
+  }]
+}

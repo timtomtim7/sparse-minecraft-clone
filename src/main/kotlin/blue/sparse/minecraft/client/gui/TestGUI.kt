@@ -9,6 +9,7 @@ import blue.sparse.math.wrap
 import blue.sparse.minecraft.client.MinecraftClient
 import blue.sparse.minecraft.client.player.ClientPlayer
 import blue.sparse.minecraft.client.text.TextRenderer
+import blue.sparse.minecraft.client.world.proxy.ClientWorldProxy
 import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
 import blue.sparse.minecraft.common.inventory.impl.Section
@@ -163,15 +164,18 @@ object TestGUI : GUI() {
 
 		 */
 
-		fun line(i: Int) = manager.top - 9 * i
+		var line = 1
+		fun line() = manager.top - 9 * (line++)
 
-		drawString(String.format("FPS: %.1f", SparseEngine.frameRate), 1f, line(1))
-		drawString(String.format("MEM: %s", MemoryUsage.getMemoryUsedString()), 1f, line(2))
+		drawString(String.format("FPS: %.1f", SparseEngine.frameRate), 1f, line())
+		drawString(String.format("TPS: %.1f", Minecraft.tickRate), 1f, line())
+		drawString(String.format("MEM: %s", MemoryUsage.getMemoryUsedString()), 1f, line())
 
 		val (camX, camY, camZ) = SparseEngine.game.camera.transform.translation
-		drawString(String.format("POS: %.1f, %.1f, %.1f", camX, camY, camZ), 1f, line(3))
+		drawString(String.format("POS: %.1f, %.1f, %.1f", camX, camY, camZ), 1f, line())
 
-		drawString("ENT: ${Minecraft.world.entities.size}", 1f, line(4))
+		drawString("ENT: ${Minecraft.world.entities.size}", 1f, line())
+		drawString("VIS: ${(Minecraft.world.proxy as ClientWorldProxy).renderer.visible}", 1f, line())
 
 
 		for ((index, message) in chatMessages.withIndex()) {

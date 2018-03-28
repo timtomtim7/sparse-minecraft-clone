@@ -3,18 +3,19 @@ package blue.sparse.minecraft.common
 import blue.sparse.math.util.DeltaTimer
 import blue.sparse.math.util.FrequencyTimer
 
-class TickingThread(name: String, private val onTick: (Float) -> Unit) : Thread(name) {
+class TickingThread(name: String, val targetTickRate: Double, private val onTick: (Float) -> Unit) : Thread(name) {
 
-	private val tickTimer = FrequencyTimer(1.0 / TARGET_TICK_RATE)
+	private val tickTimer = FrequencyTimer(1.0 / targetTickRate)
 
 	var ticking: Boolean = false
 		private set
 
-	var tickRate: Double = TARGET_TICK_RATE
+	var tickRate: Double = targetTickRate
 		private set
 
-	val partialTicks: Double
-		get() = tickTimer.count
+	var partialTicks: Double = 0.0
+		private set
+//		get() = tickTimer.count
 
 	override fun run() {
 		var tickCounter = 0.0
@@ -23,8 +24,12 @@ class TickingThread(name: String, private val onTick: (Float) -> Unit) : Thread(
 		val deltaTimer = DeltaTimer()
 		ticking = true
 		while (ticking) {
-			if (!tickTimer.use())
+			if (!tickTimer.use()) {
+				partialTicks = tickTimer.count
 				continue
+			}
+
+			partialTicks = tickTimer.count
 
 			val delta = deltaTimer.deltaFloat()
 			onTick(delta)
@@ -45,7 +50,7 @@ class TickingThread(name: String, private val onTick: (Float) -> Unit) : Thread(
 		ticking = false
 	}
 
-	companion object {
-		const val TARGET_TICK_RATE = 20.0
-	}
+//	companion object {
+//		const val TARGET_TICK_RATE = 20.0
+//	}
 }

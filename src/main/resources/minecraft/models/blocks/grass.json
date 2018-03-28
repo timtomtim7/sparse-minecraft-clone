@@ -1,0 +1,17 @@
+{
+  "cubes": [{
+    "origin": [0, 0, 0],
+    "size": [16, 16, 16],
+    "faceData": [
+      {
+        "faces": "X+ X- Z+ Z-",
+        "textures": [
+          {"asset": "minecraft:blocks/grass_side"},
+          {"asset": "minecraft:blocks/grass_side_overlay", "color": "biome"}
+        ]
+      },
+      {"faces": "Y+", "textures": [{"asset": "minecraft:blocks/grass_top", "color": "biome"}]},
+      {"faces": "Y-", "textures": [{"asset": "minecraft:blocks/dirt"}]}
+    ]
+  }]
+}

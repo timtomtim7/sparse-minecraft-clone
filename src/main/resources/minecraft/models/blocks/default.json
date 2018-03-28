@@ -1,0 +1,16 @@
+{
+  "cubes": [{
+    "origin": [0, 0, 0],
+    "size": [16, 16, 16],
+    "faceData": [{
+      "faces": "X+ X- Y+ Y- Z+ Z-",
+      "visible": true,
+      "ao": true,
+      "cull": true,
+      "textures": [{
+        "asset": "$texture",
+        "uv": [0, 0, 1, 1]
+      }]
+    }]
+  }]
+}

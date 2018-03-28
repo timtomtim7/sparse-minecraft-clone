@@ -10,9 +10,11 @@ import blue.sparse.engine.window.input.MouseButton
 import blue.sparse.math.matrices.Matrix4f
 import blue.sparse.math.vectors.floats.Quaternion4f
 import blue.sparse.math.vectors.floats.Vector3f
+import blue.sparse.minecraft.client.block.proxy.ClientBlockTypeProxy
 import blue.sparse.minecraft.client.entity.render.*
 import blue.sparse.minecraft.client.gui.GUIManager
 import blue.sparse.minecraft.client.gui.TestGUI
+import blue.sparse.minecraft.client.item.proxy.ClientItemTypeProxy
 import blue.sparse.minecraft.client.player.ClientPlayer
 import blue.sparse.minecraft.client.util.Debug
 import blue.sparse.minecraft.client.world.proxy.ClientWorldProxy
@@ -21,7 +23,9 @@ import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.MinecraftProxy
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.entity.Entity
+import blue.sparse.minecraft.common.entity.EntityType
 import blue.sparse.minecraft.common.entity.impl.types.living.EntityTypePlayer
+import blue.sparse.minecraft.common.item.ItemType
 import blue.sparse.minecraft.common.util.ProxyHolder
 import org.lwjgl.opengl.GL11
 import java.io.File
@@ -38,48 +42,13 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 			field = value
 		}
 
-	private var entityModel: EntityModel
+	private val entityModel: EntityModel = EntityModel.load(Asset["minecraft/models/entities/test.json"])
 	private lateinit var entityPose: Pose
-
 	private lateinit var animation: Animation
 	private var animationTime: Float = 0f
 
 	init {
-//		camera.apply {
-//			move(Vector3f(0f, -30f, 10f))
-//			controller = FirstPerson(this, movementSpeed = 7f)
-//			viewEntity?.let {
-//				controller = EntityCameraController(this, it)
-//			}
-//		}
-
-		entityModel = EntityModel.load(Asset["minecraft/models/entities/test.json"])
 		setupAnimation()
-	}
-
-	private fun setupAnimation() {
-		entityPose = entityModel.createPose()
-
-		val a = entityModel.createPose()
-		val legAmount = 1f
-		val armAmount = 1f
-
-		a["left_leg"]!!.setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), legAmount))
-		a["right_arm"]!!.setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), armAmount))
-		a["right_leg"]!!.setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), -legAmount))
-		a["left_arm"]!!.setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), -armAmount))
-
-		val b = entityModel.createPose()
-		b["left_leg"]!!.setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), -legAmount))
-		b["right_arm"]!!.setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), -armAmount))
-		b["right_leg"]!!.setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), legAmount))
-		b["left_arm"]!!.setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), armAmount))
-
-		animation = Animation(listOf(
-				Animation.KeyFrame(a, 0f),
-				Animation.KeyFrame(b, 0.3f),
-				Animation.KeyFrame(a, 0.6f)
-		))
 	}
 
 	private fun resetCameraProjection() {
@@ -87,25 +56,20 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 	}
 
 	override fun postInit() {
-//		ItemType.registry.values.forEach { (it.proxy as ClientItemTypeProxy).sprite }
-//		BlockType.registry.values.forEach { (it.proxy as ClientBlockTypeProxy).apply {
-//			backSprite
-//			bottomSprite
-//			frontSprite
-//			leftSprite
-//			rightSprite
-//			topSprite
-//		} }
-//		EntityType
+		ItemType.registry.values.forEach { (it.proxy as ClientItemTypeProxy).sprite }
+		BlockType.registry.values.forEach { (it.proxy as ClientBlockTypeProxy).apply {
+			backSprite
+			bottomSprite
+			frontSprite
+			leftSprite
+			rightSprite
+			topSprite
+		} }
+		EntityType
 
 		ClientPlayer.entity = Minecraft.world.spawnEntity(EntityTypePlayer, Vector3f(0f, 128f, 0f))
 		viewEntity = ClientPlayer.entity
-
-		val world = Minecraft.world
-		val renderDistance = (world.proxy as ClientWorldProxy).renderer.renderDistance
-		for(c in renderDistance) {
-			world.getOrGenerateBlock(c.x, c.y, c.z)
-		}
+		Minecraft.addPlayer(ClientPlayer)
 
 		GUIManager.open(TestGUI)
 	}
@@ -133,10 +97,6 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 		if(input[Key.F7].pressed) {
 			setupAnimation()
 		}
-//			entityModel.texture.delete()
-//			entityModel.delete()
-//			entityModel = EntityModel.load(Asset["minecraft/models/entities/test.json"])
-//		}
 
 		val targetBlock = viewEntity?.getTargetBlock(32f)
 		if(targetBlock != null && captured) {
@@ -155,8 +115,6 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 			}
 		}
 
-
-//		Minecraft.world.update(delta)
 		GUIManager.update(delta)
 	}
 
@@ -200,5 +158,30 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 
 		if (window.cursorMode == Window.CursorMode.DISABLED && (input[Key.ESCAPE].pressed))
 			window.cursorMode = Window.CursorMode.NORMAL
+	}
+
+	private fun setupAnimation() {
+		entityPose = entityModel.createPose()
+
+		val a = entityModel.createPose()
+		val legAmount = 1f
+		val armAmount = 1f
+
+		a["left_leg"].setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), legAmount))
+		a["right_arm"].setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), armAmount))
+		a["right_leg"].setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), -legAmount))
+		a["left_arm"].setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), -armAmount))
+
+		val b = entityModel.createPose()
+		b["left_leg"].setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), -legAmount))
+		b["right_arm"].setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), -armAmount))
+		b["right_leg"].setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), legAmount))
+		b["left_arm"].setRotation(Quaternion4f(Vector3f(1f, 0f, 0f), armAmount))
+
+		animation = Animation(listOf(
+				Animation.KeyFrame(a, 0f),
+				Animation.KeyFrame(b, 0.3f),
+				Animation.KeyFrame(a, 0.6f)
+		))
 	}
 }

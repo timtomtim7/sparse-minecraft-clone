@@ -2,7 +2,6 @@ package blue.sparse.minecraft.common.world
 
 import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.math.vectors.ints.Vector3i
-import blue.sparse.minecraft.client.player.ClientPlayer
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.entity.Entity
 import blue.sparse.minecraft.common.util.*
@@ -132,21 +131,8 @@ class Chunk internal constructor(val region: Region, position: Vector3i, data: I
 		return bounds.isIntersecting(pos, entityBounds, entity.position)
 	}
 
-	internal fun debugBoundingBox() {
-		val bounds = AABB(Vector3f(0f), Vector3f(SIZE.toFloat()))
-		val pos = worldBlockPosition.toFloatVector()
-
-		ClientPlayer.entity?.let { entity ->
-			val entityBounds = entity.type.bounds
-
-			val color = if(bounds.isIntersecting(pos, entityBounds, entity.position))
-				Vector3f(1f, 0f, 0f)
-			else Vector3f(1f, 1f, 0f)
-
-
-			bounds.debugRender(pos, color)
-		}
-
+	internal fun debugBoundingBox(color: Vector3f = Vector3f(1f)) {
+		bounds.debugRender(worldBlockPosition.toFloatVector(), color)
 	}
 
 	abstract class ChunkProxy(val chunk: Chunk): Proxy
@@ -156,6 +142,8 @@ class Chunk internal constructor(val region: Region, position: Vector3i, data: I
 		const val SIZE = 1 shl BITS
 		const val MASK = SIZE - 1
 		const val VOLUME = SIZE * SIZE * SIZE
+
+		val bounds = AABB(Vector3f(0f), Vector3f(SIZE.toFloat()))
 
 		fun indexOfBlock(x: Int, y: Int, z: Int): Int {
 			if (x < 0 || x >= SIZE || y < 0 || y >= SIZE || z < 0 || z >= SIZE) return -1

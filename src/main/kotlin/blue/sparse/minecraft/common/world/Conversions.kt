@@ -1,5 +1,8 @@
 package blue.sparse.minecraft.common.world
 
+import blue.sparse.math.vectors.ints.Vector3i
+import blue.sparse.minecraft.common.util.shl
+
 
 /*
 	chunk -> region
@@ -61,3 +64,37 @@ internal fun worldBlockToChunkBlock(wb: Int): Int {
 internal fun worldBlockToWorldChunk(wb: Int): Int {
 	return wb shr Chunk.BITS
 }
+
+internal fun worldChunkToWorldRegion(wc: Vector3i): Vector3i {
+	return Vector3i(
+			worldChunkToWorldRegion(wc.x),
+			worldChunkToWorldRegion(wc.y),
+			worldChunkToWorldRegion(wc.z)
+	)
+}
+
+internal fun worldChunkToRegionChunk(wc: Vector3i): Vector3i {
+	return Vector3i(
+			worldChunkToRegionChunk(wc.x),
+			worldChunkToRegionChunk(wc.y),
+			worldChunkToRegionChunk(wc.z)
+	)
+}
+
+internal fun worldChunkToWorldBlock(wc: Vector3i): Vector3i {
+	return wc shl Chunk.BITS
+}
+
+//val worldChunkPosition = run {
+//	val wr = region.worldRegionPosition
+//	val rc = regionChunkPosition
+//	Vector3i(regionChunkToWorldChunk(wr.x, rc.x), regionChunkToWorldChunk(wr.y, rc.y), regionChunkToWorldChunk(wr.z, rc.z))
+//}
+//	get() = field.clone()
+//
+//val worldBlockPosition = run {
+//	val wr = region.worldRegionPosition
+//	val rc = regionChunkPosition
+//	Vector3i(chunkBlockToWorldBlock(wr.x, rc.x, 0), chunkBlockToWorldBlock(wr.y, rc.y, 0),chunkBlockToWorldBlock(wr.z, rc.z, 0))
+//}
+//	get() = field.clone()

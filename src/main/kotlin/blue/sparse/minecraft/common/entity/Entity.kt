@@ -74,9 +74,13 @@ class Entity<out T : EntityType>(
 		position.plusAssign(movement)
 
 		if(unaffected.any { it == 0f }) {
-
 			val affected = Vector3f(1f) - unaffected
-			val friction = unaffected * 0.02f
+
+			// Minecraft only does friction vertically
+			affected.x = 0f
+			affected.z = 0f
+
+			val friction = unaffected * 0.005f
 			friction += affected
 
 			friction.x = Math.pow(friction.x.toDouble(), delta.toDouble()).toFloat()

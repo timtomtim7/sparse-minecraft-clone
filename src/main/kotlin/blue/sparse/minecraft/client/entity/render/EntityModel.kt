@@ -96,8 +96,6 @@ class EntityModel(val texture: Texture, val bones: List<Bone>) {
 		val vtY = size.y * texelHeight
 		val vtZ = size.z * texelHeight
 
-		//TODO: Add min
-
 		val uvnx = Vector4f(0f, vtZ, htZ, vtZ + vtY)
 		val uvpx = Vector4f(htZ + htX, vtZ, htZ + htX + htZ, vtZ + vtY)
 

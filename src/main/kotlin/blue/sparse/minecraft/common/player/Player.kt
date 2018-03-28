@@ -7,6 +7,7 @@ import blue.sparse.minecraft.common.inventory.Inventory
 import blue.sparse.minecraft.common.inventory.impl.types.InventoryTypePlayer
 import blue.sparse.minecraft.common.player.gamemode.GameMode
 import blue.sparse.minecraft.common.player.gamemode.GameModeSurvival
+import blue.sparse.minecraft.common.world.PlayerChunks
 import blue.sparse.minecraft.common.world.World
 
 abstract class Player(entity: Entity<EntityTypePlayer>? = null) {
@@ -29,6 +30,8 @@ abstract class Player(entity: Entity<EntityTypePlayer>? = null) {
 	var isSneaking: Boolean = false
 
 	var canFly: Boolean = false
+
+	var renderDistance = PlayerChunks(this, 8, 2)
 
 	open fun sendMessage(vararg message: Any?) {}
 
