@@ -5,30 +5,31 @@ import blue.sparse.math.vectors.floats.*
 import blue.sparse.math.vectors.shorts.Vector3s
 import blue.sparse.minecraft.client.block.proxy.ClientBlockTypeProxy
 import blue.sparse.minecraft.common.util.math.BlockFace
+import blue.sparse.minecraft.common.world.BlockView
 import blue.sparse.minecraft.common.world.Chunk
-import blue.sparse.minecraft.common.world.chunkBlockToWorldBlock
 
 class OfflineChunkModel(private val chunk: Chunk) {
 
 	private val buffer = VertexBuffer()
 
+	val worldBlock = chunk.worldBlockPosition
+
+	private fun getRelativeBlock(x: Int, y: Int, z: Int): BlockView? {
+		if (x < 0 || x >= Chunk.SIZE || y < 0 || y >= Chunk.SIZE || z < 0 || z >= Chunk.SIZE)
+			return chunk.world[x + worldBlock.x, y + worldBlock.y, z + worldBlock.z]
+
+		return chunk[x, y, z]
+	}
+
 	private fun isSolid(x: Int, y: Int, z: Int): Boolean {
-		return chunk.world.getBlock(x, y, z)?.type != null
+		return getRelativeBlock(x, y, z)?.type != null
 	}
 
 	init {
-		val rcx = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.x, chunk.regionChunkPosition.x, 0)
-		val rcy = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.y, chunk.regionChunkPosition.y, 0)
-		val rcz = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.z, chunk.regionChunkPosition.z, 0)
-
 		for (i in 0 until Chunk.VOLUME) {
 			val x = Chunk.xFromIndex(i)
 			val y = Chunk.yFromIndex(i)
 			val z = Chunk.zFromIndex(i)
-
-			val rx = x + rcx
-			val ry = y + rcy
-			val rz = z + rcz
 
 			val blockType = chunk.getBlockType(x, y, z) ?: continue
 			val proxy = (blockType.proxy as ClientBlockTypeProxy)
@@ -40,12 +41,12 @@ class OfflineChunkModel(private val chunk: Chunk) {
 			//y+ top
 			//y- bottom
 
-			val px = !isSolid(rx + 1, ry, rz)
-			val py = !isSolid(rx, ry + 1, rz)
-			val pz = !isSolid(rx, ry, rz + 1)
-			val nx = !isSolid(rx - 1, ry, rz)
-			val ny = !isSolid(rx, ry - 1, rz)
-			val nz = !isSolid(rx, ry, rz - 1)
+			val px = !isSolid(x + 1, y, z)
+			val py = !isSolid(x, y + 1, z)
+			val pz = !isSolid(x, y, z + 1)
+			val nx = !isSolid(x - 1, y, z)
+			val ny = !isSolid(x, y - 1, z)
+			val nz = !isSolid(x, y, z - 1)
 
 			val x0 = (x * 16).toShort()
 			val y0 = (y * 16).toShort()
@@ -55,7 +56,7 @@ class OfflineChunkModel(private val chunk: Chunk) {
 			val z1 = (z * 16 + 16).toShort()
 
 			if (px) {
-				val ao = calculateAO(rx, ry, rz, BlockFace.POSITIVE_X, BlockFace.POSITIVE_Y, BlockFace.POSITIVE_Z)
+				val ao = calculateAO(x, y, z, BlockFace.POSITIVE_X, BlockFace.POSITIVE_Y, BlockFace.POSITIVE_Z)
 
 				val texCoords = proxy.rightSprite.textureCoords
 				buffer.add(Vector3s(x1, y0, z0), texCoords.xw, positiveX, ao[0]) // A
@@ -68,7 +69,7 @@ class OfflineChunkModel(private val chunk: Chunk) {
 			}
 
 			if (nx) {
-				val ao = calculateAO(rx, ry, rz, BlockFace.NEGATIVE_X, BlockFace.POSITIVE_Y, BlockFace.POSITIVE_Z)
+				val ao = calculateAO(x, y, z, BlockFace.NEGATIVE_X, BlockFace.POSITIVE_Y, BlockFace.POSITIVE_Z)
 
 				val texCoords = proxy.leftSprite.textureCoords
 				buffer.add(Vector3s(x0, y0, z1), texCoords.xw, negativeX, ao[3]) // D
@@ -81,7 +82,7 @@ class OfflineChunkModel(private val chunk: Chunk) {
 			}
 
 			if (py) {
-				val ao = calculateAO(rx, ry, rz, BlockFace.POSITIVE_Y, BlockFace.POSITIVE_X, BlockFace.POSITIVE_Z)
+				val ao = calculateAO(x, y, z, BlockFace.POSITIVE_Y, BlockFace.POSITIVE_X, BlockFace.POSITIVE_Z)
 
 				val texCoords = proxy.topSprite.textureCoords
 				buffer.add(Vector3s(x0, y1, z1), texCoords.zw, positiveY, ao[3]) // D
@@ -94,7 +95,7 @@ class OfflineChunkModel(private val chunk: Chunk) {
 			}
 
 			if (ny) {
-				val ao = calculateAO(rx, ry, rz, BlockFace.NEGATIVE_Y, BlockFace.POSITIVE_X, BlockFace.POSITIVE_Z)
+				val ao = calculateAO(x, y, z, BlockFace.NEGATIVE_Y, BlockFace.POSITIVE_X, BlockFace.POSITIVE_Z)
 
 				val texCoords = proxy.bottomSprite.textureCoords
 				buffer.add(Vector3s(x0, y0, z0), texCoords.xw, negativeY, ao[0]) // A
@@ -107,7 +108,7 @@ class OfflineChunkModel(private val chunk: Chunk) {
 			}
 
 			if (pz) {
-				val ao = calculateAO(rx, ry, rz, BlockFace.POSITIVE_Z, BlockFace.NEGATIVE_X, BlockFace.POSITIVE_Y)
+				val ao = calculateAO(x, y, z, BlockFace.POSITIVE_Z, BlockFace.NEGATIVE_X, BlockFace.POSITIVE_Y)
 
 				val texCoords = proxy.frontSprite.textureCoords
 				buffer.add(Vector3s(x0, y1, z1), texCoords.zy, positiveZ, ao[2]) // C
@@ -120,7 +121,7 @@ class OfflineChunkModel(private val chunk: Chunk) {
 			}
 
 			if (nz) {
-				val ao = calculateAO(rx, ry, rz, BlockFace.NEGATIVE_Z, BlockFace.NEGATIVE_X, BlockFace.POSITIVE_Y)
+				val ao = calculateAO(x, y, z, BlockFace.NEGATIVE_Z, BlockFace.NEGATIVE_X, BlockFace.POSITIVE_Y)
 
 				val texCoords = proxy.backSprite.textureCoords
 				buffer.add(Vector3s(x0, y0, z0), texCoords.xw, negativeZ, ao[1]) // B
@@ -139,10 +140,8 @@ class OfflineChunkModel(private val chunk: Chunk) {
 	}
 
 	private fun calculateAO(x: Int, y: Int, z: Int, faceForward: BlockFace, faceA: BlockFace, faceB: BlockFace): Array<Vector3f> {
-		val world = chunk.world
-
 		fun isShadowing(a: Int, b: Int): Boolean {
-			return world.getBlock(
+			return getRelativeBlock(
 					x + faceForward.x + a * faceA.x + b * faceB.x,
 					y + faceForward.y + a * faceA.y + b * faceB.y,
 					z + faceForward.z + a * faceA.z + b * faceB.z
