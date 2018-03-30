@@ -4,11 +4,12 @@ import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.math.vectors.ints.Vector3i
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.entity.Entity
-import blue.sparse.minecraft.common.util.*
+import blue.sparse.minecraft.common.util.math.AABB
+import blue.sparse.minecraft.common.util.proxy.Proxy
+import blue.sparse.minecraft.common.util.proxy.ProxyProvider
 
-class Chunk internal constructor(val region: Region, position: Vector3i, data: IntArray?) {
+class Chunk internal constructor(val region: Region, position: Vector3i, private var data: IntArray?) {
 
-	private var data: IntArray? = data// = IntArray(SIZE * SIZE * SIZE)
 	private var filled: Int = 0
 
 	var lastChangedMillis: Long = System.currentTimeMillis()
@@ -49,10 +50,6 @@ class Chunk internal constructor(val region: Region, position: Vector3i, data: I
 	)
 
 	constructor(region: Region, position: Vector3i): this(region, position, null)
-
-	init {
-//		println("Generating chunk $worldChunkPosition on thread ${Thread.currentThread().name}")
-	}
 
 	fun fill(type: BlockType?) {
 		data = null
@@ -108,6 +105,10 @@ class Chunk internal constructor(val region: Region, position: Vector3i, data: I
 
 	operator fun get(index: Int): BlockView {
 		return get(xFromIndex(index), yFromIndex(index), zFromIndex(index))
+	}
+
+	operator fun get(chunkBlock: Vector3i): BlockView {
+		return get(chunkBlock.x, chunkBlock.y, chunkBlock.z)
 	}
 
 	operator fun get(x: Int, y: Int, z: Int): BlockView {

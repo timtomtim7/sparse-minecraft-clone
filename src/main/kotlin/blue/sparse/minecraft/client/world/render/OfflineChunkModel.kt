@@ -4,7 +4,7 @@ import blue.sparse.engine.render.resource.model.*
 import blue.sparse.math.vectors.floats.*
 import blue.sparse.math.vectors.shorts.Vector3s
 import blue.sparse.minecraft.client.block.proxy.ClientBlockTypeProxy
-import blue.sparse.minecraft.common.util.BlockFace
+import blue.sparse.minecraft.common.util.math.BlockFace
 import blue.sparse.minecraft.common.world.Chunk
 import blue.sparse.minecraft.common.world.chunkBlockToWorldBlock
 
@@ -13,19 +13,7 @@ class OfflineChunkModel(private val chunk: Chunk) {
 	private val buffer = VertexBuffer()
 
 	private fun isSolid(x: Int, y: Int, z: Int): Boolean {
-
 		return chunk.world.getBlock(x, y, z)?.type != null
-
-//		val rx = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.x, chunk.regionChunkPosition.x, x)
-//		val ry = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.y, chunk.regionChunkPosition.y, y)
-//		val rz = chunkBlockToWorldBlock(chunk.region.worldRegionPosition.z, chunk.regionChunkPosition.z, z)
-
-
-//		val index = Chunk.indexOfBlock(x, y, z)
-//		if (index < 0 || index >= Chunk.VOLUME)
-//			return false
-//
-//		return chunk.getBlockType(index)?.transparent != false
 	}
 
 	init {
@@ -45,8 +33,6 @@ class OfflineChunkModel(private val chunk: Chunk) {
 			val blockType = chunk.getBlockType(x, y, z) ?: continue
 			val proxy = (blockType.proxy as ClientBlockTypeProxy)
 
-//			println("DEBUG $x $y $z")
-
 			//z+ front
 			//z- back
 			//x+ right
@@ -60,8 +46,6 @@ class OfflineChunkModel(private val chunk: Chunk) {
 			val nx = !isSolid(rx - 1, ry, rz)
 			val ny = !isSolid(rx, ry - 1, rz)
 			val nz = !isSolid(rx, ry, rz - 1)
-
-//			println("$px $py $pz $nx $ny $nz")
 
 			val x0 = (x * 16).toShort()
 			val y0 = (y * 16).toShort()
@@ -176,19 +160,19 @@ class OfflineChunkModel(private val chunk: Chunk) {
 				isShadowing(-1, 1)
 		)
 
+		val value = Vector3f(0.6f)
+
 		val result = Array(4) { Vector3f(1f) }
 		if (blocks[0] || blocks[1] || blocks[2])
-			result[0] = Vector3f(0.5f)
+			result[0] = value
 		if (blocks[2] || blocks[3] || blocks[4])
-			result[1] = Vector3f(0.5f)
+			result[1] = value
 		if (blocks[4] || blocks[5] || blocks[6])
-			result[2] = Vector3f(0.5f)
+			result[2] = value
 		if (blocks[6] || blocks[7] || blocks[0])
-			result[3] = Vector3f(0.5f)
+			result[3] = value
 
 		return result
-
-//		val a = world.getBlock(x, y, z)!!.type?.transparent == falsve
 	}
 
 	companion object {

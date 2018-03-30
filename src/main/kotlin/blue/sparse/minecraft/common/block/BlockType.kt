@@ -3,7 +3,10 @@ package blue.sparse.minecraft.common.block
 import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.minecraft.common.block.impl.*
 import blue.sparse.minecraft.common.item.impl.types.ItemTypeBlock
-import blue.sparse.minecraft.common.util.*
+import blue.sparse.minecraft.common.util.Identifier
+import blue.sparse.minecraft.common.util.math.AABB
+import blue.sparse.minecraft.common.util.proxy.Proxy
+import blue.sparse.minecraft.common.util.proxy.ProxyProvider
 
 abstract class BlockType(val identifier: Identifier, val hasItem: Boolean = true) {
 	internal val id: Int

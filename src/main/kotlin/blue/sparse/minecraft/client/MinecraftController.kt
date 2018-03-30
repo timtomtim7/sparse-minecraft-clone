@@ -8,7 +8,7 @@ import blue.sparse.engine.window.input.*
 import blue.sparse.math.vectors.floats.*
 import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
-import blue.sparse.minecraft.common.util.AABB
+import blue.sparse.minecraft.common.util.math.AABB
 
 class MinecraftController(camera: Camera, private val mouseSensitivity: Float = 0.17f, private val movementSpeed: Float = 6f) : CameraController(camera) {
 	private var lastMousePos = Vector2f(0f)
@@ -35,7 +35,7 @@ class MinecraftController(camera: Camera, private val mouseSensitivity: Float = 
 		Minecraft.world.entities.filter { it.type == EntityTypeItem && it.timeSinceSpawned >= 0.5f }.filter {
 			bounds.isIntersecting(camera.transform.translation, it.type.bounds, it.position)
 		}.forEach {
-			it.despawn()
+			it.remove()
 		}
 	}
 

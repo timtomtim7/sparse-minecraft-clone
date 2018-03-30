@@ -24,9 +24,8 @@ import blue.sparse.minecraft.common.MinecraftProxy
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.entity.Entity
 import blue.sparse.minecraft.common.entity.EntityType
-import blue.sparse.minecraft.common.entity.impl.types.living.EntityTypePlayer
 import blue.sparse.minecraft.common.item.ItemType
-import blue.sparse.minecraft.common.util.ProxyHolder
+import blue.sparse.minecraft.common.util.proxy.ProxyHolder
 import org.lwjgl.opengl.GL11
 import java.io.File
 import javax.imageio.ImageIO
@@ -67,7 +66,7 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 		} }
 		EntityType
 
-		ClientPlayer.entity = Minecraft.world.spawnEntity(EntityTypePlayer, Vector3f(0f, 128f, 0f))
+		ClientPlayer.addEntity(Minecraft.world)
 		viewEntity = ClientPlayer.entity
 		Minecraft.addPlayer(ClientPlayer)
 
@@ -78,7 +77,6 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 		super.update(delta)
 		time += delta
 
-		val captured = window.cursorMode == Window.CursorMode.DISABLED
 		handleMouseCapture()
 		ClientPlayer.input(window.input, delta)
 
@@ -96,23 +94,6 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 
 		if(input[Key.F7].pressed) {
 			setupAnimation()
-		}
-
-		val targetBlock = viewEntity?.getTargetBlock(32f)
-		if(targetBlock != null && captured) {
-			val breakPos = targetBlock.block.position
-			val placePos = breakPos + targetBlock.face.offset
-
-			Debug.addTempCube(breakPos.toFloatVector(), breakPos.toFloatVector() + 1f, Vector3f(1f, 0f, 0f))
-			Debug.addTempCube(placePos.toFloatVector(), placePos.toFloatVector() + 1f)
-
-			if (input[MouseButton.RIGHT].pressed || input[MouseButton.RIGHT].heldTime >= 1f) {
-				Minecraft.world.getOrGenerateBlock(placePos.x, placePos.y, placePos.z).type = BlockType.diamondBlock
-			}
-
-			if (input[MouseButton.LEFT].pressed || input[MouseButton.LEFT].heldTime >= 1f) {
-				Minecraft.world.getBlock(breakPos.x, breakPos.y, breakPos.z)?.type = null
-			}
 		}
 
 		GUIManager.update(delta)

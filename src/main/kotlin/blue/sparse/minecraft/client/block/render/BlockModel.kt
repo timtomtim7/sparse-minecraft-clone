@@ -2,7 +2,7 @@ package blue.sparse.minecraft.client.block.render
 
 import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.math.vectors.floats.Vector4f
-import blue.sparse.minecraft.common.util.BlockFace
+import blue.sparse.minecraft.common.util.math.BlockFace
 
 class BlockModel {
 

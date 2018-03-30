@@ -1,6 +1,5 @@
 package blue.sparse.minecraft.common.nbt
 
-import com.google.common.primitives.Primitives
 import java.io.DataInputStream
 import java.io.DataOutputStream
 
@@ -17,7 +16,7 @@ sealed class TagType<T: Any>(val id: Int, val clazz: Class<T>)
 		)}
 
 		@Suppress("UNCHECKED_CAST")
-		fun <T: Any> getType(obj: T) = types.find { Primitives.wrap(it.clazz).isAssignableFrom(obj.javaClass) } as? TagType<T>
+		fun <T: Any> getType(obj: T) = types.find { primitiveWrap(it.clazz).isAssignableFrom(obj.javaClass) } as? TagType<T>
 
 		fun <T: Any> getTypeOrError(obj: T?): TagType<T>
 		{
@@ -27,9 +26,15 @@ sealed class TagType<T: Any>(val id: Int, val clazz: Class<T>)
 
 		internal fun getTypeById(id: Int) = types.find { it.id == id }
 		internal fun getTypeByIdOrError(id: Int) = getTypeById(id) ?: throw IllegalArgumentException("No type matches the given id: $id")
+
+		private fun primitiveWrap(clazz: Class<*>): Class<*> {
+			if(clazz.isPrimitive)
+				return clazz.kotlin.javaObjectType
+			return clazz
+		}
 	}
 
-	open fun isSupported(obj: Any) = Primitives.wrap(clazz).isInstance(obj)
+	open fun isSupported(obj: Any) = primitiveWrap(clazz).isInstance(obj)
 	abstract fun write(out: DataOutputStream, obj: T)
 	abstract fun read(inp: DataInputStream): T
 	open fun toJSON(obj: T): String = obj.toString()

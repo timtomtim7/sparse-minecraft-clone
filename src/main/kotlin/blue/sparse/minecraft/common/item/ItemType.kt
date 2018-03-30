@@ -1,7 +1,9 @@
 package blue.sparse.minecraft.common.item
 
 import blue.sparse.minecraft.common.item.impl.*
-import blue.sparse.minecraft.common.util.*
+import blue.sparse.minecraft.common.util.Identifier
+import blue.sparse.minecraft.common.util.proxy.Proxy
+import blue.sparse.minecraft.common.util.proxy.ProxyProvider
 
 abstract class ItemType(val identifier: Identifier, val maxStackSize: Int = 64) {
 	constructor(id: String, maxStackSize: Int = 64): this(Identifier(id), maxStackSize)

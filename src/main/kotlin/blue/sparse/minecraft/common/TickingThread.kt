@@ -13,9 +13,10 @@ class TickingThread(name: String, val targetTickRate: Double, private val onTick
 	var tickRate: Double = targetTickRate
 		private set
 
-	var partialTicks: Double = 0.0
-		private set
-//		get() = tickTimer.count
+//	var partialTicks: Double = 0.0
+//		private set
+
+	val partialTicks get() = tickTimer.count
 
 	override fun run() {
 		var tickCounter = 0.0
@@ -25,11 +26,11 @@ class TickingThread(name: String, val targetTickRate: Double, private val onTick
 		ticking = true
 		while (ticking) {
 			if (!tickTimer.use()) {
-				partialTicks = tickTimer.count
+//				partialTicks = tickTimer.count
 				continue
 			}
 
-			partialTicks = tickTimer.count
+//			partialTicks = tickTimer.count
 
 			val delta = deltaTimer.deltaFloat()
 			onTick(delta)

@@ -1,4 +1,4 @@
-package blue.sparse.minecraft.common.util
+package blue.sparse.minecraft.common.util.proxy
 
 import blue.sparse.minecraft.common.Minecraft
 import kotlin.reflect.KClass

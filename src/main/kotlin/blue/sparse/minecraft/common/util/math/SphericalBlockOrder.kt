@@ -1,9 +1,9 @@
-package blue.sparse.minecraft.common.util
+package blue.sparse.minecraft.common.util.math
 
 import blue.sparse.math.vectors.floats.lengthSquared
 import blue.sparse.math.vectors.ints.Vector3i
 
-object BlockLoop {
+object SphericalBlockOrder {
 
 	private val cache = ArrayList<Vector3i>()
 

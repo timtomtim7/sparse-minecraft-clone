@@ -1,4 +1,4 @@
-package blue.sparse.minecraft.common.util
+package blue.sparse.minecraft.common.util.math
 
 import blue.sparse.math.abs
 import blue.sparse.math.vectors.floats.Vector3f

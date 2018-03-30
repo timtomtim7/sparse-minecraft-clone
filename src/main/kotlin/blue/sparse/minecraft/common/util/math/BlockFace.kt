@@ -1,4 +1,4 @@
-package blue.sparse.minecraft.common.util
+package blue.sparse.minecraft.common.util.math
 
 import blue.sparse.math.vectors.ints.Vector3i
 

@@ -2,7 +2,7 @@ package blue.sparse.minecraft.common.item.impl.types
 
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.item.ItemType
-import blue.sparse.minecraft.common.util.ProxyProvider
+import blue.sparse.minecraft.common.util.proxy.ProxyProvider
 
 open class ItemTypeBlock(val blockType: BlockType): ItemType(blockType.identifier) {
 

@@ -3,6 +3,8 @@ package blue.sparse.minecraft.common.entity
 import blue.sparse.math.vectors.floats.*
 import blue.sparse.math.vectors.ints.Vector3i
 import blue.sparse.minecraft.common.Minecraft
+import blue.sparse.minecraft.common.entity.attribute.EntityAttribute
+import blue.sparse.minecraft.common.entity.attribute.EntityAttributeType
 import blue.sparse.minecraft.common.entity.data.EntityData
 import blue.sparse.minecraft.common.entity.impl.types.living.EntityTypeLiving
 import blue.sparse.minecraft.common.util.TargetBlock
@@ -12,12 +14,11 @@ import blue.sparse.minecraft.common.world.World
 class Entity<out T : EntityType>(
 		val type: T,
 		var world: World,
-		position: Vector3f = Vector3f(0f, 0f, 0f),
-		rotation: Quaternion4f = Quaternion4f()
+		var position: Vector3f = Vector3f(0f, 0f, 0f),
+		var rotation: Quaternion4f = Quaternion4f()
 ) {
 
-	var rotation = rotation
-	var position = position
+	private val attributes = HashMap<EntityAttributeType<*, *>, EntityAttribute<*>>()
 
 	var lastPosition = position.clone()
 		get() = field.clone()
@@ -30,10 +31,10 @@ class Entity<out T : EntityType>(
 	val interpolatedPosition: Vector3f
 		get() = lerp(lastPosition, position, Minecraft.partialTicks)
 
+	var velocity = Vector3f(0f)
+
 	var timeSinceSpawned = 0f
 		private set
-
-	var velocity = Vector3f(0f)
 
     val data = type.createData()
 
@@ -43,13 +44,40 @@ class Entity<out T : EntityType>(
 	val block: BlockView
 		get() = blockPosition.run { world.getOrGenerateBlock(x, y, z) }
 
-    fun despawn(): Boolean {
-		timeSinceSpawned = 0f
-		return world.despawnEntity(this)
+	init {
+		for (type in type.getAttributeTypes())
+			attributes[type] = type.create(this)
 	}
 
-    fun spawn(): Boolean {
-		return world.spawnEntity(this)
+    fun add(): Boolean {
+		return world.addEntity(this)
+	}
+
+	fun remove(): Boolean {
+		if (world.removeEntity(this)) {
+			timeSinceSpawned = 0f
+			return true
+		}
+		return false
+	}
+
+	@Suppress("UNCHECKED_CAST")
+	fun <V: Any, A: EntityAttribute<V>> getAttribute(type: EntityAttributeType<V, A>): A {
+		return attributes[type] as A
+	}
+
+	operator fun <V: Any, A: EntityAttribute<V>> set(type: EntityAttributeType<V, A>, value: V): V {
+		val attrib = getAttribute(type)
+		attrib.value = value
+		return attrib.value
+	}
+
+	operator fun <V: Any, A: EntityAttribute<V>> get(type: EntityAttributeType<V, A>): V {
+		return getAttribute(type).value
+	}
+
+	infix fun has(type: EntityAttributeType<*, *>): Boolean {
+		return type in attributes
 	}
 
     fun update(delta: Float) {

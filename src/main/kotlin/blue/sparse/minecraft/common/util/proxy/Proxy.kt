@@ -1,4 +1,4 @@
-package blue.sparse.minecraft.common.util
+package blue.sparse.minecraft.common.util.proxy
 
 interface Proxy {
 	interface Client: Proxy

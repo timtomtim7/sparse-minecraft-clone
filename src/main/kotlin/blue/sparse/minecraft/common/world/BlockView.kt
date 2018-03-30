@@ -16,6 +16,8 @@ class BlockView(val chunk: Chunk, val xInChunk: Int, val yInChunk: Int, val zInC
 		get() = chunk.getRaw(xInChunk, yInChunk, zInChunk)
 		set(value) = chunk.setRaw(xInChunk, yInChunk, zInChunk, value)
 
+	//TODO: There is probably a more simple way to do these things
+
 	internal var typeID: Int
 		get() = (raw shr 0) and 0xFFF
 		set(value) {

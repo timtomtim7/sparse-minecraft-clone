@@ -11,6 +11,7 @@ import blue.sparse.minecraft.client.player.ClientPlayer
 import blue.sparse.minecraft.client.text.TextRenderer
 import blue.sparse.minecraft.client.world.proxy.ClientWorldProxy
 import blue.sparse.minecraft.common.Minecraft
+import blue.sparse.minecraft.common.entity.attribute.types.AttributeHealth
 import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
 import blue.sparse.minecraft.common.inventory.impl.Section
 import blue.sparse.minecraft.common.item.*
@@ -70,11 +71,11 @@ object TestGUI : GUI() {
 //			TestInventory.clear()
 //		}
 		if(input[Key.KP_5].pressed) {
-			Minecraft.world.entities.toList().forEach { it.despawn() }
+			Minecraft.world.entities.toList().forEach { it.remove() }
 		}
 
 		if(input[Key.Y].pressed || input[Key.Y].heldTime >= 2f) {
-			val entity = Minecraft.world.spawnEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
+			val entity = Minecraft.world.addEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
 			entity.velocity = MinecraftClient.proxy.camera.transform.rotation.forward * 10f
 			entity.editData<EntityTypeItem.Data> {
 				stack = ItemStack(ItemTypeApple)
@@ -87,13 +88,27 @@ object TestGUI : GUI() {
 				if(selectedItem.amount <= 0)
 					ClientPlayer.inventory[Section.Key.Hotbar][selectedSlot] = null
 
-				val entity = Minecraft.world.spawnEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
+				val entity = Minecraft.world.addEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
 				entity.velocity = MinecraftClient.proxy.camera.transform.rotation.forward * 10f
 				entity.editData<EntityTypeItem.Data> {
 					stack = selectedItem.deepCopy(1)
 				}
 			}
 		}
+
+		val player = ClientPlayer.entity
+		if(player != null) {
+			if(input[Key.K].pressed) {
+				player[AttributeHealth] += 1f
+				println(player[AttributeHealth])
+			}
+			if(input[Key.M].pressed) {
+				player[AttributeHealth] -= 1f
+				println(player[AttributeHealth])
+			}
+		}
+
+
 
 //		if(input[Key.HOME].pressed) {
 //			MinecraftClient.proxy.camera.transform.translate(Vector3f(0f, 1f, 0f))
@@ -137,14 +152,28 @@ object TestGUI : GUI() {
 		drawString(levelString, expTextLeft, expTextBottom + 1, 0x000000, shadow = false)
 		drawString(levelString, expTextLeft, expTextBottom, 0x80FF20, shadow = false)
 
+		val health = ClientPlayer.entity?.get(AttributeHealth) ?: 0.0f
 
 		for (i in 0 until 10) {
 			drawTexturedRectangle("icons/heart_black_outline", hotbarLeft + (i * 8), 30f, 9f)
-			if (i < 5) {
+
+			if(health >= (i+1) * 2) {
 				drawTexturedRectangle("icons/heart_full", hotbarLeft + (i * 8), 30f, 9f)
-			} else if (i == 5) {
-				drawTexturedRectangle("icons/heart_half", hotbarLeft + (i * 8), 30f, 9f)
+			}else {
+				val fractionalHeart = clamp((health - ((i) * 2)) / 2f, 0f, 1f)
+				drawTexturedRectangle(
+						"icons/heart_full",
+						hotbarLeft + (i * 8),
+						30f, 9f * fractionalHeart,
+						9f,
+						fractionalHeart
+				)
 			}
+
+			// Traditional Minecraft half-hearts
+//			else if(health >= (i+1) * 2 - 1) {
+//				drawTexturedRectangle("icons/heart_half", hotbarLeft + (i * 8), 30f, 9f)
+//			}
 		}
 
 		for (i in 0 until 10) {

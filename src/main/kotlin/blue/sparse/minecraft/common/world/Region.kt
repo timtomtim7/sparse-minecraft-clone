@@ -15,6 +15,11 @@ class Region(val world: World, position: Vector3i) {
 	val loadedChunks: Collection<Chunk>
 		get() = chunks.values
 
+	fun getChunk(pos: Vector3i): Chunk? {
+		boundsCheck(pos.x, pos.y, pos.z)
+		return chunks[pos]
+	}
+
 	fun getChunk(x: Int, y: Int, z: Int): Chunk? {
 		boundsCheck(x, y, z)
 
@@ -24,31 +29,33 @@ class Region(val world: World, position: Vector3i) {
 	}
 
 	fun getOrGenerateChunk(x: Int, y: Int, z: Int): Chunk {
-		boundsCheck(x, y, z)
-
 		val key = this.key.get()
 		key.assign(x, y, z)
-		var chunk = chunks[key]
-		if(chunk != null)
+		return getOrGenerateChunk(x, y, z)
+	}
+
+	fun getOrGenerateChunk(regionChunk: Vector3i): Chunk {
+		boundsCheck(regionChunk.x, regionChunk.y, regionChunk.z)
+
+		var chunk = chunks[regionChunk]
+		if (chunk != null)
 			return chunk
 
 		val blocks = ChunkGenerator.blocks.get()
 		blocks.fill(null)
 		val worldRegion = worldRegionPosition
-		val position = Vector3i(
-				regionChunkToWorldChunk(worldRegion.x, x),
-				regionChunkToWorldChunk(worldRegion.y, y),
-				regionChunkToWorldChunk(worldRegion.z, z)
-		)
+		val position = regionChunkToWorldChunk(worldRegion, regionChunk)
 		world.generator.generate(position, blocks)
 
 		val first = blocks.first()
 		val filled = blocks.all { it == first }
+		val data = if (filled)
+			null
+		else
+			IntArray(Chunk.VOLUME) { blocks[it]?.rawID ?: 0 }
 
-		val data = if(filled) null else IntArray(Chunk.VOLUME) { blocks[it]?.rawID ?: 0 }
-		chunk = Chunk(this, key.clone(), data)
-		if(filled)
-			chunk.fill(first?.type)
+		chunk = Chunk(this, regionChunk.clone(), data)
+		if (filled) chunk.fill(first?.type)
 		chunks[chunk.regionChunkPosition] = chunk
 
 		return chunk
@@ -60,7 +67,7 @@ class Region(val world: World, position: Vector3i) {
 		const val MASK = SIZE - 1
 
 		private fun boundsCheck(x: Int, y: Int, z: Int) {
-			if(x < 0 || y < 0 || z < 0 || x >= SIZE || y >= SIZE || z >= SIZE)
+			if (x < 0 || y < 0 || z < 0 || x >= SIZE || y >= SIZE || z >= SIZE)
 				throw IllegalArgumentException("Chunk coordinates out of range ($SIZE): $x, $y, $z")
 		}
 	}

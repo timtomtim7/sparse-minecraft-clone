@@ -5,8 +5,8 @@ import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.entity.EntityType
 import blue.sparse.minecraft.common.entity.data.EntityData
 import blue.sparse.minecraft.common.item.ItemStack
-import blue.sparse.minecraft.common.util.AABB
-import blue.sparse.minecraft.common.util.ProxyProvider
+import blue.sparse.minecraft.common.util.math.AABB
+import blue.sparse.minecraft.common.util.proxy.ProxyProvider
 
 object EntityTypeItem : EntityType("item") {
 

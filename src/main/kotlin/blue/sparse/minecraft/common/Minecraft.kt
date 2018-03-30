@@ -1,7 +1,9 @@
 package blue.sparse.minecraft.common
 
+import blue.sparse.minecraft.common.event.EventBus
+import blue.sparse.minecraft.common.events.GameInitializationEvent
 import blue.sparse.minecraft.common.player.Player
-import blue.sparse.minecraft.common.util.ProxyProvider
+import blue.sparse.minecraft.common.util.proxy.ProxyProvider
 import blue.sparse.minecraft.common.world.World
 import blue.sparse.minecraft.common.world.generator.TestChunkGenerator
 import java.util.concurrent.ConcurrentHashMap
@@ -43,6 +45,8 @@ object Minecraft {
 		get() = _players
 	// </player>
 
+	val events = EventBus()
+
 	fun init(side: Side) {
 		if (this::side.isInitialized)
 			throw IllegalStateException("Already initialized")
@@ -52,6 +56,14 @@ object Minecraft {
 		thread = TickingThread("CommonTickingThread", 20.0, this::onTick)
 		thread.isDaemon = true
 		thread.start()
+
+		//TODO: Load mods?
+
+		events.post(when(side) {
+			Side.CLIENT -> GameInitializationEvent.Client()
+			Side.SERVER -> GameInitializationEvent.Server()
+		})
+
 		regenerateWorld()
 	}
 

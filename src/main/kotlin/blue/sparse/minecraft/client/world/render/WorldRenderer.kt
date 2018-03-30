@@ -13,7 +13,7 @@ import blue.sparse.minecraft.client.entity.proxy.ClientEntityTypeProxy
 import blue.sparse.minecraft.client.player.ClientPlayer
 import blue.sparse.minecraft.client.world.proxy.ClientChunkProxy
 import blue.sparse.minecraft.client.world.proxy.ClientWorldProxy
-import blue.sparse.minecraft.common.util.AABB
+import blue.sparse.minecraft.common.util.math.AABB
 import blue.sparse.minecraft.common.world.*
 
 class WorldRenderer(val world: World) {

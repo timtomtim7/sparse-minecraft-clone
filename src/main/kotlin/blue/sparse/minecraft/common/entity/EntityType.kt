@@ -1,10 +1,14 @@
 package blue.sparse.minecraft.common.entity
 
 import blue.sparse.math.vectors.floats.Vector3f
+import blue.sparse.minecraft.common.entity.attribute.EntityAttributeType
 import blue.sparse.minecraft.common.entity.data.EntityData
 import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
 import blue.sparse.minecraft.common.entity.impl.types.living.hostile.undead.zombie.EntityTypeZombie
-import blue.sparse.minecraft.common.util.*
+import blue.sparse.minecraft.common.util.Identifier
+import blue.sparse.minecraft.common.util.math.AABB
+import blue.sparse.minecraft.common.util.proxy.Proxy
+import blue.sparse.minecraft.common.util.proxy.ProxyProvider
 
 abstract class EntityType(val identifier: Identifier) {
 
@@ -30,6 +34,10 @@ abstract class EntityType(val identifier: Identifier) {
 
 	open fun createData(): EntityData {
 		return EntityData.Default
+	}
+
+	open fun getAttributeTypes(): List<EntityAttributeType<*, *>> {
+		return emptyList()
 	}
 
 	companion object {
