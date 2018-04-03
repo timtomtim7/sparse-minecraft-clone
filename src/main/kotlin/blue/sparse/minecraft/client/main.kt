@@ -8,12 +8,14 @@ import blue.sparse.minecraft.common.Minecraft
 import java.io.File
 
 fun main(args: Array<String>) {
+	Thread.currentThread().priority = Thread.NORM_PRIORITY + 1
 	Minecraft.init(Minecraft.Side.CLIENT)
 
 	val window = Window(
 			args.getOrNull(0)?.toIntOrNull() ?: 1600,
 			args.getOrNull(1)?.toIntOrNull() ?: 900
 	) {
+		title("Minecraft: Sparse Edition")
 		resizable()
 		icon("sparse_icon_64.png")
 		vSync(true)

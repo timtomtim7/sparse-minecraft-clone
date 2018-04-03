@@ -1,4 +1,4 @@
-package blue.sparse.minecraft.common.block.impl.types
+package blue.sparse.minecraft.common.block.types
 
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.util.Identifier

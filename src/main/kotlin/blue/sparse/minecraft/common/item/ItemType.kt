@@ -1,22 +1,22 @@
 package blue.sparse.minecraft.common.item
 
-import blue.sparse.minecraft.common.item.impl.*
 import blue.sparse.minecraft.common.util.Identifier
 import blue.sparse.minecraft.common.util.proxy.Proxy
 import blue.sparse.minecraft.common.util.proxy.ProxyProvider
 
 abstract class ItemType(val identifier: Identifier, val maxStackSize: Int = 64) {
-	constructor(id: String, maxStackSize: Int = 64): this(Identifier(id), maxStackSize)
-
-	init {
-		register(this)
-	}
 
 	open val proxy: ItemTypeProxy by ProxyProvider<ItemTypeProxy>(
 			"blue.sparse.minecraft.client.item.proxy.Default",
 			"blue.sparse.minecraft.server.item.proxy.Default",
 			this
 	)
+
+	constructor(id: String, maxStackSize: Int = 64): this(Identifier(id), maxStackSize)
+
+	init {
+		register(this)
+	}
 
 	override fun toString() = identifier.toString()
 

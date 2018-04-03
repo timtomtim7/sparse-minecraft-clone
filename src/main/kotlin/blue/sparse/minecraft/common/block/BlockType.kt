@@ -1,8 +1,7 @@
 package blue.sparse.minecraft.common.block
 
 import blue.sparse.math.vectors.floats.Vector3f
-import blue.sparse.minecraft.common.block.impl.*
-import blue.sparse.minecraft.common.item.impl.types.ItemTypeBlock
+import blue.sparse.minecraft.common.item.types.ItemTypeBlock
 import blue.sparse.minecraft.common.util.Identifier
 import blue.sparse.minecraft.common.util.math.AABB
 import blue.sparse.minecraft.common.util.proxy.Proxy
@@ -19,7 +18,7 @@ abstract class BlockType(val identifier: Identifier, val hasItem: Boolean = true
 
 	val item = if(hasItem) ItemTypeBlock(this) else null
 
-	open val boundingBox = AABB(Vector3f(0f), Vector3f(1f))
+	open val bounds = AABB(Vector3f(0f), Vector3f(1f))
 
 	open val transparent: Boolean = false
 
@@ -199,6 +198,7 @@ abstract class BlockType(val identifier: Identifier, val hasItem: Boolean = true
 		val glowstone                           = BlockGlowstone
 		val goldBlock                           = BlockGoldBlock
 		val goldOre                             = BlockGoldOre
+		val grass								= BlockGrass
 		val gravel                              = BlockGravel
 		val hardenedClay                        = BlockHardenedClay
 //		val hardenedClayStainedBlack            = BlockHardenedClayStainedBlack

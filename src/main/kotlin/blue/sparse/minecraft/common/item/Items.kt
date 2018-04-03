@@ -1,10 +1,9 @@
-package blue.sparse.minecraft.common.item.impl
+package blue.sparse.minecraft.common.item
 
-import blue.sparse.minecraft.common.item.ItemType
-import blue.sparse.minecraft.common.item.impl.types.*
-import blue.sparse.minecraft.common.item.impl.types.armor.*
-import blue.sparse.minecraft.common.item.impl.types.tools.ItemTypeTool
-import blue.sparse.minecraft.common.item.impl.types.tools.ItemTypeWeapon
+import blue.sparse.minecraft.common.item.types.*
+import blue.sparse.minecraft.common.item.types.armor.*
+import blue.sparse.minecraft.common.item.types.tools.ItemTypeTool
+import blue.sparse.minecraft.common.item.types.tools.ItemTypeWeapon
 
 /**
  * EDIBLE ITEM TYPES

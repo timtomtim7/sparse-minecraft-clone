@@ -13,34 +13,68 @@ import blue.sparse.minecraft.client.entity.proxy.ClientEntityTypeProxy
 import blue.sparse.minecraft.client.player.ClientPlayer
 import blue.sparse.minecraft.client.world.proxy.ClientChunkProxy
 import blue.sparse.minecraft.client.world.proxy.ClientWorldProxy
+import blue.sparse.minecraft.client.world.render.thread.ChunkModellingThread
 import blue.sparse.minecraft.common.util.math.AABB
 import blue.sparse.minecraft.common.world.*
+import kotlin.coroutines.experimental.buildSequence
 
 class WorldRenderer(val world: World) {
+
+	private val modellingThread: ChunkModellingThread
 
 	var visible = 0
 		private set
 
+	init {
+		modellingThread = ChunkModellingThread(world, buildSequence {
+			while (true) {
+				val player = ClientPlayer
+				val frustum = MinecraftClient.proxy.camera.viewProjectionMatrix
+
+				val renderDistance = player.renderDistance
+				val found = renderDistance.firstOrNull {
+					val blockPos = worldChunkToWorldBlock(it).toFloatVector()
+					if (!inFrustum(frustum, blockPos, Chunk.bounds))
+						return@firstOrNull false
+
+					val chunk = world.getChunk(it) ?: return@firstOrNull false
+
+					val proxy = chunk.proxy as ClientChunkProxy
+
+					proxy.canGenerateModel && proxy.shouldGenerateModel
+				}
+				yield(world.getChunk(found ?: continue) ?: continue)
+			}
+		})
+		modellingThread.start()
+	}
+
 	fun render(delta: Float) {
+		ClientChunkProxy.update()
+
 		val camera = MinecraftClient.proxy.camera
 
-		val sky = (world.proxy as ClientWorldProxy).sky
+		val worldProxy = world.proxy as ClientWorldProxy
+		val sky = worldProxy.sky
 		sky.render(camera, delta)
 
 		val viewProjection = camera.viewProjectionMatrix
 
+//		StateManager.blend = true
+//		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
 		chunkShader.bind {
-			uniforms["uLightDirection"] = sky.sun.direction
+			//			uniforms["uLightDirection"] = worldProxy.lightDirection
 			uniforms["uViewProj"] = viewProjection
 			atlas.texture.bind(0)
 			uniforms["uTexture"] = 0
 
-			var generate = 1
+//			var generate = 1
 
 			visible = 0
-			for(chunkPosition in ClientPlayer.renderDistance) {
+			for (chunkPosition in ClientPlayer.renderDistance) {
 				val blockPos = worldChunkToWorldBlock(chunkPosition).toFloatVector()
-				if(!inFrustum(viewProjection, blockPos, Chunk.bounds))
+				if (!inFrustum(viewProjection, blockPos, Chunk.bounds))
 					continue
 
 				val chunk = world.getChunk(chunkPosition.x, chunkPosition.y, chunkPosition.z) ?: continue
@@ -49,14 +83,15 @@ class WorldRenderer(val world: World) {
 				uniforms["uModel"] = Matrix4f.translation(chunk.worldBlockPosition.toFloatVector())
 				val proxy = chunk.proxy as ClientChunkProxy
 
-				if(generate > 0 && proxy.shouldGenerateModel && proxy.canGenerateModel) {
-					generate--
-					proxy.generateOfflineModel()
-				}
+				proxy.uploadOfflineModel()
+//				if(generate > 0 && proxy.uploadOfflineModel())
+//					generate--
 
 				proxy.model?.render()
 			}
 		}
+
+//		StateManager.blend = false
 
 		for (entity in world.entities) {
 			val proxy = entity.type.proxy as ClientEntityTypeProxy
@@ -80,13 +115,13 @@ class WorldRenderer(val world: World) {
 		)
 
 		val tests = IntArray(6)
-		for(point in points) {
-			if(point.x < -point.w) tests[0]++
-			if(point.x >  point.w) tests[1]++
-			if(point.y < -point.w) tests[2]++
-			if(point.y >  point.w) tests[3]++
-			if(point.z < -point.w) tests[4]++
-			if(point.z >  point.w) tests[5]++
+		for (point in points) {
+			if (point.x < -point.w) tests[0]++
+			if (point.x > point.w) tests[1]++
+			if (point.y < -point.w) tests[2]++
+			if (point.y > point.w) tests[3]++
+			if (point.z < -point.w) tests[4]++
+			if (point.z > point.w) tests[5]++
 		}
 
 		return points.size !in tests

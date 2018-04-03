@@ -3,7 +3,7 @@ package blue.sparse.minecraft.common.block
 interface BlockState {
 	val stateID: Int
 
-	object None: BlockState {
+	object Default: BlockState {
 		override val stateID = 0
 	}
 }

@@ -7,13 +7,15 @@ import blue.sparse.minecraft.client.TextureAtlas
 import blue.sparse.minecraft.client.item.proxy.ClientItemTypeProxy
 import blue.sparse.minecraft.client.text.TextRenderer
 import blue.sparse.minecraft.common.item.*
-import blue.sparse.minecraft.common.item.impl.types.ItemTypeDurable
+import blue.sparse.minecraft.common.item.types.ItemTypeDurable
 import blue.sparse.minecraft.common.text.Text
 
 abstract class GUI {
 	private val identity = Matrix4f.identity()
 
 	val manager: GUIManager get() = GUIManager
+
+	open val overridingInput: Boolean = false
 
 	abstract fun update(delta: Float)
 	abstract fun render(delta: Float)

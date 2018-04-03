@@ -14,7 +14,7 @@ import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.entity.Entity
 import blue.sparse.minecraft.common.entity.EntityType
 import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
-import blue.sparse.minecraft.common.item.impl.types.ItemTypeBlock
+import blue.sparse.minecraft.common.item.types.ItemTypeBlock
 
 class ClientEntityTypeItemProxy(type: EntityType) : ClientEntityTypeProxy(type) {
 
@@ -34,7 +34,7 @@ class ClientEntityTypeItemProxy(type: EntityType) : ClientEntityTypeProxy(type) 
 		transform.setTranslation(entity.interpolatedPosition + Vector3f(0f, bobbing, 0f))
 
 		shader.bind {
-			uniforms["uLightDirection"] = (Minecraft.world.proxy as ClientWorldProxy).sky.sun.direction
+			uniforms["uLightDirection"] = (Minecraft.world.proxy as ClientWorldProxy).lightDirection
 			uniforms["uViewProj"] = camera.viewProjectionMatrix
 			uniforms["uModel"] = transform.matrix
 			uniforms["uColor"] = item.color.vectorFromIntRGB()

@@ -96,7 +96,7 @@ class AABB(min: Vector3f, max: Vector3f) {
 	}
 
 	internal fun debugRender(position: Vector3f, color: Vector3f = Vector3f(1f, 0f, 0f)){
-		Debug.addTempCube(min + position, max + position, color, 2f)
+		Debug.addTempCube(min + position, max + position, color)
 	}
 
 	companion object {

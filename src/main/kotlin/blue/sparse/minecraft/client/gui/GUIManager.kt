@@ -29,6 +29,9 @@ object GUIManager {
 	var right = 0f
 		private set
 
+	val overridingInput: Boolean
+		get() = stack.lastOrNull()?.overridingInput == true
+
 	init {
 		updateProjection()
 	}
@@ -55,7 +58,7 @@ object GUIManager {
 		if(SparseEngine.window.resized)
 			updateProjection()
 
-		stack.firstOrNull()?.update(delta)
+		stack.lastOrNull()?.update(delta)
 	}
 
 	fun render(delta: Float) {

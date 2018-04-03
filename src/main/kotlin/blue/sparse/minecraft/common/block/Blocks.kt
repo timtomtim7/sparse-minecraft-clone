@@ -1,7 +1,6 @@
-package blue.sparse.minecraft.common.block.impl
+package blue.sparse.minecraft.common.block
 
-import blue.sparse.minecraft.common.block.BlockType
-import blue.sparse.minecraft.common.block.impl.types.BlockTypeGravity
+import blue.sparse.minecraft.common.block.types.*
 
 //object BlockAnvilBase                          : BlockType("anvil_base")
 //object BlockBeacon                             : BlockType("beacon")
@@ -111,7 +110,7 @@ object BlockEndStone                           : BlockType("end_stone")
 //object BlockFlowerTulipWhite                   : BlockType("flower_tulip_white")
 //object BlockFurnaceFrontOff                    : BlockType("furnace_front_off")
 //object BlockFurnaceFrontOn                     : BlockType("furnace_front_on")
-object BlockGlass                              : BlockType("glass")
+object BlockGlass                              : BlockTypeGlass("glass")
 //object BlockGlassBlack                         : BlockType("glass_black")
 //object BlockGlassBlue                          : BlockType("glass_blue")
 //object BlockGlassBrown                         : BlockType("glass_brown")
@@ -147,6 +146,7 @@ object BlockGlass                              : BlockType("glass")
 object BlockGlowstone                          : BlockType("glowstone")
 object BlockGoldBlock                          : BlockType("gold_block")
 object BlockGoldOre                            : BlockType("gold_ore")
+object BlockGrass							   : BlockTypeBiome("grass_top") //TODO
 object BlockGravel                             : BlockType("gravel")
 object BlockHardenedClay                       : BlockType("hardened_clay")
 //object BlockHardenedClayStainedBlack           : BlockType("hardened_clay_stained_black")

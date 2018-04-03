@@ -1,13 +1,20 @@
 package blue.sparse.minecraft.common.world
 
 import blue.sparse.math.vectors.ints.Vector3i
+import blue.sparse.minecraft.common.block.Block
+import blue.sparse.minecraft.common.util.getValue
+import blue.sparse.minecraft.common.util.threadLocal
 import blue.sparse.minecraft.common.world.generator.ChunkGenerator
 import java.util.concurrent.ConcurrentHashMap
 
 class Region(val world: World, position: Vector3i) {
 
 	private val chunks = ConcurrentHashMap<Vector3i, Chunk>()
-	private val key = ThreadLocal.withInitial { Vector3i(0) }
+//	private val key = ThreadLocal.withInitial { Vector3i(0) }
+	private val key by threadLocal { Vector3i(0)}
+
+	var lastAccessTime = System.currentTimeMillis()
+		private set
 
 	val worldRegionPosition: Vector3i = position
 		get() = field.clone()
@@ -17,32 +24,31 @@ class Region(val world: World, position: Vector3i) {
 
 	fun getChunk(pos: Vector3i): Chunk? {
 		boundsCheck(pos.x, pos.y, pos.z)
+		accessed()
 		return chunks[pos]
 	}
 
 	fun getChunk(x: Int, y: Int, z: Int): Chunk? {
 		boundsCheck(x, y, z)
-
-		val key = this.key.get()
-		key.assign(x, y, z)
-		return chunks[key]
+		accessed()
+		return chunks[key.apply { assign(x, y, z) }]
 	}
 
 	fun getOrGenerateChunk(x: Int, y: Int, z: Int): Chunk {
-		val key = this.key.get()
-		key.assign(x, y, z)
 		return getOrGenerateChunk(x, y, z)
 	}
 
 	fun getOrGenerateChunk(regionChunk: Vector3i): Chunk {
 		boundsCheck(regionChunk.x, regionChunk.y, regionChunk.z)
+		accessed()
 
 		var chunk = chunks[regionChunk]
 		if (chunk != null)
 			return chunk
 
 		val blocks = ChunkGenerator.blocks.get()
-		blocks.fill(null)
+		blocks.fill(Block.empty)
+
 		val worldRegion = worldRegionPosition
 		val position = regionChunkToWorldChunk(worldRegion, regionChunk)
 		world.generator.generate(position, blocks)
@@ -52,13 +58,23 @@ class Region(val world: World, position: Vector3i) {
 		val data = if (filled)
 			null
 		else
-			IntArray(Chunk.VOLUME) { blocks[it]?.rawID ?: 0 }
+			IntArray(Chunk.VOLUME) { blocks[it].rawID }
 
 		chunk = Chunk(this, regionChunk.clone(), data)
-		if (filled) chunk.fill(first?.type)
+		if (filled) chunk.fill(first)
 		chunks[chunk.regionChunkPosition] = chunk
 
 		return chunk
+	}
+
+	fun accessed() {
+		lastAccessTime = System.currentTimeMillis()
+	}
+
+	internal fun unloaded() {
+		loadedChunks.forEach(Chunk::unloaded)
+
+		//TODO: Save region?
 	}
 
 	companion object {

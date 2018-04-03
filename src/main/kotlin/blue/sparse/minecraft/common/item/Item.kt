@@ -1,6 +1,6 @@
 package blue.sparse.minecraft.common.item
 
-import blue.sparse.minecraft.common.item.impl.types.ItemTypeDurable
+import blue.sparse.minecraft.common.item.types.ItemTypeDurable
 import blue.sparse.minecraft.common.nbt.Compound
 
 data class Item<T : ItemType>(val type: T, var data: Compound? = null) {

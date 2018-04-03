@@ -15,7 +15,7 @@ abstract class Player(entity: Entity<EntityTypePlayer>? = null) {
 	open var entity = entity
 		protected set
 
-	val inventory = Inventory(InventoryTypePlayer)//.apply { /* LOAD FROM WHEREVER */ }
+	val inventory = Inventory(InventoryTypePlayer)
 
 	var walkSpeed = 4.317f
 	var sprintSpeed = walkSpeed * 1.3f
@@ -31,7 +31,7 @@ abstract class Player(entity: Entity<EntityTypePlayer>? = null) {
 
 	var canFly: Boolean = false
 
-	var renderDistance = PlayerChunks(this, 8, 2)
+	var renderDistance = PlayerChunks(this, 8, 4)
 
 	open fun sendMessage(vararg message: Any?) {}
 

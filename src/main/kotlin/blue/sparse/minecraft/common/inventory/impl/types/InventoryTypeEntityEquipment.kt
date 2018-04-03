@@ -2,7 +2,7 @@ package blue.sparse.minecraft.common.inventory.impl.types
 
 import blue.sparse.minecraft.common.inventory.impl.Section
 import blue.sparse.minecraft.common.inventory.impl.SlotType
-import blue.sparse.minecraft.common.item.impl.types.armor.*
+import blue.sparse.minecraft.common.item.types.armor.*
 
 object InventoryTypeEntityEquipment : InventoryType() {
 

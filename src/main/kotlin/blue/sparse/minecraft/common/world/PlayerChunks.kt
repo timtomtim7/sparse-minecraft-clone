@@ -26,7 +26,7 @@ class PlayerChunks(val player: Player, horizontalDistance: Int = 8, verticalDist
 		}
 
 	val chunkPosition: Vector3i?
-		get() = player.entity?.block?.chunk?.worldChunkPosition
+		get() = player.entity?.chunk?.worldChunkPosition
 
 	val volume: Int
 		get() = (horizontalDistance * 2 + 1) * (horizontalDistance * 2 + 1) * (verticalDistance * 2 + 1)

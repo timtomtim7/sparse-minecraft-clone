@@ -42,13 +42,13 @@ class EntityModel(val texture: Texture, val bones: List<Bone>) {
 				val bone = bones[i]
 
 				val transform = Matrix4f.translation(bone.origin / 16f)
-				pose[bone.name]?.let { transform *= it.matrix }
+				transform *= pose[bone.name].matrix
 
 				uniforms["uBoneTransforms[$i]"] = transform
 			}
 //			uniforms["uBoneTransforms[0]"] = Matrix4f.identity()
 //			uniforms["uBoneTransforms[1]"] = Matrix4f.identity()
-			uniforms["uLightDirection"] = (Minecraft.world.proxy as ClientWorldProxy).sky.sun.direction
+			uniforms["uLightDirection"] = (Minecraft.world.proxy as ClientWorldProxy).lightDirection
 			model.render()
 		}
 	}

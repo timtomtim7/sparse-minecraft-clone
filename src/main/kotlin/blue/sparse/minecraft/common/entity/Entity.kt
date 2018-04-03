@@ -8,8 +8,7 @@ import blue.sparse.minecraft.common.entity.attribute.EntityAttributeType
 import blue.sparse.minecraft.common.entity.data.EntityData
 import blue.sparse.minecraft.common.entity.impl.types.living.EntityTypeLiving
 import blue.sparse.minecraft.common.util.TargetBlock
-import blue.sparse.minecraft.common.world.BlockView
-import blue.sparse.minecraft.common.world.World
+import blue.sparse.minecraft.common.world.*
 
 class Entity<out T : EntityType>(
 		val type: T,
@@ -40,6 +39,9 @@ class Entity<out T : EntityType>(
 
 	val blockPosition: Vector3i
 		get() = floor(position).toIntVector()
+
+	val chunk: Chunk
+		get() = blockPosition.run { world.getOrGenerateChunk(worldBlockToWorldChunk(this)) }
 
 	val block: BlockView
 		get() = blockPosition.run { world.getOrGenerateBlock(x, y, z) }
@@ -95,11 +97,10 @@ class Entity<out T : EntityType>(
 		val movement = vel * delta
 		val unaffected = world.testBlockIntersections(bounds, position, movement)
 
-//		bounds.debugRender(position, Vector3f(1f))
-
 		vel = movement / delta
 		lastPosition = position.clone()
-		position.plusAssign(movement)
+//		position.plusAssign(movement)
+		position = position + movement
 
 		if(unaffected.any { it == 0f }) {
 			val affected = Vector3f(1f) - unaffected
@@ -120,7 +121,8 @@ class Entity<out T : EntityType>(
 		velocity = vel
 
         type.update(this, delta)
-    }
+//		bounds.debugRender(position, Vector3f(1f))
+	}
 
 	fun getTargetBlock(maxDistance: Float): TargetBlock? {
 		val eyeHeight = if(type is EntityTypeLiving) type.eyeHeight else 0f

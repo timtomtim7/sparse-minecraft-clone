@@ -7,6 +7,7 @@ import blue.sparse.engine.render.resource.bind
 import blue.sparse.engine.render.resource.shader.ShaderProgram
 import blue.sparse.math.vectors.floats.Vector3f
 import org.lwjgl.opengl.GL11.*
+import java.util.concurrent.ConcurrentLinkedQueue
 
 object Debug {
 
@@ -16,7 +17,7 @@ object Debug {
 			Asset["minecraft/shaders/debug/line.gs"]
 	)
 
-	private val temp = ArrayList<DebugElement>()
+	private val temp = ConcurrentLinkedQueue<DebugElement>()
 
 	interface DebugElement {
 		fun render()

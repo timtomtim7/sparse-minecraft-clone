@@ -1,7 +1,7 @@
 package blue.sparse.minecraft.client.item.proxy
 
 import blue.sparse.minecraft.client.block.proxy.ClientBlockTypeProxy
-import blue.sparse.minecraft.common.item.impl.types.ItemTypeBlock
+import blue.sparse.minecraft.common.item.types.ItemTypeBlock
 
 class ItemTypeBlockProxy(itemType: ItemTypeBlock) : ClientItemTypeProxy(itemType) {
 //	override val texture = Asset["minecraft/textures/blocks/${itemType.identifier.name}.png"]

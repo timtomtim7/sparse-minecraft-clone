@@ -3,6 +3,7 @@ package blue.sparse.minecraft.client.gui
 import blue.sparse.engine.SparseEngine
 import blue.sparse.engine.errors.glCall
 import blue.sparse.engine.util.MemoryUsage
+import blue.sparse.engine.window.Window
 import blue.sparse.engine.window.input.Key
 import blue.sparse.math.clamp
 import blue.sparse.math.wrap
@@ -15,7 +16,6 @@ import blue.sparse.minecraft.common.entity.attribute.types.AttributeHealth
 import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
 import blue.sparse.minecraft.common.inventory.impl.Section
 import blue.sparse.minecraft.common.item.*
-import blue.sparse.minecraft.common.item.impl.ItemTypeApple
 import blue.sparse.minecraft.common.text.Text
 import blue.sparse.minecraft.common.util.random
 import org.lwjgl.opengl.GL11.*
@@ -23,9 +23,11 @@ import org.lwjgl.opengl.GL11.*
 object TestGUI : GUI() {
 	private var selectedSlot: Int = 0
 
-	data class ChatMessage(val text: Text, var timeRemaining: Float)
-
 	private val chatMessages = ArrayList<ChatMessage>()
+	private var textBuffer: StringBuffer? = null
+
+	override val overridingInput: Boolean
+		get() = textBuffer != null
 
 //	private val item = Item(ItemType.chainmailChestplate)
 
@@ -38,6 +40,7 @@ object TestGUI : GUI() {
 	}
 
 	override fun update(delta: Float) {
+
 		selectedSlot -= SparseEngine.window.input.scrollDelta.toInt()
 		selectedSlot = wrap(selectedSlot, 0, 8)
 
@@ -51,6 +54,35 @@ object TestGUI : GUI() {
 //		}
 
 		val input = SparseEngine.window.input
+
+		val textBuffer = textBuffer
+		if(textBuffer != null) {
+			textBuffer.append(input.textBuffer)
+
+			if(input[Key.BACKSPACE].pressed && textBuffer.isNotEmpty()) {
+				textBuffer.deleteCharAt(textBuffer.length-1)
+			}
+			if(input[Key.ENTER].pressed) {
+				val string = textBuffer.toString().trim()
+				if(string.isNotBlank())
+					sendMessage(string)
+				this.textBuffer = null
+			}
+			if(input[Key.ESCAPE].pressed) {
+				this.textBuffer = null
+			}
+
+			if(this.textBuffer == null) {
+//				input.window.cursorMode = Window.CursorMode.DISABLED
+			}
+			return
+		}
+		if(input[Key.T].pressed) {
+			input.window.cursorMode = Window.CursorMode.NORMAL
+			this.textBuffer = StringBuffer()
+			return
+		}
+
 		if (input[Key.U].pressed || input[Key.U].heldTime >= 1f) {
 //			val item = Item(ItemTypeIronIngot)
 
@@ -206,6 +238,22 @@ object TestGUI : GUI() {
 		drawString("ENT: ${Minecraft.world.entities.size}", 1f, line())
 		drawString("VIS: ${(Minecraft.world.proxy as ClientWorldProxy).renderer.visible}", 1f, line())
 
+		val entity = ClientPlayer.entity
+		if(entity != null) {
+			val block = entity.block
+			drawString("TYP: ${block.type?.identifier}", 1f, line())
+			drawString("BIO: ${block.biome.identifier}", 1f, line())
+		}
+
+		val textBuffer = textBuffer
+		if(textBuffer != null) {
+			val string = textBuffer.toString()
+			val width = TextRenderer.stringWidth(string)
+			drawRectangle(1f, 1f, manager.right-2f, 12f, 0x0000007F)
+			drawString(string, 3f, 3f)
+			drawRectangle(3f + width, 3f, 5f, 1f)
+			drawRectangle(3f + width + 1f, 3f - 1f, 5f, 1f, 0x3F3F3FFF)
+		}
 
 		for ((index, message) in chatMessages.withIndex()) {
 			if (index >= 20) break
@@ -216,5 +264,7 @@ object TestGUI : GUI() {
 		}
 
 	}
+
+	data class ChatMessage(val text: Text, var timeRemaining: Float)
 }
 

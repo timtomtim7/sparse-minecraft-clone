@@ -7,24 +7,32 @@ import blue.sparse.minecraft.common.entity.Entity
 import blue.sparse.minecraft.common.entity.EntityType
 import blue.sparse.minecraft.common.event.post
 import blue.sparse.minecraft.common.events.world.*
-import blue.sparse.minecraft.common.util.TargetBlock
+import blue.sparse.minecraft.common.player.Player
+import blue.sparse.minecraft.common.util.*
 import blue.sparse.minecraft.common.util.math.*
 import blue.sparse.minecraft.common.util.proxy.Proxy
 import blue.sparse.minecraft.common.util.proxy.ProxyProvider
 import blue.sparse.minecraft.common.world.generator.ChunkGenerator
+import blue.sparse.minecraft.common.world.generator.thread.ChunkGenerationThread
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.coroutines.experimental.buildSequence
 
 class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: ChunkGenerator) {
-
-	private val regions = ConcurrentHashMap<Vector3i, Region>()
-	private val key = ThreadLocal.withInitial { Vector3i(0) }
 
 	val proxy by ProxyProvider.invoke<WorldProxy>(
 			"blue.sparse.minecraft.client.world.proxy.ClientWorldProxy",
 			"blue.sparse.minecraft.server.world.proxy.ServerWorldProxy",
 			this
 	)
+
+	private val regions = ConcurrentHashMap<Vector3i, Region>()
+
+	private val key by threadLocal { Vector3i(0) }
+
+	private val chunkGenerationThread: ChunkGenerationThread
+
+	private var lastUnloadCheck = System.currentTimeMillis()
 
 	private val _entities = ConcurrentHashMap.newKeySet<Entity<*>>()
 
@@ -34,8 +42,20 @@ class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: C
 	val loadedChunks: Collection<Chunk>
 		get() = regions.values.flatMap(Region::loadedChunks)
 
+	val players: Set<Player>
+		get() = Minecraft.players.filterTo(HashSet()) { it.entity?.world == this }
+
 	init {
 		WorldInitializationEvent(this).post()
+		chunkGenerationThread = ChunkGenerationThread(this, buildSequence {
+			while(true) {
+				for (player in players) {
+					val renderDistance = player.renderDistance
+					yield(renderDistance.firstOrNull { getChunk(it) == null } ?: continue)
+				}
+			}
+		})
+		chunkGenerationThread.start()
 	}
 
 	fun <T : EntityType> addEntity(entityType: T, position: Vector3f): Entity<T> {
@@ -69,16 +89,24 @@ class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: C
 	}
 
 	fun update(delta: Float) {
-		var generate = 1
-		for (player in Minecraft.players) {
-			val renderDistance = player.renderDistance
-			for(chunkPos in renderDistance) {
-				if(getChunk(chunkPos.x, chunkPos.y, chunkPos.z) != null || generate <= 0)
-					continue
+//		var generate = 1
+//		for (player in Minecraft.players) {
+//			val renderDistance = player.renderDistance
+//			for(chunkPos in renderDistance) {
+//				if(getChunk(chunkPos.x, chunkPos.y, chunkPos.z) != null || generate <= 0)
+//					continue
+//
+//				getOrGenerateChunk(chunkPos.x, chunkPos.y, chunkPos.z)
+//				generate--
+//			}
+//		}
 
-				getOrGenerateChunk(chunkPos.x, chunkPos.y, chunkPos.z)
-				generate--
-			}
+		val now = System.currentTimeMillis()
+		if(now - lastUnloadCheck > 2500L) {
+			lastUnloadCheck = now
+			val toUnload = regions.values.filter { now - it.lastAccessTime > 5000L }
+			toUnload.forEach(Region::unloaded)
+			regions.values.removeAll(toUnload)
 		}
 
 		entities.forEach { it.update(delta) }
@@ -95,7 +123,7 @@ class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: C
 		for(i in 0 until volume) {
 			val pos = SphericalBlockOrder[i, (max - min) / 2 + min]
 			val type = getBlock(pos.x, pos.y, pos.z)?.type ?: continue
-			val blockBounds = type.boundingBox
+			val blockBounds = type.bounds
 			val blockPosition = pos.toFloatVector()
 
 			result *= blockBounds.testIntersection(blockPosition, movement, bounds, position)
@@ -191,9 +219,7 @@ class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: C
 	}
 
 	private fun key(x: Int, y: Int, z: Int): Vector3i {
-		val key = this.key.get()
-		key.assign(x, y, z)
-		return key
+		return key.apply { assign(x, y, z) }
 	}
 
 	abstract class WorldProxy(val world: World) : Proxy

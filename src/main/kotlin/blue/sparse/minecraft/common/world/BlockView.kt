@@ -1,7 +1,9 @@
 package blue.sparse.minecraft.common.world
 
 import blue.sparse.math.vectors.ints.Vector3i
+import blue.sparse.minecraft.common.biome.BiomeType
 import blue.sparse.minecraft.common.block.BlockType
+import blue.sparse.minecraft.common.util.math.BlockFace
 
 class BlockView(val chunk: Chunk, val xInChunk: Int, val yInChunk: Int, val zInChunk: Int) {
 
@@ -19,39 +21,38 @@ class BlockView(val chunk: Chunk, val xInChunk: Int, val yInChunk: Int, val zInC
 	//TODO: There is probably a more simple way to do these things
 
 	internal var typeID: Int
-		get() = (raw shr 0) and 0xFFF
-		set(value) {
-			raw = (raw.inv() or 0xFFF).inv() or value
-		}
+		get() = Chunk.typeID(raw)
+		set(value) { raw = Chunk.typeID(raw, value) }
 
 	internal var stateID: Int
-		get() = (raw shr 12) and 0xF
-		set(value) {
-			raw = (raw.inv() or (0xF shl 12)).inv() or (value shl 12)
-		}
+		get() = Chunk.stateID(raw)
+		set(value) { raw = Chunk.stateID(raw, value) }
 
 	var type: BlockType?
-		get() = typeID.takeIf { it > 0 }?.let { BlockType[it] }
-		set(value) {
-			typeID = value?.id ?: 0
-		}
+		get() = Chunk.type(raw)
+		set(value) { raw = Chunk.type(raw, value) }
 
-	var light: Int
-		get() = (raw shr 16) and 0xF
-		set(value) {
-			raw = (raw.inv() or (0xF shl 16)).inv() or (value shl 16)
-		}
+	var blockLight: Int
+		get() = Chunk.blockLight(raw)
+		set(value) { raw = Chunk.blockLight(raw, value) }
 
 	var skyLight: Int
-		get() = (raw shr 20) and 0xF
-		set(value) {
-			raw = (raw.inv() or (0xF shl 20)).inv() or (value shl 20)
-		}
+		get() = Chunk.skyLight(raw)
+		set(value) { raw = Chunk.skyLight(raw, value) }
 
 	internal var biomeID: Int
-		get() = (raw shr 24) and 0xFF
-		set(value) {
-			raw = (raw.inv() or (0xFF shl 24)).inv() or (value shl 24)
-		}
+		get() = Chunk.biomeID(raw)
+		set(value) { raw = Chunk.biomeID(raw, value) }
 
+	var biome: BiomeType
+		get() = Chunk.biome(raw)
+		set(value) { raw = Chunk.biome(raw, value) }
+
+	fun relative(x: Int, y: Int, z: Int): BlockView {
+		return chunk.world.getOrGenerateBlock(this.x + x, this.y + y, this.z + z)
+	}
+
+	fun relative(face: BlockFace): BlockView {
+		return relative(face.x, face.y, face.z)
+	}
 }

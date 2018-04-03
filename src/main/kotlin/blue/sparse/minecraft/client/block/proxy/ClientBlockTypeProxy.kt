@@ -2,9 +2,11 @@ package blue.sparse.minecraft.client.block.proxy
 
 import blue.sparse.engine.asset.Asset
 import blue.sparse.engine.render.resource.model.Model
+import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.minecraft.client.item.render.BlockItemModelGenerator
 import blue.sparse.minecraft.client.world.render.WorldRenderer
 import blue.sparse.minecraft.common.block.BlockType
+import blue.sparse.minecraft.common.world.World
 
 abstract class ClientBlockTypeProxy(blockType: BlockType) : BlockType.BlockTypeProxy(blockType) {
 
@@ -21,6 +23,10 @@ abstract class ClientBlockTypeProxy(blockType: BlockType) : BlockType.BlockTypeP
 	val bottomSprite by lazy { WorldRenderer.atlas.getOrAddSprite(bottomTexture) }
 	val leftSprite by lazy { WorldRenderer.atlas.getOrAddSprite(leftTexture) }
 	val rightSprite by lazy { WorldRenderer.atlas.getOrAddSprite(rightTexture) }
+
+	open fun getColor(world: World, x: Int, y: Int, z: Int): Vector3f {
+		return Vector3f(1f)
+	}
 
 	open fun generateItemModel(): Model? {
 		if (blockType.hasItem) {

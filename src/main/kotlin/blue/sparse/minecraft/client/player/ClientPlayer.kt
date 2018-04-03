@@ -9,6 +9,7 @@ import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.entity.impl.types.living.EntityTypePlayer
 import blue.sparse.minecraft.common.player.Player
+import blue.sparse.minecraft.common.util.math.BlockFace
 import blue.sparse.minecraft.common.world.World
 
 object ClientPlayer : Player() {
@@ -21,21 +22,36 @@ object ClientPlayer : Player() {
 
 	fun input(input: Input, delta: Float) {
 		freeMove(input, delta)
+
 		if (input.window.cursorMode == Window.CursorMode.DISABLED) {
+			val entity = entity
 			val targetBlock = entity?.getTargetBlock(32f)
 			if(targetBlock != null) {
 				val breakPos = targetBlock.block.position
 				val placePos = breakPos + targetBlock.face.offset
 
+				val typeToPlace = BlockType.stonebrick
+
+				val bounds = typeToPlace.bounds
+				val intersect = entity.type.bounds.isIntersecting(entity.position, bounds, placePos.toFloatVector())
+
 				Debug.addTempCube(breakPos.toFloatVector(), breakPos.toFloatVector() + 1f, Vector3f(1f, 0f, 0f))
+				if(!intersect)
 				Debug.addTempCube(placePos.toFloatVector(), placePos.toFloatVector() + 1f)
 
-				if (input[MouseButton.RIGHT].pressed || input[MouseButton.RIGHT].heldTime >= 1f) {
-					Minecraft.world.getOrGenerateBlock(placePos.x, placePos.y, placePos.z).type = BlockType.diamondBlock
+				if (!intersect && (input[MouseButton.RIGHT].pressed || input[MouseButton.RIGHT].heldTime >= 1f)) {
+					Minecraft.world.getOrGenerateBlock(placePos.x, placePos.y, placePos.z).type = typeToPlace
 				}
 
 				if (input[MouseButton.LEFT].pressed || input[MouseButton.LEFT].heldTime >= 1f) {
 					Minecraft.world.getBlock(breakPos.x, breakPos.y, breakPos.z)?.type = null
+				}
+			}
+
+			if(input[Key.E].held) {
+				val block = entity?.block?.relative(BlockFace.NEGATIVE_Y)
+				if(block != null && block.type == null) {
+					block.type = BlockType.planksOak
 				}
 			}
 
@@ -67,15 +83,14 @@ object ClientPlayer : Player() {
 			entity.velocity.y = 12f
 		}
 
-//        if (input[Key.SPACE].pressed) wasdMovement += Vector3f(0f, 1f, 0f)
-
-		isSprinting = input[Key.LEFT_CONTROL].held
+		isSneaking = input[Key.LEFT_SHIFT].held
+		isSprinting = !isSneaking && input[Key.LEFT_CONTROL].held
 
 		var speed = when {
 			isSneaking -> sneakSpeed
 			isSprinting -> sprintSpeed
 			else -> walkSpeed
-		} * delta * 6f
+		}
 
 		if (wasdMovement.any { it != 0f }) {
 			var rotated = normalize(normalize(wasdMovement) * entity.rotation)
@@ -85,28 +100,27 @@ object ClientPlayer : Player() {
 			if (input[Key.TAB].held)
 				speed *= 2
 
-			val movement = rotated * speed
+			val movement = rotated * (speed * delta * 6f)
 			Minecraft.world.testBlockIntersections(entity.type.bounds, entity.position, movement)
 
-//			fun calculateVelocity(a: Float, b: Float): Float {
-//				if(b > 0 && a > b)
-//					return a
-//				if(b < 0 && a < b)
-//					return a
+//			fun calculateVelocity(original: Float, toAdd: Float, max: Float): Float {
+//				if (original < 0 && original < -max)
+//					return original
+//				if (original > 0 && original > max)
+//					return original
 //
-//				return a + b
+//				if(original + toAdd > max)
+//					return max
+//				if(original + toAdd < -max)
+//					return -max
+//
+//				return original + toAdd
 //			}
-////
-//			entity.velocity.assign(
-//					calculateVelocity(entity.velocity.x, movement.x),
-//					calculateVelocity(entity.velocity.y, movement.y),
-//					calculateVelocity(entity.velocity.z, movement.z)
-//			)
 
-//			entity.velocity = Vector3f(
-//					max(entity.velocity.x, movement.x),
-//					max(entity.velocity.x, movement.x),
-//					max(entity.velocity.x, movement.x)
+//			entity.velocity.assign(
+//					calculateVelocity(entity.velocity.x, movement.x, speed),
+//					calculateVelocity(entity.velocity.y, movement.y, speed),
+//					calculateVelocity(entity.velocity.z, movement.z, speed)
 //			)
 
 			entity.velocity.plusAssign(movement)

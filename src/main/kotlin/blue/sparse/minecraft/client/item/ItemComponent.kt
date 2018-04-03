@@ -13,7 +13,7 @@ import blue.sparse.minecraft.client.world.proxy.ClientWorldProxy
 import blue.sparse.minecraft.client.world.render.WorldRenderer
 import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.item.Item
-import blue.sparse.minecraft.common.item.impl.types.ItemTypeBlock
+import blue.sparse.minecraft.common.item.types.ItemTypeBlock
 import blue.sparse.minecraft.common.util.random
 
 class ItemComponent(val item: Item<*>, val position: Vector3f) : Transformed() {
@@ -47,7 +47,7 @@ class ItemComponent(val item: Item<*>, val position: Vector3f) : Transformed() {
 
 	override fun render(delta: Float, camera: Camera, shader: ShaderProgram) {
 		Companion.shader.bind {
-			uniforms["uLightDirection"] = (Minecraft.world.proxy as ClientWorldProxy).sky.sun.direction
+			uniforms["uLightDirection"] = (Minecraft.world.proxy as ClientWorldProxy).lightDirection
 			uniforms["uViewProj"] = camera.viewProjectionMatrix
 			uniforms["uModel"] = modelMatrix
 			uniforms["uColor"] = color

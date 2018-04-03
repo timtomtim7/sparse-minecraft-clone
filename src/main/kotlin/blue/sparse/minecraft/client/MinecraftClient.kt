@@ -4,6 +4,7 @@ import blue.sparse.engine.SparseEngine
 import blue.sparse.engine.SparseGame
 import blue.sparse.engine.asset.Asset
 import blue.sparse.engine.errors.glCall
+import blue.sparse.engine.render.camera.FirstPerson
 import blue.sparse.engine.window.Window
 import blue.sparse.engine.window.input.Key
 import blue.sparse.engine.window.input.MouseButton
@@ -48,6 +49,7 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 
 	init {
 		setupAnimation()
+		camera.controller = FirstPerson(camera)
 	}
 
 	private fun resetCameraProjection() {
@@ -77,8 +79,20 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 		super.update(delta)
 		time += delta
 
-		handleMouseCapture()
+		GUIManager.update(delta)
+		if(GUIManager.overridingInput)
+			return
+
+//		ClientPlayer.entity!!.apply {
+//			position = camera.transform.translation.clone()
+//			velocity = Vector3f(0f)
+//		}
+
+//		ClientPlayer.entity?.let { it.type.bounds.debugRender(it.interpolatedPosition) }
+
 		ClientPlayer.input(window.input, delta)
+
+		handleMouseCapture()
 
 		if (window.resized)
 			resetCameraProjection()
@@ -95,8 +109,6 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 		if(input[Key.F7].pressed) {
 			setupAnimation()
 		}
-
-		GUIManager.update(delta)
 	}
 
 	override fun render(delta: Float) {
