@@ -21,6 +21,7 @@ out vec2 gTexCoord;
 out vec4 gTexCoordRange;
 
 vec4 transform(vec2 vert) {
+	//TODO: This is setting W to 2, that's wrong!
 	vec4 pos = vec4(uPosition, 1) + vec4(vert, 0, 1);
 	return (pos * uModel) * uViewProj;
 }

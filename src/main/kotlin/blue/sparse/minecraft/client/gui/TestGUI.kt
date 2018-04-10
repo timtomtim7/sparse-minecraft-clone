@@ -6,22 +6,29 @@ import blue.sparse.engine.util.MemoryUsage
 import blue.sparse.engine.window.Window
 import blue.sparse.engine.window.input.Key
 import blue.sparse.math.clamp
+import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.math.wrap
 import blue.sparse.minecraft.client.MinecraftClient
 import blue.sparse.minecraft.client.player.ClientPlayer
 import blue.sparse.minecraft.client.text.TextRenderer
 import blue.sparse.minecraft.client.world.proxy.ClientWorldProxy
 import blue.sparse.minecraft.common.Minecraft
+import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.entity.attribute.types.AttributeHealth
 import blue.sparse.minecraft.common.entity.impl.types.EntityTypeItem
 import blue.sparse.minecraft.common.inventory.impl.Section
-import blue.sparse.minecraft.common.item.*
+import blue.sparse.minecraft.common.item.Item
+import blue.sparse.minecraft.common.item.ItemType
 import blue.sparse.minecraft.common.text.Text
+import blue.sparse.minecraft.common.util.Identifier
 import blue.sparse.minecraft.common.util.random
 import org.lwjgl.opengl.GL11.*
 
 object TestGUI : GUI() {
-	private var selectedSlot: Int = 0
+	var selectedSlot: Int = 0
+		set(value) {
+			field = wrap(value, 0, 8)
+		}
 
 	private val chatMessages = ArrayList<ChatMessage>()
 	private var textBuffer: StringBuffer? = null
@@ -42,7 +49,7 @@ object TestGUI : GUI() {
 	override fun update(delta: Float) {
 
 		selectedSlot -= SparseEngine.window.input.scrollDelta.toInt()
-		selectedSlot = wrap(selectedSlot, 0, 8)
+//		selectedSlot = wrap(selectedSlot, 0, 8)
 
 		chatMessages.removeAll {
 			it.timeRemaining -= delta
@@ -64,8 +71,30 @@ object TestGUI : GUI() {
 			}
 			if(input[Key.ENTER].pressed) {
 				val string = textBuffer.toString().trim()
-				if(string.isNotBlank())
-					sendMessage(string)
+				if(string.isNotBlank()) {
+					if(string.startsWith("/tp")) {
+						val split = string.split(" ")
+
+						val x = split.getOrNull(1)?.toFloatOrNull() ?: 0f
+						val y = split.getOrNull(2)?.toFloatOrNull() ?: 0f
+						val z = split.getOrNull(3)?.toFloatOrNull() ?: 0f
+
+						ClientPlayer.teleport(Vector3f(x, y, z), Minecraft.world)
+						sendMessage("Teleported to $x $y $z")
+					}else if(string.startsWith("/give")) {
+						val split = string.split(" ")
+
+						val itemName = split.getOrNull(1) ?: "debug"
+						val item = ItemType.registry[Identifier(itemName)] ?: BlockType.debug.item!!
+
+						val amount = split.getOrNull(2)?.toIntOrNull() ?: 1
+
+						ClientPlayer.inventory += Item(item).stack(amount)
+
+					}else {
+						sendMessage(string)
+					}
+				}
 				this.textBuffer = null
 			}
 			if(input[Key.ESCAPE].pressed) {
@@ -83,10 +112,10 @@ object TestGUI : GUI() {
 			return
 		}
 
-		if (input[Key.U].pressed || input[Key.U].heldTime >= 1f) {
+		if (input[Key.V].pressed || input[Key.V].heldTime >= 1f) {
 //			val item = Item(ItemTypeIronIngot)
 
-			val item = Item(arrayOf(ItemType.ironIngot, ItemType.goldIngot, ItemType.emerald, ItemType.diamond, ItemType.coal).random())
+			val item = Item(arrayOf(BlockType.ironBlock, BlockType.goldBlock, BlockType.emeraldBlock, BlockType.diamondBlock, BlockType.coalBlock).random().item!!)
 
 //			TestInventory.addItem(item)
 			ClientPlayer.inventory.addItem(item)
@@ -99,20 +128,21 @@ object TestGUI : GUI() {
 				selectedSlot = i
 		}
 
-//		if (input[Key.KP_8].pressed) {
-//			TestInventory.clear()
-//		}
+		if (input[Key.KP_8].pressed) {
+			ClientPlayer.inventory.clear()
+		}
 		if(input[Key.KP_5].pressed) {
 			Minecraft.world.entities.toList().forEach { it.remove() }
+			Minecraft.players.forEach { it.entity?.add() }
 		}
 
-		if(input[Key.Y].pressed || input[Key.Y].heldTime >= 2f) {
-			val entity = Minecraft.world.addEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
-			entity.velocity = MinecraftClient.proxy.camera.transform.rotation.forward * 10f
-			entity.editData<EntityTypeItem.Data> {
-				stack = ItemStack(ItemTypeApple)
-			}
-		}
+//		if(input[Key.Y].pressed || input[Key.Y].heldTime >= 2f) {
+//			val entity = Minecraft.world.addEntity(EntityTypeItem, MinecraftClient.proxy.camera.transform.translation.clone())
+//			entity.velocity = MinecraftClient.proxy.camera.transform.rotation.forward * 10f
+//			entity.editData<EntityTypeItem.Data> {
+//				stack = ItemStack(ItemTypeApple)
+//			}
+//		}
 		if(input[Key.Q].pressed || input[Key.Q].heldTime >= 1f) {
 			val selectedItem = ClientPlayer.inventory[Section.Key.Hotbar][selectedSlot]
 			if(selectedItem != null) {
@@ -241,9 +271,11 @@ object TestGUI : GUI() {
 		val entity = ClientPlayer.entity
 		if(entity != null) {
 			val block = entity.block
-			drawString("TYP: ${block.type?.identifier}", 1f, line())
+//			drawString("TYP: ${block.type?.identifier}", 1f, line())
 			drawString("BIO: ${block.biome.identifier}", 1f, line())
 		}
+
+		drawString("ITM: ${ClientPlayer.inventory[Section.Key.Hotbar][selectedSlot]?.item?.type?.identifier}", 1f, line())
 
 		val textBuffer = textBuffer
 		if(textBuffer != null) {

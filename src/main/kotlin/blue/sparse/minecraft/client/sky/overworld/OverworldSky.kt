@@ -1,4 +1,4 @@
-package blue.sparse.minecraft.client.sky
+package blue.sparse.minecraft.client.sky.overworld
 
 import blue.sparse.engine.asset.Asset
 import blue.sparse.engine.render.camera.Camera
@@ -6,6 +6,7 @@ import blue.sparse.engine.render.resource.Texture
 import blue.sparse.engine.render.scene.component.ShaderSkybox
 import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.minecraft.client.CelestialBodyComponent
+import blue.sparse.minecraft.client.sky.Sky
 import blue.sparse.minecraft.client.util.BlankShader
 
 class OverworldSky : Sky {

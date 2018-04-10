@@ -2,7 +2,7 @@ package blue.sparse.minecraft.client.world.proxy
 
 import blue.sparse.engine.render.resource.model.IndexedModel
 import blue.sparse.minecraft.client.world.render.OfflineChunkModel
-import blue.sparse.minecraft.common.world.Chunk
+import blue.sparse.minecraft.common.world.chunk.Chunk
 import java.util.concurrent.ConcurrentLinkedQueue
 
 class ClientChunkProxy(chunk: Chunk): Chunk.ChunkProxy(chunk) {
@@ -29,7 +29,7 @@ class ClientChunkProxy(chunk: Chunk): Chunk.ChunkProxy(chunk) {
 	val shouldGenerateModel: Boolean
 		get() = (offline == null && model == null) || modelLastGenerated < chunkLastModified
 
-	override fun changed(x: Int, y: Int, z: Int, before: Int, new: Int) {
+	override fun changed(x: Int, y: Int, z: Int) {
 		chunkLastModified = System.currentTimeMillis()
 
 		if (x == 0) relativeChanged(-1, 0, 0)
@@ -74,7 +74,8 @@ class ClientChunkProxy(chunk: Chunk): Chunk.ChunkProxy(chunk) {
 		private val deleteQueue = ConcurrentLinkedQueue<ClientChunkProxy>()
 
 		fun update() {
-			deleteQueue.poll()?.deleteModel()
+			for(i in 1..16)
+				deleteQueue.poll()?.deleteModel()
 //			deleteQueue.removeAll {
 //				it.deleteModel()
 //				true

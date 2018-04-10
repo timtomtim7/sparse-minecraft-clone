@@ -4,10 +4,14 @@ import blue.sparse.engine.window.Window
 import blue.sparse.engine.window.input.*
 import blue.sparse.math.abs
 import blue.sparse.math.vectors.floats.*
+import blue.sparse.minecraft.client.gui.TestGUI
 import blue.sparse.minecraft.client.util.Debug
 import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.entity.impl.types.living.EntityTypePlayer
+import blue.sparse.minecraft.common.inventory.impl.Section
+import blue.sparse.minecraft.common.item.Item
+import blue.sparse.minecraft.common.item.types.ItemTypeBlock
 import blue.sparse.minecraft.common.player.Player
 import blue.sparse.minecraft.common.util.math.BlockFace
 import blue.sparse.minecraft.common.world.World
@@ -15,6 +19,13 @@ import blue.sparse.minecraft.common.world.World
 object ClientPlayer : Player() {
 	private val mouseSensitivity: Float = 0.17f
 	private var lastMousePos = Vector2f(0f)
+
+	init {
+		inventory += Item(BlockType.glowstone.item!!).stack(64)
+		inventory += Item(BlockType.glowstone.item!!).stack(64)
+		inventory += Item(BlockType.endBricks.item!!).stack(64)
+		inventory += Item(BlockType.endBricks.item!!).stack(64)
+	}
 
 	fun addEntity(world: World) {
 		entity = world.addEntity(EntityTypePlayer, Vector3f(0f, 128f, 0f))
@@ -30,21 +41,49 @@ object ClientPlayer : Player() {
 				val breakPos = targetBlock.block.position
 				val placePos = breakPos + targetBlock.face.offset
 
-				val typeToPlace = BlockType.stonebrick
+//				val typeToPlace = BlockType.stonebrick
+				val selectedItem = inventory[Section.Key.Hotbar][TestGUI.selectedSlot]
+				val selectedItemType = selectedItem?.item?.type
+				val typeToPlace = (selectedItemType as? ItemTypeBlock)?.blockType
 
-				val bounds = typeToPlace.bounds
-				val intersect = entity.type.bounds.isIntersecting(entity.position, bounds, placePos.toFloatVector())
+				if(typeToPlace != null) {
+					val bounds = typeToPlace.bounds
+					val intersect = entity.type.bounds.isIntersecting(entity.position, bounds, placePos.toFloatVector())
+					if(!intersect)
+						Debug.addTempCube(placePos.toFloatVector(), placePos.toFloatVector() + 1f)
 
-				Debug.addTempCube(breakPos.toFloatVector(), breakPos.toFloatVector() + 1f, Vector3f(1f, 0f, 0f))
-				if(!intersect)
-				Debug.addTempCube(placePos.toFloatVector(), placePos.toFloatVector() + 1f)
+					if (!intersect && (input[MouseButton.RIGHT].pressed || input[MouseButton.RIGHT].heldTime >= 1f)) {
+						Minecraft.world.getOrGenerateBlock(placePos.x, placePos.y, placePos.z).type = typeToPlace
+						selectedItem.amount--
 
-				if (!intersect && (input[MouseButton.RIGHT].pressed || input[MouseButton.RIGHT].heldTime >= 1f)) {
-					Minecraft.world.getOrGenerateBlock(placePos.x, placePos.y, placePos.z).type = typeToPlace
+						inventory[Section.Key.Hotbar][TestGUI.selectedSlot] = selectedItem.takeIf { it.amount > 0 }
+					}
 				}
 
+				Debug.addTempCube(breakPos.toFloatVector(), breakPos.toFloatVector() + 1f, Vector3f(1f, 0f, 0f))
+
 				if (input[MouseButton.LEFT].pressed || input[MouseButton.LEFT].heldTime >= 1f) {
-					Minecraft.world.getBlock(breakPos.x, breakPos.y, breakPos.z)?.type = null
+					val block = Minecraft.world.getBlock(breakPos.x, breakPos.y, breakPos.z)
+					if(block != null && block.dropItemNaturally()) {
+						block.type = null
+					}
+				}
+
+				if (input[Key.R].pressed || input[Key.R].heldTime > 1) {
+					val range = 4
+					for(x in -range..range) {
+						for(y in -range..range) {
+							for(z in -range..range) {
+								if((x * x + y * y + z * z) >= range * range)
+									continue
+
+								val block = Minecraft.world.getBlock(breakPos.x + x, breakPos.y + y, breakPos.z + z)
+								if(block?.type != null) {
+									block.type = null
+								}
+							}
+						}
+					}
 				}
 			}
 
@@ -81,6 +120,7 @@ object ClientPlayer : Player() {
 
 		if (input[Key.SPACE].held && abs(entity.velocity.y) < 0.01f) {
 			entity.velocity.y = 12f
+//			entity.velocity.y = 30f
 		}
 
 		isSneaking = input[Key.LEFT_SHIFT].held

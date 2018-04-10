@@ -4,9 +4,9 @@ import blue.sparse.engine.render.resource.model.*
 import blue.sparse.math.vectors.floats.*
 import blue.sparse.math.vectors.shorts.Vector3s
 import blue.sparse.minecraft.client.block.proxy.ClientBlockTypeProxy
-import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.util.math.BlockFace
-import blue.sparse.minecraft.common.world.Chunk
+import blue.sparse.minecraft.common.world.BlockView
+import blue.sparse.minecraft.common.world.chunk.Chunk
 import java.nio.ByteBuffer
 
 class OfflineChunkModel(private val chunk: Chunk) {
@@ -24,18 +24,29 @@ class OfflineChunkModel(private val chunk: Chunk) {
 //		return chunk[x, y, z]
 //	}
 
-	private fun getRelativeBlockType(x: Int, y: Int, z: Int): BlockType? {
-		if (x < 0 || x >= Chunk.SIZE || y < 0 || y >= Chunk.SIZE || z < 0 || z >= Chunk.SIZE)
-			return chunk.world[x + worldBlock.x, y + worldBlock.y, z + worldBlock.z]?.type
-
-		return chunk.getType(x, y, z)
-	}
-
 	private fun isSolid(x: Int, y: Int, z: Int): Boolean {
-		return getRelativeBlockType(x, y, z)?.transparent == false
+		return getRelativeBlock(x, y, z)?.type?.transparent == false
 	}
 
+//	private fun getRelativeBlockType(x: Int, y: Int, z: Int): BlockType? {
+//		if (x < 0 || x >= Chunk.SIZE || y < 0 || y >= Chunk.SIZE || z < 0 || z >= Chunk.SIZE)
+//			return chunk.world[x + worldBlock.x, y + worldBlock.y, z + worldBlock.z]?.type
+//
+//		return chunk.getBlock(x, y, z).type
+//	}
 
+	private fun getRelativeBlock(x: Int, y: Int, z: Int): BlockView? {
+		if (x < 0 || x >= Chunk.SIZE || y < 0 || y >= Chunk.SIZE || z < 0 || z >= Chunk.SIZE)
+			return chunk.world[x + worldBlock.x, y + worldBlock.y, z + worldBlock.z]
+
+		return chunk[x, y, z]
+	}
+
+	private fun getRelativeLight(x: Int, y: Int, z: Int): Vector4f {
+		val relative = getRelativeBlock(x, y, z) ?: return Vector4f(0f)
+
+		return Vector4f(relative.blockLightFloat, relative.sunLightFloat)
+	}
 
 	init {
 		val buffer =  VertexBuffer()
@@ -68,7 +79,7 @@ class OfflineChunkModel(private val chunk: Chunk) {
 			if(!(px || py || pz || nx || ny || nz))
 				continue
 
-			val blockType = chunk.getType(x, y, z) ?: continue
+			val blockType = chunk.getBlock(x, y, z).type ?: continue
 			val proxy = (blockType.proxy as ClientBlockTypeProxy)
 
 			val x0 = (x * 16).toShort()
@@ -97,91 +108,97 @@ class OfflineChunkModel(private val chunk: Chunk) {
 			if (px) {
 				val ao = calculateAO(x, y, z, BlockFace.POSITIVE_X, BlockFace.POSITIVE_Y, BlockFace.POSITIVE_Z)
 				val texCoords = proxy.rightSprite.textureCoords
+				val light = getRelativeLight(x + 1, y, z)
 
 				if(ao[D] + ao[B] > ao[A] + ao[C])
 					addIndices(A, B, D, B, C, D)
 				else
 					addIndices(A, B, C, A, C, D)
 
-				buffer.add(v100, texCoords.xw, positiveX, positiveXBrightness * ao[0], blockColor) // A
-				buffer.add(v110, texCoords.xy, positiveX, positiveXBrightness * ao[1], blockColor) // B
-				buffer.add(v111, texCoords.zy, positiveX, positiveXBrightness * ao[2], blockColor) // C
-				buffer.add(v101, texCoords.zw, positiveX, positiveXBrightness * ao[3], blockColor) // D
+				buffer.add(v100, texCoords.xw, positiveX, positiveXBrightness * ao[0], blockColor, light) // A
+				buffer.add(v110, texCoords.xy, positiveX, positiveXBrightness * ao[1], blockColor, light) // B
+				buffer.add(v111, texCoords.zy, positiveX, positiveXBrightness * ao[2], blockColor, light) // C
+				buffer.add(v101, texCoords.zw, positiveX, positiveXBrightness * ao[3], blockColor, light) // D
 			}
 
 			if (nx) {
 				val ao = calculateAO(x, y, z, BlockFace.NEGATIVE_X, BlockFace.POSITIVE_Y, BlockFace.POSITIVE_Z)
 				val texCoords = proxy.leftSprite.textureCoords
+				val light = getRelativeLight(x - 1, y, z)
 
 				if(ao[A] + ao[C] > ao[B] + ao[D])
 					addIndices(D, C, A, C, B, A)
 				else
 					addIndices(D, C, B, D, B, A)
 
-				buffer.add(v000, texCoords.zw, negativeX, negativeXBrightness * ao[0], blockColor) // A
-				buffer.add(v010, texCoords.zy, negativeX, negativeXBrightness * ao[1], blockColor) // B
-				buffer.add(v011, texCoords.xy, negativeX, negativeXBrightness * ao[2], blockColor) // C
-				buffer.add(v001, texCoords.xw, negativeX, negativeXBrightness * ao[3], blockColor) // D
+				buffer.add(v000, texCoords.zw, negativeX, negativeXBrightness * ao[0], blockColor, light) // A
+				buffer.add(v010, texCoords.zy, negativeX, negativeXBrightness * ao[1], blockColor, light) // B
+				buffer.add(v011, texCoords.xy, negativeX, negativeXBrightness * ao[2], blockColor, light) // C
+				buffer.add(v001, texCoords.xw, negativeX, negativeXBrightness * ao[3], blockColor, light) // D
 			}
 
 			if (py) {
 				val ao = calculateAO(x, y, z, BlockFace.POSITIVE_Y, BlockFace.POSITIVE_X, BlockFace.POSITIVE_Z)
 				val texCoords = proxy.topSprite.textureCoords
+				val light = getRelativeLight(x, y + 1, z)
 
 				if(ao[A] + ao[C] > ao[B] + ao[D])
 					addIndices(D, C, A, C, B, A)
 				else
 					addIndices(D, C, B, D, B, A)
 
-				buffer.add(v010, texCoords.xw, positiveY, positiveYBrightness * ao[0], blockColor) // A
-				buffer.add(v110, texCoords.xy, positiveY, positiveYBrightness * ao[1], blockColor) // B
-				buffer.add(v111, texCoords.zy, positiveY, positiveYBrightness * ao[2], blockColor) // C
-				buffer.add(v011, texCoords.zw, positiveY, positiveYBrightness * ao[3], blockColor) // D
+				buffer.add(v010, texCoords.xw, positiveY, positiveYBrightness * ao[0], blockColor, light) // A
+				buffer.add(v110, texCoords.xy, positiveY, positiveYBrightness * ao[1], blockColor, light) // B
+				buffer.add(v111, texCoords.zy, positiveY, positiveYBrightness * ao[2], blockColor, light) // C
+				buffer.add(v011, texCoords.zw, positiveY, positiveYBrightness * ao[3], blockColor, light) // D
 			}
 
 			if (ny) {
 				val ao = calculateAO(x, y, z, BlockFace.NEGATIVE_Y, BlockFace.POSITIVE_X, BlockFace.POSITIVE_Z)
 				val texCoords = proxy.bottomSprite.textureCoords
+				val light = getRelativeLight(x, y - 1, z)
 
 				if(ao[D] + ao[B] > ao[A] + ao[C])
 					addIndices(A, B, D, B, C, D)
 				else
 					addIndices(A, B, C, A, C, D)
 
-				buffer.add(v000, texCoords.xw, negativeY, negativeYBrightness * ao[0], blockColor) // A
-				buffer.add(v100, texCoords.xy, negativeY, negativeYBrightness * ao[1], blockColor) // B
-				buffer.add(v101, texCoords.zy, negativeY, negativeYBrightness * ao[2], blockColor) // C
-				buffer.add(v001, texCoords.zw, negativeY, negativeYBrightness * ao[3], blockColor) // D
+				buffer.add(v000, texCoords.xw, negativeY, negativeYBrightness * ao[0], blockColor, light) // A
+				buffer.add(v100, texCoords.xy, negativeY, negativeYBrightness * ao[1], blockColor, light) // B
+				buffer.add(v101, texCoords.zy, negativeY, negativeYBrightness * ao[2], blockColor, light) // C
+				buffer.add(v001, texCoords.zw, negativeY, negativeYBrightness * ao[3], blockColor, light) // D
 			}
 
 			if (pz) {
 				val ao = calculateAO(x, y, z, BlockFace.POSITIVE_Z, BlockFace.NEGATIVE_X, BlockFace.POSITIVE_Y)
 				val texCoords = proxy.frontSprite.textureCoords
+				val light = getRelativeLight(x, y, z + 1)
 
 				if(ao[D] + ao[B] > ao[A] + ao[C])
 					addIndices(C, B, D, B, A, D)
 				else
 					addIndices(C, B, A, C, A, D)
 
-				buffer.add(v101, texCoords.xw, positiveZ, positiveZBrightness * ao[0], blockColor) // A
-				buffer.add(v001, texCoords.zw, positiveZ, positiveZBrightness * ao[1], blockColor) // B
-				buffer.add(v011, texCoords.zy, positiveZ, positiveZBrightness * ao[2], blockColor) // C
-				buffer.add(v111, texCoords.xy, positiveZ, positiveZBrightness * ao[3], blockColor) // D
+				buffer.add(v101, texCoords.xw, positiveZ, positiveZBrightness * ao[0], blockColor, light) // A
+				buffer.add(v001, texCoords.zw, positiveZ, positiveZBrightness * ao[1], blockColor, light) // B
+				buffer.add(v011, texCoords.zy, positiveZ, positiveZBrightness * ao[2], blockColor, light) // C
+				buffer.add(v111, texCoords.xy, positiveZ, positiveZBrightness * ao[3], blockColor, light) // D
 			}
 
 			if (nz) {
 				val ao = calculateAO(x, y, z, BlockFace.NEGATIVE_Z, BlockFace.NEGATIVE_X, BlockFace.POSITIVE_Y)
 				val texCoords = proxy.backSprite.textureCoords
+				val light = getRelativeLight(x, y, z - 1)
 
 				if(ao[A] + ao[C] > ao[B] + ao[D])
 					addIndices(B, C, A, C, D, A)
 				else
 					addIndices(B, C, D, B, D, A)
 
-				buffer.add(v100, texCoords.zw, negativeZ, negativeZBrightness * ao[0], blockColor) // A
-				buffer.add(v000, texCoords.xw, negativeZ, negativeZBrightness * ao[1], blockColor) // B
-				buffer.add(v010, texCoords.xy, negativeZ, negativeZBrightness * ao[2], blockColor) // C
-				buffer.add(v110, texCoords.zy, negativeZ, negativeZBrightness * ao[3], blockColor) // D
+				buffer.add(v100, texCoords.zw, negativeZ, negativeZBrightness * ao[0], blockColor, light) // A
+				buffer.add(v000, texCoords.xw, negativeZ, negativeZBrightness * ao[1], blockColor, light) // B
+				buffer.add(v010, texCoords.xy, negativeZ, negativeZBrightness * ao[2], blockColor, light) // C
+				buffer.add(v110, texCoords.zy, negativeZ, negativeZBrightness * ao[3], blockColor, light) // D
 			}
 		}
 
@@ -194,11 +211,11 @@ class OfflineChunkModel(private val chunk: Chunk) {
 
 	private fun calculateAO(x: Int, y: Int, z: Int, faceForward: BlockFace, faceA: BlockFace, faceB: BlockFace): Array<Float> {
 		fun isShadowing(a: Int, b: Int): Boolean {
-			return getRelativeBlockType(
+			return getRelativeBlock(
 					x + faceForward.x + a * faceA.x + b * faceB.x,
 					y + faceForward.y + a * faceA.y + b * faceB.y,
 					z + faceForward.z + a * faceA.z + b * faceB.z
-			)?.transparent == false
+			)?.type?.transparent == false
 		}
 
 		val blocks = arrayOf(
@@ -234,7 +251,7 @@ class OfflineChunkModel(private val chunk: Chunk) {
 			add<Vector3f>() // aNormal
 			add<Float>() // aBrightness
 			add<Vector3f>() // aColor
-			//add<Vector3f>() // aLighting
+			add<Vector4f>() // aLight (x, y, z (RGB Block Light), w (sun light))
 		}
 
 		private val positiveX = Vector3f(1f, 0f, 0f)

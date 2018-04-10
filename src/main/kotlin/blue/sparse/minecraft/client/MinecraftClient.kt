@@ -77,6 +77,7 @@ class MinecraftClient : SparseGame(), MinecraftProxy {
 
 	override fun update(delta: Float) {
 		super.update(delta)
+
 		time += delta
 
 		GUIManager.update(delta)

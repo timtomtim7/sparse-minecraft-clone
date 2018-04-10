@@ -9,6 +9,7 @@ import blue.sparse.minecraft.common.entity.data.EntityData
 import blue.sparse.minecraft.common.entity.impl.types.living.EntityTypeLiving
 import blue.sparse.minecraft.common.util.TargetBlock
 import blue.sparse.minecraft.common.world.*
+import blue.sparse.minecraft.common.world.chunk.Chunk
 
 class Entity<out T : EntityType>(
 		val type: T,
@@ -85,7 +86,7 @@ class Entity<out T : EntityType>(
     fun update(delta: Float) {
 		timeSinceSpawned += delta
 
-		val drag = 0.4f
+		val drag = 0.5f
 		var vel = velocity.clone()
 
 		vel.timesAssign(Math.pow(drag.toDouble(), delta.toDouble()).toFloat())

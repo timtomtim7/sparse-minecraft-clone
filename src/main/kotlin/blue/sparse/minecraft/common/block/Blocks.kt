@@ -143,7 +143,7 @@ object BlockGlass                              : BlockTypeGlass("glass")
 //object BlockGlazedTerracottaSilver             : BlockType("glazed_terracotta_silver")
 //object BlockGlazedTerracottaWhite              : BlockType("glazed_terracotta_white")
 //object BlockGlazedTerracottaYellow             : BlockType("glazed_terracotta_yellow")
-object BlockGlowstone                          : BlockType("glowstone")
+object BlockGlowstone                          : BlockTypeLight("glowstone")
 object BlockGoldBlock                          : BlockType("gold_block")
 object BlockGoldOre                            : BlockType("gold_ore")
 object BlockGrass							   : BlockTypeBiome("grass_top") //TODO

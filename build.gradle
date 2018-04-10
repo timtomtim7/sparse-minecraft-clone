@@ -38,7 +38,7 @@ dependencies {
     compile "blue.sparse:sparse-engine:1.0.3"
     compile "blue.sparse:config:1.0-SNAPSHOT"
 //    compile "io.netty:netty-all:4.1.22.Final"
-//    compile 'com.google.guava:guava:24.0-jre'
+    compile 'com.google.guava:guava:24.0-jre'
 }
 
 compileKotlin {

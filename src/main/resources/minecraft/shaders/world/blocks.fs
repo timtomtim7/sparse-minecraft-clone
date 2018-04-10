@@ -8,6 +8,7 @@ in vec2 vTexCoord;
 in vec3 vNormal;
 in float vBrightness;
 in vec3 vColor;
+in vec3 vLight;
 
 out vec4 fColor;
 
@@ -24,7 +25,7 @@ void main() {
 //	brightness = brightness * 0.6 + 0.4;
 
 	vec4 texColor = texture2D(uTexture, vTexCoord);
-	vec4 shadowedColor = vec4(texColor.rgb * vColor * vBrightness, texColor.a);
+	vec4 shadowedColor = vec4(texColor.rgb * vColor * vBrightness * vLight, texColor.a);
 	vec4 fogColor =  vec4(0.701960, 0.811764, 1, 1.0);
 
 	fColor = mix(shadowedColor, fogColor, fog());

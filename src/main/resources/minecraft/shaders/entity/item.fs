@@ -24,7 +24,7 @@ out vec4 fColor;
 
 void main() {
 	vec4 color = texture2D(uTexture, vTexCoord);
-	if(color.a < 0.5)
+	if(color.a < 0.1)
 		discard;
 
 	vec2 rotatedCoord1 = (vTexCoord * ROTATION_MATRIX) * 4 + uEnchantTime;
@@ -35,13 +35,15 @@ void main() {
 //	vec4 enchantColor = texture2D(uEnchantTexture, rotatedCoord1) * vec4(uEnchantColor, 1.0);
 //	color += enchantColor;
 
-	vec4 enchantColor = vec4(0);
+	vec3 enchantColor = vec3(0);
 	if(uEnchantTime != 0) {
-		enchantColor = mix(texture2D(uEnchantTexture, rotatedCoord1), texture2D(uEnchantTexture, rotatedCoord2), 0.5) * vec4(uEnchantColor, 1.0);
+		enchantColor = mix(texture2D(uEnchantTexture, rotatedCoord1).rgb, texture2D(uEnchantTexture, rotatedCoord2).rgb, 0.5) * uEnchantColor;
 	}
 
 	float brightness = dot(vNormal, uLightDirection) * 0.5 + 0.5;
 	brightness = brightness * 0.6 + 0.4;
 
-	fColor = ((color * vec4(uColor, 1.0)) + enchantColor) * brightness;
+	fColor = vec4((color.rgb * uColor + enchantColor) * brightness, color.a);
+
+//	fColor = ((color * vec4(uColor, 1.0)) + enchantColor) * brightness;
 }

@@ -1,4 +1,4 @@
-package blue.sparse.minecraft.common.world.generator
+package blue.sparse.minecraft.common.world.chunk.generator
 
 import blue.sparse.math.vectors.ints.Vector3i
 import blue.sparse.minecraft.common.biome.BiomeType
@@ -6,23 +6,29 @@ import blue.sparse.minecraft.common.block.Block
 import blue.sparse.minecraft.common.block.BlockType
 import blue.sparse.minecraft.common.util.math.Perlin
 import blue.sparse.minecraft.common.util.math.Voronoi
-import blue.sparse.minecraft.common.world.Chunk
+import blue.sparse.minecraft.common.world.chunk.Chunk
+import blue.sparse.minecraft.common.world.chunk.ChunkElementStorage
 
 object TestChunkGenerator: ChunkGenerator {
-	override fun generate(chunkPosition: Vector3i, blocks: Array<Block>) {
+
+	override fun generate(chunkPosition: Vector3i, blocks: ChunkElementStorage<Block>, biomes: ChunkElementStorage<BiomeType>) {
 		val cbx = chunkPosition.x shl Chunk.BITS
 		val cby = chunkPosition.y shl Chunk.BITS
 		val cbz = chunkPosition.z shl Chunk.BITS
 
 		for(x in 0 until Chunk.SIZE) {
 			for(z in 0 until Chunk.SIZE) {
+				if(x + cbx == 0 && z + cbz == 0) continue
+
 				val (temperature, humidity) = generateBiome(x + cbx, z + cbz)
 				val biome = BiomeType[temperature, humidity] ?: BiomeType.void
 
-				var maxY = (Perlin.noise((cbx + x).toFloat(), (cbz + z).toFloat(), 0f, 8, 0.5f, 0.002f) * 64)
-				maxY *= (Perlin.noise((cbx + x).toFloat(), (cbz + z).toFloat(), 100f, 1, 1f, 0.02371f) + 1) * 2
-				maxY += 64
-				val maxYInt = maxY.toInt()
+//				var maxY = (Perlin.noise((cbx + x).toFloat(), (cbz + z).toFloat(), 0f, 8, 0.5f, 0.002f) * 32)
+//				maxY *= (Perlin.noise((cbx + x).toFloat(), (cbz + z).toFloat(), 100f, 2, 1f, 0.007371f) + 1) * 4
+//				maxY += 64
+//				val maxYInt = maxY.toInt()
+
+				val maxYInt = 48
 
 //				val maxY = biome.id * 2
 
@@ -36,7 +42,8 @@ object TestChunkGenerator: ChunkGenerator {
 						else -> BlockType.stone
 					}
 
-					blocks[Chunk.indexOfBlock(x, y, z)] = Block(blockType, biome = biome)
+					blocks[x, y, z] = Block(blockType)
+					biomes[x, y, z] = biome
 				}
 			}
 		}

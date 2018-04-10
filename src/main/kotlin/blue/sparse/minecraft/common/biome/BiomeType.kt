@@ -11,8 +11,6 @@ abstract class BiomeType(
 		val temperature: Float = 0.5f,
 		val rainfall: Float = 0.5f
 ) {
-	internal val id: Int
-
 	open val proxy: BiomeTypeProxy by ProxyProvider<BiomeTypeProxy>(
 			"blue.sparse.minecraft.client.biome.proxy.Default",
 			"blue.sparse.minecraft.server.biome.proxy.Default",
@@ -22,27 +20,22 @@ abstract class BiomeType(
 	constructor(id: String, temperature: Float = 0.5f, rainfall: Float = 0.5f) : this(Identifier(id), temperature, rainfall)
 
 	init {
-		id = BiomeType.registry.size + 1
 		register(this)
 	}
 
 	companion object {
 		internal val registry = LinkedHashMap<Identifier, BiomeType>()
-		private val idRegistry = LinkedHashMap<Int, BiomeType>()
 
 		private fun register(type: BiomeType) {
 			if (type.identifier in registry)
 				throw IllegalArgumentException("Biome with identifier \"${type.identifier}\" is already registered.")
 
 			registry[type.identifier] = type
-			idRegistry[type.id] = type
 		}
 
 		operator fun get(identifier: Identifier) = registry[identifier]
 
 		operator fun get(name: String) = get(Identifier(name))
-
-		internal operator fun get(id: Int) = idRegistry[id]
 
 		operator fun get(temperature: Float, rainfall: Float): BiomeType? {
 //			val result = registry.values.sortedBy {

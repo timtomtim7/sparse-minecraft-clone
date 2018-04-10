@@ -1,10 +1,12 @@
 package blue.sparse.minecraft.common.world
 
 import blue.sparse.math.vectors.ints.Vector3i
+import blue.sparse.minecraft.common.biome.BiomeType
 import blue.sparse.minecraft.common.block.Block
 import blue.sparse.minecraft.common.util.getValue
 import blue.sparse.minecraft.common.util.threadLocal
-import blue.sparse.minecraft.common.world.generator.ChunkGenerator
+import blue.sparse.minecraft.common.world.chunk.Chunk
+import blue.sparse.minecraft.common.world.chunk.ChunkElementStorage
 import java.util.concurrent.ConcurrentHashMap
 
 class Region(val world: World, position: Vector3i) {
@@ -46,22 +48,14 @@ class Region(val world: World, position: Vector3i) {
 		if (chunk != null)
 			return chunk
 
-		val blocks = ChunkGenerator.blocks.get()
-		blocks.fill(Block.empty)
+		val blocks = ChunkElementStorage(Block.empty)
+		val biomes = ChunkElementStorage<BiomeType>(BiomeType.void)
 
 		val worldRegion = worldRegionPosition
 		val position = regionChunkToWorldChunk(worldRegion, regionChunk)
-		world.generator.generate(position, blocks)
+		world.generator.generate(position, blocks, biomes)
 
-		val first = blocks.first()
-		val filled = blocks.all { it == first }
-		val data = if (filled)
-			null
-		else
-			IntArray(Chunk.VOLUME) { blocks[it].rawID }
-
-		chunk = Chunk(this, regionChunk.clone(), data)
-		if (filled) chunk.fill(first)
+		chunk = Chunk(this, regionChunk.clone(), blocks, biomes)
 		chunks[chunk.regionChunkPosition] = chunk
 
 		return chunk

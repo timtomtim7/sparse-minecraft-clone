@@ -22,14 +22,17 @@ abstract class Player(entity: Entity<EntityTypePlayer>? = null) {
 	var sneakSpeed = walkSpeed * 0.3f
 
 	var gameMode: GameMode = GameModeSurvival
-	var hunger: Int = 20
-	var saturation: Float = 0f
-
-	var isFlying: Boolean = false
-	var isSprinting: Boolean = false
-	var isSneaking: Boolean = false
+//	var hunger: Int = 20
+//	var saturation: Float = 0f
 
 	var canFly: Boolean = false
+	var isFlying: Boolean = false
+		get() = field && canFly
+
+	var isSprinting: Boolean = false
+		get() = field && !isSneaking
+
+	var isSneaking: Boolean = false
 
 	var renderDistance = PlayerChunks(this, 8, 4)
 
@@ -37,8 +40,10 @@ abstract class Player(entity: Entity<EntityTypePlayer>? = null) {
 
 	open fun teleport(position: Vector3f, world: World) {
 		entity?.run {
+			remove()
 			this.world = world
 			this.position = position.clone()
+			add()
 		}
 	}
 

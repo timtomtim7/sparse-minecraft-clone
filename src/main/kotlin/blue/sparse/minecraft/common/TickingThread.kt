@@ -6,6 +6,7 @@ import blue.sparse.math.util.FrequencyTimer
 class TickingThread(name: String, val targetTickRate: Double, private val onTick: (Float) -> Unit) : Thread(name) {
 
 	private val tickTimer = FrequencyTimer(1.0 / targetTickRate)
+	private val tickTimer2 = FrequencyTimer(1.0 / targetTickRate)
 
 	var ticking: Boolean = false
 		private set
@@ -34,6 +35,7 @@ class TickingThread(name: String, val targetTickRate: Double, private val onTick
 
 			val delta = deltaTimer.deltaFloat()
 			onTick(delta)
+			tickTimer2.use()
 
 			tickCounter++
 			tickRate = tickCounter / secondTimer.count

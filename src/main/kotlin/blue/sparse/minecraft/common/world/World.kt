@@ -6,14 +6,17 @@ import blue.sparse.minecraft.common.Minecraft
 import blue.sparse.minecraft.common.entity.Entity
 import blue.sparse.minecraft.common.entity.EntityType
 import blue.sparse.minecraft.common.event.post
-import blue.sparse.minecraft.common.events.world.*
+import blue.sparse.minecraft.common.events.entity.EntityAddedEvent
+import blue.sparse.minecraft.common.events.entity.EntityRemovedEvent
+import blue.sparse.minecraft.common.events.world.WorldInitializationEvent
 import blue.sparse.minecraft.common.player.Player
 import blue.sparse.minecraft.common.util.*
 import blue.sparse.minecraft.common.util.math.*
 import blue.sparse.minecraft.common.util.proxy.Proxy
 import blue.sparse.minecraft.common.util.proxy.ProxyProvider
-import blue.sparse.minecraft.common.world.generator.ChunkGenerator
-import blue.sparse.minecraft.common.world.generator.thread.ChunkGenerationThread
+import blue.sparse.minecraft.common.world.chunk.Chunk
+import blue.sparse.minecraft.common.world.chunk.generator.ChunkGenerator
+import blue.sparse.minecraft.common.world.chunk.generator.thread.ChunkGenerationThread
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.experimental.buildSequence
@@ -68,7 +71,7 @@ class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: C
 		if(entity in _entities)
 			return false
 
-		val event = WorldEntityAddedEvent(this, entity)
+		val event = EntityAddedEvent(this, entity)
 		Minecraft.events.post(event)
 		if(event.canceled)
 			return false
@@ -80,7 +83,7 @@ class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: C
 		if(entity !in _entities)
 			return false
 
-		val event = WorldEntityRemovedEvent(this, entity)
+		val event = EntityRemovedEvent(this, entity)
 		Minecraft.events.post(event)
 		if(event.canceled)
 			return false
@@ -220,6 +223,10 @@ class World(val name: String, val id: UUID = UUID.randomUUID(), val generator: C
 
 	private fun key(x: Int, y: Int, z: Int): Vector3i {
 		return key.apply { assign(x, y, z) }
+	}
+
+	internal fun unloaded() {
+		regions.values.forEach { it.unloaded() }
 	}
 
 	abstract class WorldProxy(val world: World) : Proxy

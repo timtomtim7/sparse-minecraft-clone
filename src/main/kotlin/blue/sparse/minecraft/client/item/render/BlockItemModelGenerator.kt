@@ -39,6 +39,7 @@ object BlockItemModelGenerator {
 		val rightNormal = Vector3f(1f, 0f, 0f)
 		val leftNormal = Vector3f(-1f, 0f, 0f)
 
+		//TODO: Texture coordinates are rotated on some faces
 		//front
 		indices(0, 1, 2, 0, 2, 3)
 		buffer.add(Vector3f(-0.5f, -0.5f, -0.5f), frontNormal, texCoords.front.xw)

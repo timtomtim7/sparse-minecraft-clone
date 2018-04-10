@@ -3,8 +3,8 @@ package blue.sparse.minecraft.client.world.render.thread
 import blue.sparse.minecraft.client.world.proxy.ClientChunkProxy
 import blue.sparse.minecraft.common.util.getValue
 import blue.sparse.minecraft.common.util.weak
-import blue.sparse.minecraft.common.world.Chunk
 import blue.sparse.minecraft.common.world.World
+import blue.sparse.minecraft.common.world.chunk.Chunk
 
 class ChunkModellingThread(world: World, val provider: Sequence<Chunk>) : Thread("ChunkModellingThread") {
 

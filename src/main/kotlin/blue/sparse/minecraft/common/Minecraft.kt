@@ -1,11 +1,12 @@
 package blue.sparse.minecraft.common
 
+import blue.sparse.math.vectors.floats.Vector3f
 import blue.sparse.minecraft.common.event.EventBus
 import blue.sparse.minecraft.common.events.GameInitializationEvent
 import blue.sparse.minecraft.common.player.Player
 import blue.sparse.minecraft.common.util.proxy.ProxyProvider
 import blue.sparse.minecraft.common.world.World
-import blue.sparse.minecraft.common.world.generator.TestChunkGenerator
+import blue.sparse.minecraft.common.world.chunk.generator.TestChunkGenerator
 import java.util.concurrent.ConcurrentHashMap
 
 object Minecraft {
@@ -68,7 +69,10 @@ object Minecraft {
 	}
 
 	fun regenerateWorld() {
-		Minecraft.world = World("world", generator = TestChunkGenerator)
+		if(this::world.isInitialized)
+			world.unloaded()
+		world = World("world", generator = TestChunkGenerator)
+		players.forEach { it.teleport(Vector3f(0f, 100f, 0f), world) }
 	}
 
 	fun addPlayer(player: Player): Boolean {

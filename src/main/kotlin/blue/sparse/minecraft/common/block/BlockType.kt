@@ -1,6 +1,7 @@
 package blue.sparse.minecraft.common.block
 
 import blue.sparse.math.vectors.floats.Vector3f
+import blue.sparse.math.vectors.ints.Vector3i
 import blue.sparse.minecraft.common.item.types.ItemTypeBlock
 import blue.sparse.minecraft.common.util.Identifier
 import blue.sparse.minecraft.common.util.math.AABB
@@ -8,8 +9,6 @@ import blue.sparse.minecraft.common.util.proxy.Proxy
 import blue.sparse.minecraft.common.util.proxy.ProxyProvider
 
 abstract class BlockType(val identifier: Identifier, val hasItem: Boolean = true) {
-	internal val id: Int
-
 	open val proxy: BlockTypeProxy by ProxyProvider<BlockTypeProxy>(
 			"blue.sparse.minecraft.client.block.proxy.Default",
 			"blue.sparse.minecraft.server.block.proxy.Default",
@@ -19,13 +18,12 @@ abstract class BlockType(val identifier: Identifier, val hasItem: Boolean = true
 	val item = if(hasItem) ItemTypeBlock(this) else null
 
 	open val bounds = AABB(Vector3f(0f), Vector3f(1f))
-
 	open val transparent: Boolean = false
+	open val lightEmission: Vector3i? = null
 
 	constructor(id: String) : this(Identifier(id))
 
 	init {
-		id = registry.size + 1
 		register(this)
 	}
 
@@ -33,21 +31,17 @@ abstract class BlockType(val identifier: Identifier, val hasItem: Boolean = true
 
 	companion object {
 		internal val registry = LinkedHashMap<Identifier, BlockType>()
-		private val idRegistry = LinkedHashMap<Int, BlockType>()
 
 		private fun register(type: BlockType) {
 			if (type.identifier in registry)
 				throw IllegalArgumentException("Block with identifier \"${type.identifier}\" is already registered.")
 
 			registry[type.identifier] = type
-			idRegistry[type.id] = type
 		}
 
 		operator fun get(identifier: Identifier) = registry[identifier]
 
 		operator fun get(name: String) = get(Identifier(name))
-
-		internal operator fun get(id: Int) = idRegistry[id]
 
 //		val stone = BlockStone
 //		val dirt = BlockDirt

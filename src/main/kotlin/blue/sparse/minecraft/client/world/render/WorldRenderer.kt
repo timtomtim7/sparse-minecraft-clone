@@ -15,7 +15,9 @@ import blue.sparse.minecraft.client.world.proxy.ClientChunkProxy
 import blue.sparse.minecraft.client.world.proxy.ClientWorldProxy
 import blue.sparse.minecraft.client.world.render.thread.ChunkModellingThread
 import blue.sparse.minecraft.common.util.math.AABB
-import blue.sparse.minecraft.common.world.*
+import blue.sparse.minecraft.common.world.World
+import blue.sparse.minecraft.common.world.chunk.Chunk
+import blue.sparse.minecraft.common.world.worldChunkToWorldBlock
 import kotlin.coroutines.experimental.buildSequence
 
 class WorldRenderer(val world: World) {
@@ -65,6 +67,7 @@ class WorldRenderer(val world: World) {
 
 		chunkShader.bind {
 			//			uniforms["uLightDirection"] = worldProxy.lightDirection
+			uniforms["uAmbientLight"] = Vector3f(1f, 1f, 0.5f)
 			uniforms["uViewProj"] = viewProjection
 			atlas.texture.bind(0)
 			uniforms["uTexture"] = 0

@@ -2,6 +2,7 @@ package blue.sparse.minecraft.common.world
 
 import blue.sparse.math.vectors.ints.Vector3i
 import blue.sparse.minecraft.common.util.math.*
+import blue.sparse.minecraft.common.world.chunk.Chunk
 
 
 /*

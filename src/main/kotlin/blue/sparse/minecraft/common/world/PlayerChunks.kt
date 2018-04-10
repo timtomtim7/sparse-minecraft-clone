@@ -4,6 +4,7 @@ import blue.sparse.math.vectors.floats.lengthSquared
 import blue.sparse.math.vectors.ints.Vector3i
 import blue.sparse.math.vectors.ints.abs
 import blue.sparse.minecraft.common.player.Player
+import blue.sparse.minecraft.common.world.chunk.Chunk
 
 class PlayerChunks(val player: Player, horizontalDistance: Int = 8, verticalDistance: Int = 8) : Iterable<Vector3i> {
 
