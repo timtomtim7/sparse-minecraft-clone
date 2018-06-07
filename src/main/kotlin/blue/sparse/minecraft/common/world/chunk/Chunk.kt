@@ -96,7 +96,7 @@ class Chunk constructor(
 	fun setBlock(x: Int, y: Int, z: Int, value: Block) {
 		val light = value.type?.lightEmission
 		if (light != null) {
-			propegateBlockLight(light, Vector3i(x, y, z), emptySet())
+			propagateBlockLight(light, Vector3i(x, y, z), emptySet())
 		}
 		blocks[x, y, z] = value
 		proxy.changed(x, y, z)
@@ -142,7 +142,7 @@ class Chunk constructor(
 	}
 
 
-	private fun propegateBlockLight(light: Vector3i, origin: Vector3i, chunkBlacklist: Set<Chunk>) {
+	private fun propagateBlockLight(light: Vector3i, origin: Vector3i, chunkBlacklist: Set<Chunk>) {
 		if(getBlock(origin.x, origin.y, origin.z).isOccluding)
 			return
 
@@ -174,7 +174,7 @@ class Chunk constructor(
 					)
 
 					val adjChunkRelative = worldBlockToChunkBlock(worldBlock)
-					adjacentChunk.propegateBlockLight(newLight, adjChunkRelative, newBlacklist)
+					adjacentChunk.propagateBlockLight(newLight, adjChunkRelative, newBlacklist)
 					affectedChunks.add(adjacentChunk)
 //					adjacentChunk.proxy.changed(adjChunkRelative.x, adjChunkRelative.y, adjChunkRelative.z)
 
@@ -182,7 +182,7 @@ class Chunk constructor(
 				}
 
 				if(getBlock(position.x, position.y, position.z).isOccluding) {
-					println("Block is occluding $position")
+//					println("Block is occluding $position")
 					continue
 				}
 
@@ -195,7 +195,7 @@ class Chunk constructor(
 				)
 
 				if(adjLight != newLight) {
-					println("$adjLight -> $newLight")
+//					println("$adjLight -> $newLight")
 
 					setBlockLight(position.x, position.y, position.z, newLight)
 					queue.add(position)
