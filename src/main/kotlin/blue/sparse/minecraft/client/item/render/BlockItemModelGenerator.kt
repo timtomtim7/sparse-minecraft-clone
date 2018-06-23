@@ -3,6 +3,7 @@ package blue.sparse.minecraft.client.item.render
 import blue.sparse.engine.render.resource.model.*
 import blue.sparse.math.vectors.floats.*
 import blue.sparse.math.vectors.ints.Vector2i
+import java.util.ArrayList
 
 object BlockItemModelGenerator {
 
@@ -83,6 +84,6 @@ object BlockItemModelGenerator {
 		buffer.add(Vector3f(+0.5f, +0.5f, -0.5f), rightNormal, texCoords.right.zy)
 
 		array.add(buffer, layout)
-		return IndexedModel(array, indices.toIntArray())
+		return array.setIndices(indices.toIntArray()).toModel()
 	}
 }

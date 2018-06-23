@@ -23,12 +23,12 @@ object TestChunkGenerator: ChunkGenerator {
 				val (temperature, humidity) = generateBiome(x + cbx, z + cbz)
 				val biome = BiomeType[temperature, humidity] ?: BiomeType.void
 
-//				var maxY = (Perlin.noise((cbx + x).toFloat(), (cbz + z).toFloat(), 0f, 8, 0.5f, 0.002f) * 32)
-//				maxY *= (Perlin.noise((cbx + x).toFloat(), (cbz + z).toFloat(), 100f, 2, 1f, 0.007371f) + 1) * 4
-//				maxY += 64
-//				val maxYInt = maxY.toInt()
+				var maxY = (Perlin.noise((cbx + x).toFloat(), (cbz + z).toFloat(), 0f, 8, 0.5f, 0.002f) * 16)
+				maxY *= (Perlin.noise((cbx + x).toFloat(), (cbz + z).toFloat(), 100f, 2, 1f, 0.007371f) + 1) * 4
+				maxY += 64
+				val maxYInt = maxY.toInt()
 
-				val maxYInt = 48
+//				val maxYInt = 48
 
 //				val maxY = biome.id * 2
 

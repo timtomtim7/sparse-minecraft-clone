@@ -14,14 +14,14 @@ import blue.sparse.minecraft.common.Minecraft
 
 class EntityModel(val texture: Texture, val bones: List<Bone>) {
 
-	private val model: IndexedModel
+	private val model: BasicModel
 
 	init {
 		model = upload()
 	}
 
 	fun delete() {
-		model.delete()
+//		model.delete()
 		model.array.delete()
 	}
 
@@ -53,7 +53,7 @@ class EntityModel(val texture: Texture, val bones: List<Bone>) {
 		}
 	}
 
-	private fun upload(): IndexedModel {
+	private fun upload(): BasicModel {
 		val indices = ArrayList<Int>()
 
 		val buffer = VertexBuffer()
@@ -68,7 +68,7 @@ class EntityModel(val texture: Texture, val bones: List<Bone>) {
 		val array = VertexArray()
 		array.add(buffer, layout)
 
-		return IndexedModel(array, indices.toIntArray())
+		return array.setIndices(indices.toIntArray()).toModel() as BasicModel
 	}
 
 	private fun uploadCube(buffer: VertexBuffer, indices: MutableList<Int>, cube: Cube, boneIndex: Int) {

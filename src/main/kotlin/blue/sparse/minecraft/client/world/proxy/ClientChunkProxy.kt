@@ -1,6 +1,6 @@
 package blue.sparse.minecraft.client.world.proxy
 
-import blue.sparse.engine.render.resource.model.IndexedModel
+import blue.sparse.engine.render.resource.model.BasicModel
 import blue.sparse.minecraft.client.world.render.OfflineChunkModel
 import blue.sparse.minecraft.common.world.chunk.Chunk
 import java.util.concurrent.ConcurrentLinkedQueue
@@ -10,7 +10,7 @@ class ClientChunkProxy(chunk: Chunk): Chunk.ChunkProxy(chunk) {
 	private var modelLastGenerated: Long = 0L
 	private var chunkLastModified: Long = 0L
 
-	var model: IndexedModel? = null
+	var model: BasicModel? = null
 		private set
 
 	val canGenerateModel: Boolean
@@ -67,7 +67,7 @@ class ClientChunkProxy(chunk: Chunk): Chunk.ChunkProxy(chunk) {
 
 	private fun deleteModel() {
 		model?.array?.delete()
-		model?.delete()
+//		model?.delete()
 	}
 
 	companion object {

@@ -43,9 +43,10 @@ class OfflineChunkModel(private val chunk: Chunk) {
 	}
 
 	private fun getRelativeLight(x: Int, y: Int, z: Int): Vector4f {
-		val relative = getRelativeBlock(x, y, z) ?: return Vector4f(0f)
-
-		return Vector4f(relative.blockLightFloat, relative.sunLightFloat)
+		return Vector4f(1f)
+//		val relative = getRelativeBlock(x, y, z) ?: return Vector4f(0f)
+//
+//		return Vector4f(relative.blockLightFloat, relative.sunLightFloat)
 	}
 
 	init {
@@ -205,8 +206,8 @@ class OfflineChunkModel(private val chunk: Chunk) {
 		this.buffer = buffer.toByteBuffer()
 	}
 
-	fun upload(): IndexedModel {
-		return IndexedModel(VertexArray().apply { add(buffer, layout) }, indices.toIntArray())
+	fun upload(): BasicModel {
+		return VertexArray().add(buffer, layout).setIndices(indices.toIntArray()).toModel() as BasicModel
 	}
 
 	private fun calculateAO(x: Int, y: Int, z: Int, faceForward: BlockFace, faceA: BlockFace, faceB: BlockFace): Array<Float> {

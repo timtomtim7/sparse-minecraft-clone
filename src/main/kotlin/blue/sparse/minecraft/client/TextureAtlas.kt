@@ -12,7 +12,8 @@ import java.awt.image.BufferedImage
 
 class TextureAtlas(size: Vector2i) {
 
-	private val sprites = LinkedHashMap<String, Sprite>()
+	private val spriteMap = LinkedHashMap<String, Sprite>()
+	private val sprites = ArrayList<Sprite>()
 
 	val texture = Texture(BufferedImage(size.x, size.y, BufferedImage.TYPE_INT_ARGB))
 
@@ -29,31 +30,31 @@ class TextureAtlas(size: Vector2i) {
 	}
 
 	operator fun get(name: String): Sprite? {
-		return sprites[name]
+		return spriteMap[name]
 	}
 
 	fun getOrAddSprite(name: String): Sprite {
-		sprites[name]?.let { return it }
+		spriteMap[name]?.let { return it }
 		return addSprite(name, Asset[name])!!
 	}
 
 	fun getOrAddSprite(asset: Asset): Sprite {
-		sprites[asset.path]?.let { return it }
+		spriteMap[asset.path]?.let { return it }
 		return addSprite(asset.path, asset)!!
 	}
 
 //	fun getOrAddSprite(name: String, asset: Asset): Sprite {
-//		sprites[name]?.let { return it }
+//		spriteMap[name]?.let { return it }
 //
 //		addSprite(name, asset.readImage())
-//		return sprites[name]!!
+//		return spriteMap[name]!!
 //	}
 
 	fun getOrAddSprite(name: String, image: BufferedImage): Sprite {
-		sprites[name]?.let { return it }
+		spriteMap[name]?.let { return it }
 
 		addSprite(name, image)
-		return sprites[name]!!
+		return spriteMap[name]!!
 	}
 
 	fun addSprite(name: String, asset: Asset = Asset[name]): Sprite? {
@@ -61,7 +62,7 @@ class TextureAtlas(size: Vector2i) {
 	}
 
 	fun addSprite(name: String, image: BufferedImage): Sprite? {
-		if(name in sprites)
+		if(name in spriteMap)
 			throw IllegalStateException("Sprite with the name \"$name\" already present.")
 
 		val size = Vector2i(image.width, image.height)
@@ -69,7 +70,8 @@ class TextureAtlas(size: Vector2i) {
 
 		texture.subImage(image, position)
 		val sprite = Sprite(name, position, size)
-		sprites[name] = sprite
+		spriteMap[name] = sprite
+		sprites.add(sprite)
 
 		return sprite
 	}
@@ -86,7 +88,8 @@ class TextureAtlas(size: Vector2i) {
 		if(free)
 			return min
 
-		for(sprite in sprites.values) {
+//		for(sprite in spriteMap.values) {
+		for(sprite in sprites.asReversed()) {
 			min.x = sprite.max.x
 			min.y = sprite.min.y
 			free = fits(min, min+spriteSize)
@@ -125,7 +128,7 @@ class TextureAtlas(size: Vector2i) {
 		val topA = min.y
 		val bottomA = max.y
 
-		for(sprite in sprites.values) {
+		for(sprite in spriteMap.values) {
 			val leftB = sprite.min.x
 			val rightB = sprite.max.x
 			val topB = sprite.min.y

@@ -86,7 +86,8 @@ class Entity<out T : EntityType>(
     fun update(delta: Float) {
 		timeSinceSpawned += delta
 
-		val drag = 0.5f
+//		val drag = 0.1f
+		val drag = 0.3f
 		var vel = velocity.clone()
 
 		vel.timesAssign(Math.pow(drag.toDouble(), delta.toDouble()).toFloat())

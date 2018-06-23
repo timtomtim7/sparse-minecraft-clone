@@ -137,7 +137,7 @@ object ItemModelGenerator {
 		}
 
 		array.add(buffer, layout)
-		return IndexedModel(array, indices.toIntArray())
+		return array.setIndices(indices.toIntArray()).toModel()
 	}
 
 	fun findEdges(image: BufferedImage): List<Edge> {

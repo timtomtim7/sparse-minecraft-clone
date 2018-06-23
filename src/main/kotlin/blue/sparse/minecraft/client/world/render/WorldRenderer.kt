@@ -67,7 +67,7 @@ class WorldRenderer(val world: World) {
 
 		chunkShader.bind {
 			//			uniforms["uLightDirection"] = worldProxy.lightDirection
-			uniforms["uAmbientLight"] = Vector3f(1f, 1f, 0.5f)
+			uniforms["uAmbientLight"] = Vector3f(0.85f, 0.8f, 0.8f)
 			uniforms["uViewProj"] = viewProjection
 			atlas.texture.bind(0)
 			uniforms["uTexture"] = 0

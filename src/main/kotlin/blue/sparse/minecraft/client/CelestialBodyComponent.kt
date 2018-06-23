@@ -62,7 +62,7 @@ class CelestialBodyComponent(
 	}
 
 	companion object {
-		private val model: IndexedModel
+		private val model: Model
 		private val shader = ShaderProgram(Asset["minecraft/shaders/world/sky/celestial.fs"], Asset["minecraft/shaders/world/sky/celestial.vs"])
 
 		init {
@@ -80,7 +80,7 @@ class CelestialBodyComponent(
 
 			array.add(buffer, layout)
 
-			model = IndexedModel(array, intArrayOf(0, 1, 2, 0, 2, 3))
+			model = array.setIndices(intArrayOf(0, 1, 2, 0, 2, 3)).toModel()
 		}
 	}
 }
